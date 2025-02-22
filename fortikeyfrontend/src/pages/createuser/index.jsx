@@ -1,162 +1,226 @@
 import { Box, Button, TextField, Typography } from "@mui/material";
-import { Formik } from "formik";
-import * as yup from "yup";
+import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 import Navbar from "../global/Navbar";
 
 const CreateUser = () => {
-  const handleFormSubmit = (values) => {
-    console.log(values);
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    companyName: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    // TODO: Add validation to ensure passwords match
+    if (formData.password !== formData.confirmPassword) {
+      alert("Passwords do not match!");
+      return;
+    }
+    // TODO: Add actual registration logic here
+    console.log("Registration attempt with:", formData);
+    navigate("/dashboard");
+  };
+
+  const textFieldStyles = {
+    "& .MuiOutlinedInput-root": {
+      "& fieldset": {
+        borderColor: "#e0e0e0",
+        borderWidth: "1px",
+      },
+      "&:hover fieldset": {
+        borderColor: "#007BFF",
+      },
+      "&.Mui-focused fieldset": {
+        borderColor: "#007BFF",
+      },
+    },
+    "& .MuiInputLabel-root": {
+      "&.Mui-focused": {
+        color: "#007BFF",
+      },
+      backgroundColor: "white",
+      paddingLeft: "5px",
+      paddingRight: "5px",
+    },
+    "& .MuiInputLabel-shrink": {
+      backgroundColor: "white",
+      paddingLeft: "5px",
+      paddingRight: "5px",
+    },
   };
 
   return (
-    <Box>
+    <Box
+      sx={{
+        minHeight: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        backgroundColor: "#f8f9fa",
+      }}
+    >
       <Navbar />
+
       <Box
         sx={{
-          paddingTop: "40px",
+          flex: 1,
           display: "flex",
+          alignItems: "center",
           justifyContent: "center",
+          padding: "40px 20px",
         }}
       >
         <Box
-          width="500px"
+          component="form"
+          onSubmit={handleSubmit}
           sx={{
+            width: "100%",
+            maxWidth: "500px",
             backgroundColor: "white",
+            borderRadius: "12px",
             padding: "40px",
-            borderRadius: "10px",
-            boxShadow: "0px 0px 15px rgba(0, 0, 0, 0.1)",
-            border: "1px solid rgba(0, 0, 0, 0.1)",
+            boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
           }}
         >
           <Typography
-            variant="h2"
-            color="#007BFF"
-            fontWeight="bold"
-            sx={{ mb: "40px", textAlign: "center" }}
+            variant="h4"
+            sx={{
+              textAlign: "center",
+              marginBottom: "32px",
+              fontWeight: 600,
+              color: "#1a1a1a",
+            }}
           >
             Create Account
           </Typography>
-          <Formik
-            onSubmit={handleFormSubmit}
-            initialValues={initialValues}
-            validationSchema={checkoutSchema}
-          >
-            {({
-              values,
-              errors,
-              touched,
-              handleBlur,
-              handleChange,
-              handleSubmit,
-            }) => (
-              <form onSubmit={handleSubmit}>
-                <Box display="flex" flexDirection="column" gap="30px">
-                  <TextField
-                    fullWidth
-                    variant="outlined"
-                    type="text"
-                    label="Full Name"
-                    onBlur={handleBlur}
-                    onChange={handleChange}
-                    value={values.fullName}
-                    name="fullName"
-                    error={!!touched.fullName && !!errors.fullName}
-                    helperText={touched.fullName && errors.fullName}
-                  />
-                  <TextField
-                    fullWidth
-                    variant="outlined"
-                    type="text"
-                    label="Email"
-                    onBlur={handleBlur}
-                    onChange={handleChange}
-                    value={values.email}
-                    name="email"
-                    error={!!touched.email && !!errors.email}
-                    helperText={touched.email && errors.email}
-                  />
-                  <TextField
-                    fullWidth
-                    variant="outlined"
-                    type="password"
-                    label="Password"
-                    onBlur={handleBlur}
-                    onChange={handleChange}
-                    value={values.password}
-                    name="password"
-                    error={!!touched.password && !!errors.password}
-                    helperText={touched.password && errors.password}
-                  />
-                  <TextField
-                    fullWidth
-                    variant="outlined"
-                    type="password"
-                    label="Confirm Password"
-                    onBlur={handleBlur}
-                    onChange={handleChange}
-                    value={values.confirmPassword}
-                    name="confirmPassword"
-                    error={
-                      !!touched.confirmPassword && !!errors.confirmPassword
-                    }
-                    helperText={
-                      touched.confirmPassword && errors.confirmPassword
-                    }
-                  />
-                  <TextField
-                    fullWidth
-                    variant="outlined"
-                    type="text"
-                    label="Company Name"
-                    onBlur={handleBlur}
-                    onChange={handleChange}
-                    value={values.companyName}
-                    name="companyName"
-                    error={!!touched.companyName && !!errors.companyName}
-                    helperText={touched.companyName && errors.companyName}
-                  />
-                  <Box display="flex" justifyContent="center" mt="20px">
-                    <Button
-                      type="submit"
-                      variant="contained"
-                      sx={{
-                        backgroundColor: "#007BFF",
-                        color: "white",
-                        "&:hover": {
-                          backgroundColor: "#0056b3",
-                        },
-                      }}
-                    >
-                      Create New User
-                    </Button>
-                  </Box>
-                </Box>
-              </form>
-            )}
-          </Formik>
+
+          <Box sx={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+            <Box sx={{ display: "flex", gap: "20px" }}>
+              <TextField
+                fullWidth
+                label="First Name"
+                name="firstName"
+                value={formData.firstName}
+                onChange={handleChange}
+                required
+                variant="outlined"
+                sx={textFieldStyles}
+              />
+              <TextField
+                fullWidth
+                label="Last Name"
+                name="lastName"
+                value={formData.lastName}
+                onChange={handleChange}
+                required
+                variant="outlined"
+                sx={textFieldStyles}
+              />
+            </Box>
+
+            <TextField
+              fullWidth
+              label="Company Name"
+              name="companyName"
+              value={formData.companyName}
+              onChange={handleChange}
+              required
+              variant="outlined"
+              sx={textFieldStyles}
+            />
+
+            <TextField
+              fullWidth
+              label="Email"
+              name="email"
+              type="email"
+              value={formData.email}
+              onChange={handleChange}
+              required
+              variant="outlined"
+              sx={textFieldStyles}
+            />
+
+            <TextField
+              fullWidth
+              label="Password"
+              name="password"
+              type="password"
+              value={formData.password}
+              onChange={handleChange}
+              required
+              variant="outlined"
+              sx={textFieldStyles}
+            />
+
+            <TextField
+              fullWidth
+              label="Confirm Password"
+              name="confirmPassword"
+              type="password"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              required
+              variant="outlined"
+              sx={textFieldStyles}
+            />
+
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              sx={{
+                backgroundColor: "#007BFF",
+                color: "white",
+                padding: "12px",
+                fontSize: "1rem",
+                textTransform: "none",
+                "&:hover": {
+                  backgroundColor: "#0056b3",
+                },
+              }}
+            >
+              Create Account
+            </Button>
+          </Box>
+
+          <Box sx={{ textAlign: "center", marginTop: "24px" }}>
+            <Typography
+              variant="body1"
+              sx={{ display: "inline", color: "#666" }}
+            >
+              Already have an account?{" "}
+            </Typography>
+            <Button
+              onClick={() => navigate("/login")}
+              sx={{
+                textTransform: "none",
+                color: "#007BFF",
+                "&:hover": {
+                  backgroundColor: "transparent",
+                  textDecoration: "underline",
+                },
+              }}
+            >
+              Sign In
+            </Button>
+          </Box>
         </Box>
       </Box>
     </Box>
   );
-};
-
-const checkoutSchema = yup.object().shape({
-  fullName: yup.string().required("required"),
-  email: yup.string().email("invalid email").required("required"),
-  password: yup.string().required("required"),
-  confirmPassword: yup
-    .string()
-    .oneOf([yup.ref("password"), null], "Passwords must match")
-    .required("required"),
-  companyName: yup.string().required("required"),
-});
-
-const initialValues = {
-  fullName: "",
-  email: "",
-  password: "",
-  confirmPassword: "",
-  companyName: "",
 };
 
 export default CreateUser;

@@ -10,6 +10,7 @@ import CreateUser from "./pages/createuser";
 import GenerateQR from "./pages/generateqr";
 import Landing from "./pages/landing";
 import Login from "./pages/login";
+import SignedOut from "./pages/signedout";
 // import UsageAnalytics from "./pages/usageanalytics";
 // import ApiDocumentation from "./pages/apidocumentation";
 // import ManageAPIKeys from "./pages/manageapikeys";
@@ -25,6 +26,7 @@ function App() {
         <Route path="/" element={<Landing />} />
         <Route path="/login" element={<Login />} />
         <Route path="/createuser" element={<CreateUser />} />
+        <Route path="/signedout" element={<SignedOut />} />
 
         {/* Dashboard Layout */}
         <Route

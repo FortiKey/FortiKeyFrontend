@@ -12,144 +12,179 @@ const Login = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prevState) => ({
-      ...prevState,
+    setFormData((prev) => ({
+      ...prev,
       [name]: value,
     }));
   };
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    // TODO: Add actual login logic here
     console.log("Login attempt with:", formData);
-    // Add login logic here
     navigate("/dashboard");
   };
 
   return (
     <Box
       sx={{
-        height: "100vh",
+        minHeight: "100vh",
         display: "flex",
         flexDirection: "column",
         backgroundColor: "#f8f9fa",
       }}
     >
       <Navbar />
-      {/* Login Form Section */}
+
       <Box
         sx={{
           flex: 1,
           display: "flex",
-          flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          padding: "0 20px",
+          padding: "40px 20px",
         }}
       >
         <Box
+          component="form"
+          onSubmit={handleSubmit}
           sx={{
-            backgroundColor: "white",
-            padding: "40px",
-            borderRadius: "10px",
-            boxShadow: "0px 0px 15px rgba(0,0,0,0.1)",
             width: "100%",
             maxWidth: "400px",
+            backgroundColor: "white",
+            borderRadius: "12px",
+            padding: "40px",
+            boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
           }}
         >
           <Typography
-            variant="h2"
+            variant="h4"
             sx={{
-              marginBottom: "30px",
               textAlign: "center",
-              fontWeight: "bold",
+              marginBottom: "32px",
+              fontWeight: 600,
+              color: "#1a1a1a",
             }}
           >
             Welcome Back
           </Typography>
 
-          <form onSubmit={handleSubmit}>
-            <Box
+          <Box sx={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+            <TextField
+              fullWidth
+              label="Email"
+              name="email"
+              type="email"
+              value={formData.email}
+              onChange={handleChange}
+              required
+              variant="outlined"
               sx={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "20px",
+                "& .MuiOutlinedInput-root": {
+                  "& fieldset": {
+                    borderColor: "#e0e0e0",
+                    borderWidth: "1px",
+                  },
+                  "&:hover fieldset": {
+                    borderColor: "#007BFF",
+                  },
+                  "&.Mui-focused fieldset": {
+                    borderColor: "#007BFF",
+                  },
+                },
+                "& .MuiInputLabel-root": {
+                  "&.Mui-focused": {
+                    color: "#007BFF",
+                  },
+                  backgroundColor: "white",
+                  paddingLeft: "5px",
+                  paddingRight: "5px",
+                },
+                "& .MuiInputLabel-shrink": {
+                  backgroundColor: "white",
+                  paddingLeft: "5px",
+                  paddingRight: "5px",
+                },
+              }}
+            />
+
+            <TextField
+              fullWidth
+              label="Password"
+              name="password"
+              type="password"
+              value={formData.password}
+              onChange={handleChange}
+              required
+              variant="outlined"
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  "& fieldset": {
+                    borderColor: "#e0e0e0",
+                    borderWidth: "1px",
+                  },
+                  "&:hover fieldset": {
+                    borderColor: "#007BFF",
+                  },
+                  "&.Mui-focused fieldset": {
+                    borderColor: "#007BFF",
+                  },
+                },
+                "& .MuiInputLabel-root": {
+                  "&.Mui-focused": {
+                    color: "#007BFF",
+                  },
+                  backgroundColor: "white",
+                  paddingLeft: "5px",
+                  paddingRight: "5px",
+                },
+                "& .MuiInputLabel-shrink": {
+                  backgroundColor: "white",
+                  paddingLeft: "5px",
+                  paddingRight: "5px",
+                },
+              }}
+            />
+
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              sx={{
+                backgroundColor: "#007BFF",
+                color: "white",
+                padding: "12px",
+                fontSize: "1rem",
+                textTransform: "none",
+                "&:hover": {
+                  backgroundColor: "#0056b3",
+                },
               }}
             >
-              <TextField
-                fullWidth
-                label="Email"
-                variant="outlined"
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                required
-                sx={{
-                  backgroundColor: "#f8f9fa",
-                  "& .MuiOutlinedInput-root": {
-                    "&:hover fieldset": {
-                      borderColor: "secondary.main",
-                    },
-                  },
-                }}
-              />
+              Sign In
+            </Button>
+          </Box>
 
-              <TextField
-                fullWidth
-                label="Password"
-                variant="outlined"
-                type="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                required
-                sx={{
-                  backgroundColor: "#f8f9fa",
-                  "& .MuiOutlinedInput-root": {
-                    "&:hover fieldset": {
-                      borderColor: "secondary.main",
-                    },
-                  },
-                }}
-              />
-
-              <Button
-                type="submit"
-                variant="contained"
-                size="large"
-                sx={{
-                  backgroundColor: "secondary.main",
-                  padding: "12px",
-                  "&:hover": {
-                    backgroundColor: "secondary.dark",
-                  },
-                }}
-              >
-                Login
-              </Button>
-            </Box>
-          </form>
-
-          <Box
-            sx={{
-              marginTop: "20px",
-              textAlign: "center",
-            }}
-          >
-            <Typography variant="body1">
+          <Box sx={{ textAlign: "center", marginTop: "24px" }}>
+            <Typography
+              variant="body1"
+              sx={{ display: "inline", color: "#666" }}
+            >
               Don't have an account?{" "}
-              <Button
-                color="secondary"
-                onClick={() => navigate("/createuser")}
-                sx={{
-                  textTransform: "none",
-                  fontWeight: "bold",
-                  padding: "0 4px",
-                }}
-              >
-                Sign Up
-              </Button>
             </Typography>
+            <Button
+              onClick={() => navigate("/createuser")}
+              sx={{
+                textTransform: "none",
+                color: "#007BFF",
+                "&:hover": {
+                  backgroundColor: "transparent",
+                  textDecoration: "underline",
+                },
+              }}
+            >
+              Sign Up
+            </Button>
           </Box>
         </Box>
       </Box>

@@ -186,12 +186,12 @@ const Sidebar = () => {
           <Box paddingLeft={isCollapsed ? undefined : "10%"} marginTop="auto">
             <Item
               title="Sign Out"
-              to="/"
+              to="/signedout"
               icon={<LogoutOutlinedIcon />}
               selected={selected}
               setSelected={setSelected}
               onClick={() => {
-                navigate("/");
+                navigate("/signedout");
               }}
             />
           </Box>
