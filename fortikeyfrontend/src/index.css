@@ -1,0 +1,37 @@
+/* Import Roboto font from Google Fonts with all available weights and styles */
+@import url("https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap");
+
+/* Set full height and width for main container elements */
+html,
+body,
+#root,
+.app,
+.content {
+  height: 100%;
+  width: 100%;
+}
+
+/* Configure the main app container with flex layout */
+.app {
+  display: flex; /* Enable flexbox layout */
+  position: relative; /* Set positioning context for child elements */
+  font-family: "Roboto", sans-serif; /* Set Roboto as the default font */
+}
+
+/* Style the scrollbar width */
+::-webkit-scrollbar {
+  width: 10px; /* Set scrollbar width to 10 pixels */
+}
+
+/* Style the scrollbar track (the area the scrollbar moves in) */
+::-webkit-scrollbar-track {
+  background: #e0e0e0;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
