@@ -11,8 +11,8 @@ import GenerateQR from "./pages/generateqr";
 import Landing from "./pages/landing";
 import Login from "./pages/login";
 import SignedOut from "./pages/signedout";
+import ApiDocumentation from "./pages/apidocumentation";
 // import UsageAnalytics from "./pages/usageanalytics";
-// import ApiDocumentation from "./pages/apidocumentation";
 // import ManageAPIKeys from "./pages/manageapikeys";
 // import AddUser from "./pages/adduser";
 // import AdminDashboard from "./pages/admindashboard";
@@ -40,6 +40,10 @@ function App() {
                   <Route path="/dashboard" element={<Dashboard />} />
                   <Route path="/viewaccounts" element={<ViewAccounts />} />
                   <Route path="/generateqr" element={<GenerateQR />} />
+                  <Route
+                    path="/apidocumentation"
+                    element={<ApiDocumentation />}
+                  />
                   {/* Add other dashboard routes here */}
                 </Routes>
               </main>

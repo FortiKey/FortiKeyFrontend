@@ -1,14 +1,12 @@
 import { Box, Typography, Button } from "@mui/material";
 import { useTheme } from "@mui/material";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import QRCode from "react-qr-code";
 import { useState } from "react";
 
 const GenerateQR = () => {
   const theme = useTheme();
-  const location = useLocation();
   const navigate = useNavigate();
-  const isFromDashboard = location.state?.fromDashboard;
   const [qrValue] = useState("https://fortikey.com/2fa-setup");
 
   const handleQRClick = () => {
