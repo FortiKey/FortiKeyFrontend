@@ -12,6 +12,7 @@ import Landing from "./pages/landing";
 import Login from "./pages/login";
 import SignedOut from "./pages/signedout";
 import ApiDocumentation from "./pages/apidocumentation";
+import AdminDashboard from "./pages/admindashboard";
 // import UsageAnalytics from "./pages/usageanalytics";
 // import ManageAPIKeys from "./pages/manageapikeys";
 // import AddUser from "./pages/adduser";
@@ -44,6 +45,7 @@ function App() {
                     path="/apidocumentation"
                     element={<ApiDocumentation />}
                   />
+                  <Route path="/admindashboard" element={<AdminDashboard />} />
                   {/* Add other dashboard routes here */}
                 </Routes>
               </main>

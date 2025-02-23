@@ -3,48 +3,49 @@ import { DataGrid } from "@mui/x-data-grid";
 import { tokens } from "../../theme";
 import Header from "../../components/Header";
 import { mockDataTeam } from "../../data/mockdata";
-import AdminPanelSettingsOutlinedIcon from "@mui/icons-material/AdminPanelSettingsOutlined";
-import LockClockOutlinedIcon from "@mui/icons-material/LockClockOutlined";
-import SecurityOutlinedIcon from "@mui/icons-material/SecurityOutlined";
-import { useState } from "react";
 
-const ViewAccounts = () => {
+const AdminDashboard = () => {
   const theme = useTheme();
-  const colors = tokens(theme.palette.mode);
+
+  // Process the data to count staff per company
+  const companyStaffCount = mockDataTeam.reduce((acc, current) => {
+    acc[current.company] = (acc[current.company] || 0) + 1;
+    return acc;
+  }, {});
+
+  // Convert to array format for DataGrid
+  const rows = Object.entries(companyStaffCount).map(
+    ([company, count], index) => ({
+      id: index + 1,
+      company: company,
+      staffCount: count,
+    })
+  );
+
   const columns = [
-    {
-      field: "id",
-      headerName: "ID",
-      flex: 0.5,
-    },
-    {
-      field: "name",
-      headerName: "Name",
-      flex: 1,
-      cellClassName: "name-column--cell",
-    },
     {
       field: "company",
       headerName: "Company",
       flex: 1,
     },
     {
-      field: "email",
-      headerName: "Email",
-      flex: 1.5,
-    },
-    {
-      field: "phone",
-      headerName: "Phone",
+      field: "staffCount",
+      headerName: "Number of Staff",
       flex: 1,
+      renderCell: ({ row: { staffCount } }) => (
+        <Box display="flex" alignItems="center" gap="5px">
+          <Typography>{staffCount}</Typography>
+        </Box>
+      ),
     },
   ];
+
   return (
     <Box m="20px">
-      <Header title="View Accounts" subtitle="Manage Accounts" />
+      <Header title="Admin Dashboard" subtitle="Company Staff Overview" />
       <Box height="75vh" sx={{ width: "100%" }}>
         <DataGrid
-          rows={mockDataTeam}
+          rows={rows}
           columns={columns}
           disableColumnMenu
           disableExtendRowFullWidth
@@ -73,4 +74,4 @@ const ViewAccounts = () => {
   );
 };
 
-export default ViewAccounts;
+export default AdminDashboard;
