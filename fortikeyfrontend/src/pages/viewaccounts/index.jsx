@@ -1,12 +1,8 @@
-import { Box, Typography, useTheme } from "@mui/material";
+import { Box, useTheme } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { tokens } from "../../theme";
 import Header from "../../components/Header";
 import { mockDataTeam } from "../../data/mockdata";
-import AdminPanelSettingsOutlinedIcon from "@mui/icons-material/AdminPanelSettingsOutlined";
-import LockClockOutlinedIcon from "@mui/icons-material/LockClockOutlined";
-import SecurityOutlinedIcon from "@mui/icons-material/SecurityOutlined";
-import { useState } from "react";
 
 const ViewAccounts = () => {
   const theme = useTheme();

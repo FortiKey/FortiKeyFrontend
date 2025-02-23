@@ -162,8 +162,8 @@ const Sidebar = () => {
               setSelected={setSelected}
             />
             <Item
-              title="Manage API Keys"
-              to="/manageapikeys"
+              title="Manage API Key"
+              to="/manageapikey"
               icon={<ApiOutlinedIcon />}
               selected={selected}
               setSelected={setSelected}
