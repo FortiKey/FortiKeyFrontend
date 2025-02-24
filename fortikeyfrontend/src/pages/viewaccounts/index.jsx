@@ -1,19 +1,12 @@
-import {
-  Box,
-  useTheme,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-  Button,
-} from "@mui/material";
+import { Box, useTheme, Button } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import Header from "../../components/Header";
 import { mockDataTeam } from "../../data/mockdata";
+import { tokens } from "../../theme";
 
 const ViewAccounts = () => {
   const theme = useTheme();
+  const colors = tokens(theme.palette.mode);
   let rows = mockDataTeam;
   let selectedUser = null;
   let dialogOpen = false;
@@ -56,7 +49,7 @@ const ViewAccounts = () => {
         <div
           style={{
             cursor: "pointer",
-            color: theme.palette.text.primary,
+            color: colors.text.primary,
           }}
           onClick={() => handleNameClick(params.row)}
         >
@@ -93,8 +86,8 @@ const ViewAccounts = () => {
               border: "none",
             },
             "& .MuiDataGrid-columnHeaders": {
-              backgroundColor: theme.palette.primary.main,
-              borderBottom: `1px solid ${theme.palette.secondary.main}`,
+              backgroundColor: colors.primary.main,
+              borderBottom: `1px solid ${colors.secondary.main}`,
             },
             "& .MuiDataGrid-virtualScroller": {
               border: "none",
@@ -129,23 +122,21 @@ const ViewAccounts = () => {
             top: "50%",
             left: "50%",
             transform: "translate(-50%, -50%)",
-            backgroundColor: theme.palette.primary.main,
+            backgroundColor: colors.primary.main,
             padding: "20px",
             borderRadius: "4px",
-            border: `1px solid ${theme.palette.secondary.main}`,
+            border: `1px solid ${colors.secondary.main}`,
             boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
             width: "300px",
             textAlign: "center",
           }}
         >
-          <h2
-            style={{ color: theme.palette.text.primary, margin: "0 0 20px 0" }}
-          >
+          <h2 style={{ color: colors.text.primary, margin: "0 0 20px 0" }}>
             Confirm Delete
           </h2>
           <p
             style={{
-              color: theme.palette.text.secondary,
+              color: colors.text.secondary,
               margin: "0 0 20px 0",
             }}
           >
@@ -162,9 +153,12 @@ const ViewAccounts = () => {
             <Button
               onClick={handleClose}
               variant="contained"
-              style={{
-                backgroundColor: theme.palette.secondary.main,
-                color: "#ffffff",
+              sx={{
+                backgroundColor: colors.secondary.main,
+                color: colors.primary.main,
+                "&:hover": {
+                  backgroundColor: "#0056b3",
+                },
               }}
             >
               Cancel

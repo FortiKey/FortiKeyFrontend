@@ -1,7 +1,10 @@
-import { Box, Button, Typography } from "@mui/material";
+import { Box, Button, Typography, useTheme } from "@mui/material";
 import { useNavigate, useLocation } from "react-router-dom";
+import { tokens } from "../theme";
 
 const Navbar = () => {
+  const theme = useTheme();
+  const colors = tokens(theme.palette.mode);
   const navigate = useNavigate();
   const location = useLocation();
   const isLandingPage = location.pathname === "/";
@@ -13,7 +16,7 @@ const Navbar = () => {
         display: "flex",
         justifyContent: "space-between",
         alignItems: "center",
-        backgroundColor: "white",
+        backgroundColor: colors.primary.main,
         boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
       }}
     >
@@ -45,17 +48,23 @@ const Navbar = () => {
           </Box>
           <Box sx={{ flex: 1 }}>
             <Box sx={{ marginBottom: "8px" }}>
-              <Typography variant="h4" sx={{ fontWeight: "bold" }}>
+              <Typography
+                variant="h4"
+                sx={{ fontWeight: "bold", color: colors.text.primary }}
+              >
                 FORTIKEY
               </Typography>
-              <Typography variant="subtitle1" sx={{ color: "text.secondary" }}>
+              <Typography
+                variant="subtitle1"
+                sx={{ color: colors.text.secondary }}
+              >
                 Secure. Simple. Scalable.
               </Typography>
             </Box>
             <Typography
               variant="body1"
               sx={{
-                color: "text.secondary",
+                color: colors.text.secondary,
                 maxWidth: "600px",
                 marginBottom: "20px",
               }}
@@ -75,8 +84,8 @@ const Navbar = () => {
                 onClick={() => navigate("/login")}
                 sx={{
                   marginRight: "10px",
-                  color: "#007BFF",
-                  borderColor: "#007BFF",
+                  color: colors.secondary.main,
+                  borderColor: colors.secondary.main,
                   "&:hover": {
                     borderColor: "#0056b3",
                     backgroundColor: "rgba(0, 0, 0, 0.04)",
@@ -89,8 +98,8 @@ const Navbar = () => {
                 variant="contained"
                 onClick={() => navigate("/createuser")}
                 sx={{
-                  backgroundColor: "#007BFF",
-                  color: "white",
+                  backgroundColor: colors.secondary.main,
+                  color: colors.primary.main,
                   "&:hover": {
                     backgroundColor: "#0056b3",
                   },
@@ -127,8 +136,8 @@ const Navbar = () => {
               onClick={() => navigate("/login")}
               sx={{
                 marginRight: "10px",
-                color: "#007BFF",
-                borderColor: "#007BFF",
+                color: colors.secondary.main,
+                borderColor: colors.secondary.main,
                 "&:hover": {
                   borderColor: "#0056b3",
                   backgroundColor: "rgba(0, 0, 0, 0.04)",
@@ -141,8 +150,8 @@ const Navbar = () => {
               variant="contained"
               onClick={() => navigate("/createuser")}
               sx={{
-                backgroundColor: "#007BFF",
-                color: "white",
+                backgroundColor: colors.secondary.main,
+                color: colors.primary.main,
                 "&:hover": {
                   backgroundColor: "#0056b3",
                 },

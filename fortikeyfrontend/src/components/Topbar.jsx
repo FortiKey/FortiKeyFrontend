@@ -1,11 +1,20 @@
-import { Box, IconButton, Menu, MenuItem, Typography } from "@mui/material";
+import {
+  Box,
+  IconButton,
+  Menu,
+  MenuItem,
+  useTheme,
+} from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import HelpOutlineOutlinedIcon from "@mui/icons-material/HelpOutlineOutlined";
 import PersonAddAlt1OutlinedIcon from "@mui/icons-material/PersonAddAlt1Outlined";
+import { tokens } from "../theme";
 
 const Topbar = () => {
+  const theme = useTheme();
+  const colors = tokens(theme.palette.mode);
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
@@ -28,7 +37,14 @@ const Topbar = () => {
   };
 
   return (
-    <Box display="flex" justifyContent="flex-end" p={3}>
+    <Box
+      display="flex"
+      justifyContent="flex-end"
+      p={3}
+      sx={{
+        backgroundColor: colors.primary.main,
+      }}
+    >
       <IconButton
         color="secondary"
         onClick={handleClick}
@@ -60,6 +76,7 @@ const Topbar = () => {
             overflow: "visible",
             filter: "drop-shadow(0px 2px 8px rgba(0,0,0,0.32))",
             mt: 1.5,
+            backgroundColor: colors.primary.main,
             "& .MuiMenuItem-root": {
               px: 2,
               py: 1,
@@ -70,7 +87,7 @@ const Topbar = () => {
         <MenuItem
           sx={{
             pointerEvents: "none",
-            color: "text.secondary",
+            color: colors.text.secondary,
             fontWeight: 500,
           }}
         >

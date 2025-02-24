@@ -11,9 +11,12 @@ import { DataGrid } from "@mui/x-data-grid";
 import Header from "../../components/Header";
 import { mockDataTeam } from "../../data/mockdata";
 import { useState } from "react";
+import { ThemeProvider } from "@mui/material/styles";
+import { tokens } from "../../theme";
 
 const AdminDashboard = () => {
   const theme = useTheme();
+  const colors = tokens();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedCompany, setSelectedCompany] = useState("");
   const [staffData, setStaffData] = useState([]);
@@ -66,7 +69,7 @@ const AdminDashboard = () => {
         <div
           style={{
             cursor: "pointer",
-            color: theme.palette.text.primary,
+            color: colors.text.primary,
           }}
           onClick={() => handleOpen(params.value)}
         >
@@ -136,69 +139,14 @@ const AdminDashboard = () => {
   );
 
   return (
-    <Box m="20px">
-      <Header title="Admin Dashboard" subtitle="Company Staff Overview" />
-      <Box height="75vh" sx={{ width: "100%" }}>
-        <DataGrid
-          rows={rows}
-          columns={columns}
-          disableExtendRowFullWidth
-          sx={{
-            border: "none",
-            "& .MuiDataGrid-cell": {
-              border: "none",
-            },
-            "& .MuiDataGrid-columnHeaders": {
-              backgroundColor: theme.palette.primary.main,
-              borderBottom: `1px solid ${theme.palette.secondary.main}`,
-            },
-            "& .MuiDataGrid-virtualScroller": {
-              border: "none",
-            },
-            "& .MuiDataGrid-footerContainer": {
-              border: "none",
-            },
-            "& .MuiDataGrid-row": {
-              border: "none",
-            },
-          }}
-        />
-      </Box>
-
-      {/* Staff List Dialog */}
-      <Dialog
-        open={dialogOpen}
-        onClose={handleClose}
-        maxWidth="lg"
-        fullWidth
-        PaperProps={{
-          style: {
-            backgroundColor: theme.palette.background.default,
-            width: "60%",
-            height: "60vh",
-          },
-        }}
-      >
-        <DialogTitle>
-          <Box
-            display="flex"
-            justifyContent="space-between"
-            alignItems="center"
-          >
-            <Typography variant="h2" color={theme.palette.neutral.main}>
-              Staff List - {selectedCompany}
-            </Typography>
-            <IconButton onClick={handleClose}>×</IconButton>
-          </Box>
-        </DialogTitle>
-        <Box height="calc(100% - 60px)" width="100%" p={2}>
+    <ThemeProvider theme={theme}>
+      <Box m="20px">
+        <Header title="Admin Dashboard" subtitle="Company Staff Overview" />
+        <Box height="75vh" sx={{ width: "100%" }}>
           <DataGrid
-            rows={staffData}
-            columns={staffColumns}
-            pageSize={5}
-            rowsPerPageOptions={[5]}
+            rows={rows}
+            columns={columns}
             disableExtendRowFullWidth
-            getRowId={(row) => row.id}
             sx={{
               border: "none",
               "& .MuiDataGrid-cell": {
@@ -220,78 +168,135 @@ const AdminDashboard = () => {
             }}
           />
         </Box>
-      </Dialog>
 
-      {/* Add Delete Confirmation Dialog */}
-      <Dialog
-        open={deleteDialogOpen}
-        onClose={() => setDeleteDialogOpen(false)}
-        PaperProps={{
-          style: {
-            backgroundColor: "white",
-            padding: "20px",
-            borderRadius: "12px",
-            maxWidth: "400px",
-            border: `1px solid ${theme.palette.secondary.main}`,
-          },
-        }}
-      >
-        <DialogTitle sx={{ textAlign: "center", pb: 0 }}>
-          <Typography
-            variant="h4"
-            sx={{
-              color: "#007FFF",
-              fontSize: "24px",
-              fontWeight: "bold",
-            }}
-          >
-            Confirm Delete
-          </Typography>
-        </DialogTitle>
-        <Box p={2}>
-          <Typography
-            sx={{
-              textAlign: "center",
-              mb: 3,
-              color: "rgba(0, 0, 0, 0.7)",
-              fontSize: "16px",
-            }}
-          >
-            Do you want to delete this account?
-          </Typography>
-          <Box display="flex" justifyContent="center" gap={2}>
-            <Button
-              onClick={() => setDeleteDialogOpen(false)}
-              sx={{
-                backgroundColor: "#007FFF",
-                color: "white",
-                padding: "6px 16px",
-                textTransform: "uppercase",
-                borderRadius: "4px",
-                boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-                "&:hover": { backgroundColor: "#0066CC" },
-              }}
+        {/* Staff List Dialog */}
+        <Dialog
+          open={dialogOpen}
+          onClose={handleClose}
+          maxWidth="lg"
+          fullWidth
+          sx={{
+            "& .MuiDialog-paper": {
+              bgcolor: "background.default",
+              width: "60%",
+              height: "60vh",
+            },
+          }}
+        >
+          <DialogTitle>
+            <Box
+              display="flex"
+              justifyContent="space-between"
+              alignItems="center"
             >
-              Cancel
-            </Button>
-            <Button
-              onClick={handleDeleteConfirm}
+              <Typography variant="h2" color={theme.palette.neutral.main}>
+                Staff List - {selectedCompany}
+              </Typography>
+              <IconButton onClick={handleClose}>×</IconButton>
+            </Box>
+          </DialogTitle>
+          <Box height="calc(100% - 60px)" width="100%" p={2}>
+            <DataGrid
+              rows={staffData}
+              columns={staffColumns}
+              pageSize={5}
+              rowsPerPageOptions={[5]}
+              disableExtendRowFullWidth
+              getRowId={(row) => row.id}
               sx={{
-                backgroundColor: "#DC3545",
-                color: "white",
-                padding: "6px 16px",
-                textTransform: "uppercase",
-                borderRadius: "4px",
-                boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-                "&:hover": { backgroundColor: "#C82333" },
+                border: "none",
+                "& .MuiDataGrid-cell": {
+                  border: "none",
+                },
+                "& .MuiDataGrid-columnHeaders": {
+                  backgroundColor: theme.palette.primary.main,
+                  borderBottom: `1px solid ${theme.palette.secondary.main}`,
+                },
+                "& .MuiDataGrid-virtualScroller": {
+                  border: "none",
+                },
+                "& .MuiDataGrid-footerContainer": {
+                  border: "none",
+                },
+                "& .MuiDataGrid-row": {
+                  border: "none",
+                },
               }}
-            >
-              Delete
-            </Button>
+            />
           </Box>
-        </Box>
-      </Dialog>
-    </Box>
+        </Dialog>
+
+        {/* Add Delete Confirmation Dialog */}
+        <Dialog
+          open={deleteDialogOpen}
+          onClose={() => setDeleteDialogOpen(false)}
+          PaperProps={{
+            style: {
+              backgroundColor: "white",
+              padding: "20px",
+              borderRadius: "12px",
+              maxWidth: "400px",
+              border: `1px solid ${theme.palette.secondary.main}`,
+            },
+          }}
+        >
+          <DialogTitle sx={{ textAlign: "center", pb: 0 }}>
+            <Typography
+              variant="h4"
+              sx={{
+                color: "#007FFF",
+                fontSize: "24px",
+                fontWeight: "bold",
+              }}
+            >
+              Confirm Delete
+            </Typography>
+          </DialogTitle>
+          <Box p={2}>
+            <Typography
+              sx={{
+                textAlign: "center",
+                mb: 3,
+                color: "rgba(0, 0, 0, 0.7)",
+                fontSize: "16px",
+              }}
+            >
+              Do you want to delete this account?
+            </Typography>
+            <Box display="flex" justifyContent="center" gap={2}>
+              <Button
+                onClick={() => setDeleteDialogOpen(false)}
+                sx={{
+                  backgroundColor: "#007FFF",
+                  color: "white",
+                  padding: "6px 16px",
+                  textTransform: "uppercase",
+                  borderRadius: "4px",
+                  boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                  "&:hover": { backgroundColor: "#0066CC" },
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleDeleteConfirm}
+                sx={{
+                  backgroundColor: "#DC3545",
+                  color: "white",
+                  padding: "6px 16px",
+                  textTransform: "uppercase",
+                  borderRadius: "4px",
+                  boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                  "&:hover": { backgroundColor: "#C82333" },
+                }}
+              >
+                Delete
+              </Button>
+            </Box>
+          </Box>
+        </Dialog>
+      </Box>
+    </ThemeProvider>
   );
 };
 

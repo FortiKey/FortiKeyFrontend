@@ -1,6 +1,6 @@
 import { Box, useTheme, Typography, Button } from "@mui/material";
 import { tokens } from "../../theme";
-import Header from "../../components/Header";
+import Header from '../../components/Header'
 import { Accordion, AccordionSummary, AccordionDetails } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";

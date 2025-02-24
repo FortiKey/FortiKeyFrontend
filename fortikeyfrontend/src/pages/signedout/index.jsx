@@ -1,9 +1,12 @@
-import { Box, Button, Typography } from "@mui/material";
+import { Box, Button, Typography, useTheme } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import Navbar from "../global/Navbar";
+import Navbar from "../../components/Navbar";
+import { tokens } from "../../theme";
 
 const SignedOut = () => {
   const navigate = useNavigate();
+  const theme = useTheme();
+  const colors = tokens(theme.palette.mode);
 
   return (
     <Box
@@ -11,7 +14,7 @@ const SignedOut = () => {
         minHeight: "100vh",
         display: "flex",
         flexDirection: "column",
-        backgroundColor: "#f8f9fa",
+        backgroundColor: colors.otherColor.main,
       }}
     >
       <Navbar />
@@ -30,7 +33,7 @@ const SignedOut = () => {
           sx={{
             width: "100%",
             maxWidth: "500px",
-            backgroundColor: "white",
+            backgroundColor: colors.primary.main,
             borderRadius: "12px",
             padding: "40px",
             boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
@@ -42,7 +45,7 @@ const SignedOut = () => {
             sx={{
               marginBottom: "16px",
               fontWeight: 600,
-              color: "#1a1a1a",
+              color: colors.text.primary,
             }}
           >
             You've Been Signed Out
@@ -52,7 +55,7 @@ const SignedOut = () => {
             variant="body1"
             sx={{
               marginBottom: "32px",
-              color: "#666",
+              color: colors.text.secondary,
             }}
           >
             Thank you for using FortiKey. You have been successfully signed out
@@ -65,8 +68,8 @@ const SignedOut = () => {
               variant="contained"
               onClick={() => navigate("/login")}
               sx={{
-                backgroundColor: "#007BFF",
-                color: "white",
+                backgroundColor: colors.secondary.main,
+                color: colors.primary.main,
                 padding: "12px",
                 fontSize: "1rem",
                 textTransform: "none",
@@ -83,8 +86,8 @@ const SignedOut = () => {
               variant="outlined"
               onClick={() => navigate("/")}
               sx={{
-                borderColor: "#007BFF",
-                color: "#007BFF",
+                borderColor: colors.secondary.main,
+                color: colors.secondary.main,
                 padding: "12px",
                 fontSize: "1rem",
                 textTransform: "none",
