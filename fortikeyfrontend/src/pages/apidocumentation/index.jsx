@@ -1,23 +1,25 @@
 import { Box, useTheme, Typography, Button } from "@mui/material";
 import { tokens } from "../../theme";
-import Header from '../../components/Header'
+import Header from "../../components/Header";
 import { Accordion, AccordionSummary, AccordionDetails } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
-
 const ApiDocumentation = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
   return (
     <Box m="20px">
-      <Header title="API Documentation" />
+      <Header
+        title="API Documentation"
+        subtitle="How to use the FortiKey API"
+      />
 
       <Accordion defaultExpanded={true} sx={{ mb: 2, boxShadow: 3 }}>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
           <Typography
             variant="h5"
-            sx={{ color: colors.secondary.main, fontWeight: "bold" }}
+            sx={{ color: colors.neutral.main, fontWeight: "bold" }}
           >
             Part 1: Getting Started with FortiKey API
           </Typography>
@@ -52,7 +54,7 @@ const ApiDocumentation = () => {
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
           <Typography
             variant="h5"
-            sx={{ color: colors.secondary.main, fontWeight: "bold" }}
+            sx={{ color: colors.neutral.main, fontWeight: "bold" }}
           >
             Part 2: Advanced API Features
           </Typography>

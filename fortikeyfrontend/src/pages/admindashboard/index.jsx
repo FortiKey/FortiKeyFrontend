@@ -13,7 +13,6 @@ import { mockDataTeam } from "../../data/mockdata";
 import { useState } from "react";
 import { ThemeProvider } from "@mui/material/styles";
 import { tokens } from "../../theme";
-
 const AdminDashboard = () => {
   const theme = useTheme();
   const colors = tokens();

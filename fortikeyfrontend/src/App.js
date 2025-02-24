@@ -14,7 +14,7 @@ import SignedOut from "./pages/signedout";
 import ApiDocumentation from "./pages/apidocumentation";
 import AdminDashboard from "./pages/admindashboard";
 import ManageAPIKeys from "./pages/manageapikey";
-// import UsageAnalytics from "./pages/usageanalytics";
+import UsageAnalytics from "./pages/usageanalytics";
 // import ManageAPIKeys from "./pages/manageapikeys";
 // import AddUser from "./pages/adduser";
 // import AdminDashboard from "./pages/admindashboard";
@@ -48,6 +48,7 @@ function App() {
                   />
                   <Route path="/admindashboard" element={<AdminDashboard />} />
                   <Route path="/manageapikey" element={<ManageAPIKeys />} />
+                  <Route path="/usageanalytics" element={<UsageAnalytics />} />
                   {/* Add other dashboard routes here */}
                 </Routes>
               </main>

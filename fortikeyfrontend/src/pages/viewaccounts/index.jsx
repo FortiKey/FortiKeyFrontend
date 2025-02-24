@@ -1,15 +1,16 @@
-import { Box, useTheme, Button } from "@mui/material";
+import { Box, useTheme, Button, Typography } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import Header from "../../components/Header";
 import { mockDataTeam } from "../../data/mockdata";
-import { tokens } from "../../theme";
+import { tokens,} from "../../theme";
+import { ThemeProvider } from "@mui/material/styles";
 
 const ViewAccounts = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   let rows = mockDataTeam;
   let selectedUser = null;
-  let dialogOpen = false;
+
 
   const handleNameClick = (user) => {
     selectedUser = user;
@@ -74,102 +75,105 @@ const ViewAccounts = () => {
     },
   ];
   return (
-    <Box m="20px">
-      <Header title="View Accounts" subtitle="Manage Accounts" />
-      <Box height="75vh" sx={{ width: "100%" }}>
-        <DataGrid
-          rows={mockDataTeam}
-          columns={columns}
-          sx={{
-            border: "none",
-            "& .MuiDataGrid-cell": {
+    <ThemeProvider theme={theme}>
+      <Box m="20px">
+        <Header title="View Accounts" subtitle="Manage Accounts" />
+        <Box height="75vh" sx={{ width: "100%" }}>
+          <DataGrid
+            rows={mockDataTeam}
+            columns={columns}
+            sx={{
               border: "none",
-            },
-            "& .MuiDataGrid-columnHeaders": {
-              backgroundColor: colors.primary.main,
-              borderBottom: `1px solid ${colors.secondary.main}`,
-            },
-            "& .MuiDataGrid-virtualScroller": {
-              border: "none",
-            },
-            "& .MuiDataGrid-footerContainer": {
-              border: "none",
-            },
-            "& .MuiDataGrid-row": {
-              border: "none",
-            },
-          }}
-        />
-      </Box>
+              "& .MuiDataGrid-cell": {
+                border: "none",
+              },
+              "& .MuiDataGrid-columnHeaders": {
+                backgroundColor: colors.primary.main,
+                borderBottom: `1px solid ${colors.secondary.main}`,
+              },
+              "& .MuiDataGrid-virtualScroller": {
+                border: "none",
+              },
+              "& .MuiDataGrid-footerContainer": {
+                border: "none",
+              },
+              "& .MuiDataGrid-row": {
+                border: "none",
+              },
+            }}
+          />
+        </Box>
 
-      {/* Custom Dialog */}
-      <div
-        id="confirmDialog"
-        style={{
-          display: "none",
-          position: "fixed",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: "rgba(0, 0, 0, 0.5)",
-          zIndex: 9999,
-        }}
-      >
+        {/* Custom Dialog */}
         <div
+          id="confirmDialog"
           style={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            backgroundColor: colors.primary.main,
-            padding: "20px",
-            borderRadius: "4px",
-            border: `1px solid ${colors.secondary.main}`,
-            boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
-            width: "300px",
-            textAlign: "center",
+            display: "none",
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            zIndex: 9999,
           }}
         >
-          <h2 style={{ color: colors.text.primary, margin: "0 0 20px 0" }}>
-            Confirm Delete
-          </h2>
-          <p
-            style={{
-              color: colors.text.secondary,
-              margin: "0 0 20px 0",
-            }}
-          >
-            Do you want to delete this account?
-          </p>
           <div
             style={{
-              display: "flex",
-              justifyContent: "center",
-              gap: "10px",
-              marginTop: "20px",
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              backgroundColor: colors.primary.main,
+              padding: "20px",
+              borderRadius: "4px",
+              border: `1px solid ${colors.secondary.main}`,
+              boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
+              width: "300px",
+              textAlign: "center",
             }}
           >
-            <Button
-              onClick={handleClose}
-              variant="contained"
-              sx={{
-                backgroundColor: colors.secondary.main,
-                color: colors.primary.main,
-                "&:hover": {
-                  backgroundColor: "#0056b3",
-                },
+            <Typography variant="h3" color={colors.text.primary} sx={{ mb: 2 }}>
+              Confirm Delete
+            </Typography>
+
+            <Typography
+              variant="h5"
+              color={colors.text.secondary}
+              sx={{ mb: 2 }}
+            >
+              Do you want to delete this account?
+            </Typography>
+
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                gap: "10px",
+                marginTop: "20px",
               }}
             >
-              Cancel
-            </Button>
-            <Button onClick={handleDelete} variant="contained" color="error">
-              Delete
-            </Button>
+              <Button
+                onClick={handleClose}
+                variant="contained"
+                sx={{
+                  backgroundColor: colors.secondary.main,
+                  color: colors.primary.main,
+                  "&:hover": {
+                    backgroundColor: "#0056b3",
+                  },
+                }}
+              >
+                Cancel
+              </Button>
+              <Button onClick={handleDelete} variant="contained" color="error">
+                Delete
+              </Button>
+            </div>
           </div>
         </div>
-      </div>
-    </Box>
+      </Box>
+    </ThemeProvider>
   );
 };
 

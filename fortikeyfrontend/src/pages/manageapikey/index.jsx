@@ -1,8 +1,11 @@
 import { Box, Button, Typography } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
 import { theme } from "../../theme";
+import Header from "../../components/Header";
+import { tokens } from "../../theme";
 
 const ManageAPIKeys = () => {
+  const colors = tokens();
   const actualKey = "fk_live_3x7abcdef1234567890"; // What gets copied
 
   const handleGenerateNewKey = () => {
@@ -24,58 +27,62 @@ const ManageAPIKeys = () => {
 
   return (
     <ThemeProvider theme={theme}>
-      <Box
-        sx={{
-          p: 4,
-          display: "flex",
-          flexDirection: "column",
-          gap: 3,
-        }}
-      >
-        <Typography variant="h2" color="text.primary">
-          Manage API Key
-        </Typography>
-
-        <Box
-          sx={{
-            display: "flex",
-            gap: 2,
-            alignItems: "center",
-          }}
-        >
-          <Button
-            variant="outlined"
-            onClick={handleCopyKey}
+      <Box sx={{ backgroundColor: colors.primary.main, minHeight: "100vh" }}>
+        <Box m="20px">
+          <Header
+            title="Manage API Key"
+            subtitle="View and manage your API key for FortiKey integration"
+          />
+          <Box
             sx={{
-              backgroundColor: "primary.main",
-              color: "secondary.main",
-              borderColor: "secondary.main",
-              "&:hover": {
-                backgroundColor: "primary.main",
-                borderColor: "secondary.main",
-                opacity: 0.9,
-              },
+              p: 4,
+              display: "flex",
+              flexDirection: "column",
+              gap: 3,
             }}
           >
-            {actualKey}
-          </Button>
+            <Box
+              sx={{
+                display: "flex",
+                gap: 2,
+                alignItems: "center",
+              }}
+            >
+              <Button
+                variant="outlined"
+                onClick={handleCopyKey}
+                sx={{
+                  backgroundColor: colors.primary.main,
+                  color: colors.secondary.main,
+                  borderColor: colors.secondary.main,
+                  "&:hover": {
+                    backgroundColor: colors.primary.main,
+                    borderColor: colors.secondary.main,
+                    opacity: 0.9,
+                  },
+                }}
+              >
+                {actualKey}
+              </Button>
 
-          <Button
-            variant="outlined"
-            onClick={handleGenerateNewKey}
-            sx={{
-              backgroundColor: "primary.main",
-              color: "secondary.main",
-              borderColor: "secondary.main",
-              "&:hover": {
-                backgroundColor: "primary.main",
-                borderColor: "secondary.main",
-                opacity: 0.9,
-              },
-            }}
-          >
-            Generate New API Key
-          </Button>
+              <Button
+                variant="outlined"
+                onClick={handleGenerateNewKey}
+                sx={{
+                  backgroundColor: colors.primary.main,
+                  color: colors.secondary.main,
+                  borderColor: colors.secondary.main,
+                  "&:hover": {
+                    backgroundColor: colors.primary.main,
+                    borderColor: colors.secondary.main,
+                    opacity: 0.9,
+                  },
+                }}
+              >
+                Generate New API Key
+              </Button>
+            </Box>
+          </Box>
         </Box>
       </Box>
     </ThemeProvider>

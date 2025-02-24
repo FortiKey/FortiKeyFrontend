@@ -2,6 +2,7 @@ import { Box, Button, Typography, useTheme } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../../components/Navbar";
 import { tokens } from "../../theme";
+import { theme } from "../../theme";  
 
 const SignedOut = () => {
   const navigate = useNavigate();
@@ -33,48 +34,35 @@ const SignedOut = () => {
           sx={{
             width: "100%",
             maxWidth: "500px",
-            backgroundColor: colors.primary.main,
-            borderRadius: "12px",
-            padding: "40px",
-            boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+            bgcolor: "primary.main",
+            borderRadius: 3,
+            p: 5,
+            boxShadow: 1,
             textAlign: "center",
           }}
         >
-          <Typography
-            variant="h4"
-            sx={{
-              marginBottom: "16px",
-              fontWeight: 600,
-              color: colors.text.primary,
-            }}
-          >
+          <Typography variant="h3" color="text.primary" sx={{ mb: 2 }}>
             You've Been Signed Out
           </Typography>
 
-          <Typography
-            variant="body1"
-            sx={{
-              marginBottom: "32px",
-              color: colors.text.secondary,
-            }}
-          >
+          <Typography variant="h5" color="text.secondary" sx={{ mb: 4 }}>
             Thank you for using FortiKey. You have been successfully signed out
             of your account.
           </Typography>
 
-          <Box sx={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
             <Button
               fullWidth
               variant="contained"
               onClick={() => navigate("/login")}
               sx={{
-                backgroundColor: colors.secondary.main,
-                color: colors.primary.main,
-                padding: "12px",
+                bgcolor: "secondary.main",
+                color: "primary.main",
+                py: 1.5,
                 fontSize: "1rem",
                 textTransform: "none",
                 "&:hover": {
-                  backgroundColor: "#0056b3",
+                  bgcolor: "secondary.dark",
                 },
               }}
             >
@@ -86,14 +74,14 @@ const SignedOut = () => {
               variant="outlined"
               onClick={() => navigate("/")}
               sx={{
-                borderColor: colors.secondary.main,
-                color: colors.secondary.main,
-                padding: "12px",
+                borderColor: "secondary.main",
+                color: "secondary.main",
+                py: 1.5,
                 fontSize: "1rem",
                 textTransform: "none",
                 "&:hover": {
-                  borderColor: "#0056b3",
-                  backgroundColor: "rgba(0, 123, 255, 0.04)",
+                  borderColor: "secondary.dark",
+                  bgcolor: "secondary.lighter",
                 },
               }}
             >

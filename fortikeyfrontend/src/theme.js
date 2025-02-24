@@ -6,6 +6,13 @@ export const tokens = () => ({
   otherColor: { main: "#F2F4F8" }, // Other color
   neutral: { main: "#21272A" }, // Neutral color
   text: { primary: "#007BFF", secondary: "#555555" }, // Text colors
+
+  // Add pie chart color scheme
+  pieChart: {
+    authorized: "#4CAF50", // Green for authorized
+    unauthorized: "#FF5252", // Red for unauthorized
+    apiUsage: "#2196F3", // Blue for API usage
+  },
 });
 
 // Add this themeSettings object

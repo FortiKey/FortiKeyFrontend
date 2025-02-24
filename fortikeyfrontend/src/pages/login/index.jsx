@@ -4,9 +4,10 @@ import { theme } from "../../theme";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import Navbar from "../../components/Navbar";
-
+import { tokens } from "../../theme";
 const Login = () => {
   const navigate = useNavigate();
+  const colors = tokens();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -34,7 +35,7 @@ const Login = () => {
           minHeight: "100vh",
           display: "flex",
           flexDirection: "column",
-          bgcolor: "otherColor.main",
+          bgcolor: colors.otherColor.main,
         }}
       >
         <Navbar />
@@ -54,19 +55,18 @@ const Login = () => {
             sx={{
               width: "100%",
               maxWidth: "400px",
-              bgcolor: "primary.main",
+              bgcolor: colors.primary.main,
               borderRadius: "12px",
               padding: "40px",
               boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
             }}
           >
             <Typography
-              variant="h4"
+              variant="h3"
+              color={colors.neutral.main}
               sx={{
                 textAlign: "center",
                 marginBottom: "32px",
-                fontWeight: 600,
-                color: "neutral.main",
               }}
             >
               Welcome Back
@@ -85,26 +85,26 @@ const Login = () => {
                 sx={{
                   "& .MuiOutlinedInput-root": {
                     "& fieldset": {
-                      borderColor: "text.secondary",
+                      borderColor: colors.text.secondary,
                       borderWidth: "1px",
                     },
                     "&:hover fieldset": {
-                      borderColor: "secondary.main",
+                      borderColor: colors.secondary.main,
                     },
                     "&.Mui-focused fieldset": {
-                      borderColor: "secondary.main",
+                      borderColor: colors.secondary.main,
                     },
                   },
                   "& .MuiInputLabel-root": {
                     "&.Mui-focused": {
-                      color: "secondary.main",
+                      color: colors.secondary.main,
                     },
-                    bgcolor: "primary.main",
+                    bgcolor: colors.primary.main,
                     paddingLeft: "5px",
                     paddingRight: "5px",
                   },
                   "& .MuiInputLabel-shrink": {
-                    bgcolor: "primary.main",
+                    bgcolor: colors.primary.main,
                     paddingLeft: "5px",
                     paddingRight: "5px",
                   },
@@ -123,26 +123,26 @@ const Login = () => {
                 sx={{
                   "& .MuiOutlinedInput-root": {
                     "& fieldset": {
-                      borderColor: "text.secondary",
+                      borderColor: colors.text.secondary,
                       borderWidth: "1px",
                     },
                     "&:hover fieldset": {
-                      borderColor: "secondary.main",
+                      borderColor: colors.secondary.main,
                     },
                     "&.Mui-focused fieldset": {
-                      borderColor: "secondary.main",
+                      borderColor: colors.secondary.main,
                     },
                   },
                   "& .MuiInputLabel-root": {
                     "&.Mui-focused": {
-                      color: "secondary.main",
+                      color: colors.secondary.main,
                     },
-                    bgcolor: "primary.main",
+                    bgcolor: colors.primary.main,
                     paddingLeft: "5px",
                     paddingRight: "5px",
                   },
                   "& .MuiInputLabel-shrink": {
-                    bgcolor: "primary.main",
+                    bgcolor: colors.primary.main,
                     paddingLeft: "5px",
                     paddingRight: "5px",
                   },
@@ -169,8 +169,9 @@ const Login = () => {
 
             <Box sx={{ textAlign: "center", marginTop: "24px" }}>
               <Typography
-                variant="body1"
-                sx={{ display: "inline", color: "text.secondary" }}
+                variant="h5"
+                color={colors.text.secondary}
+                sx={{ display: "inline" }}
               >
                 Don't have an account?{" "}
               </Typography>
@@ -178,7 +179,7 @@ const Login = () => {
                 onClick={() => navigate("/createuser")}
                 sx={{
                   textTransform: "none",
-                  color: "secondary.main",
+                  color: colors.secondary.main,
                   "&:hover": {
                     backgroundColor: "transparent",
                     textDecoration: "underline",
