@@ -197,6 +197,22 @@ const AdminDashboard = () => {
               "& .MuiDataGrid-row": {
                 border: "none",
               },
+              "& .MuiDataGrid-root": {
+                width: "100%",
+                overflowX: "auto",
+              },
+              "& .MuiDataGrid-cell": {
+                minWidth: "150px", // Ensures cells don't get too cramped
+              },
+              "@media (max-width: 600px)": {
+                "& .MuiDataGrid-columnHeaders": {
+                  fontSize: "0.875rem",
+                },
+                "& .MuiDataGrid-cell": {
+                  fontSize: "0.875rem",
+                  padding: "8px",
+                },
+              },
             }}
           />
         </Box>

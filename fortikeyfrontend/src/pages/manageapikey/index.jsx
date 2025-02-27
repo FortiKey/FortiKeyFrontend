@@ -35,7 +35,7 @@ const ManageAPIKeys = () => {
           />
           <Box
             sx={{
-              p: 4,
+              p: { xs: 2, sm: 4 },
               display: "flex",
               flexDirection: "column",
               gap: 3,
@@ -44,8 +44,9 @@ const ManageAPIKeys = () => {
             <Box
               sx={{
                 display: "flex",
+                flexDirection: { xs: "column", sm: "row" },
                 gap: 2,
-                alignItems: "center",
+                alignItems: { xs: "stretch", sm: "center" },
               }}
             >
               <Button
@@ -55,6 +56,11 @@ const ManageAPIKeys = () => {
                   backgroundColor: colors.primary.main,
                   color: colors.secondary.main,
                   borderColor: colors.secondary.main,
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  minWidth: 0,
+                  width: "100%",
                   "&:hover": {
                     backgroundColor: colors.primary.main,
                     borderColor: colors.secondary.main,
@@ -72,6 +78,7 @@ const ManageAPIKeys = () => {
                   backgroundColor: colors.primary.main,
                   color: colors.secondary.main,
                   borderColor: colors.secondary.main,
+                  whiteSpace: "nowrap",
                   "&:hover": {
                     backgroundColor: colors.primary.main,
                     borderColor: colors.secondary.main,

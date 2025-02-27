@@ -15,6 +15,7 @@ import ApiDocumentation from "./pages/apidocumentation";
 import AdminDashboard from "./pages/admindashboard";
 import ManageAPIKeys from "./pages/manageapikey";
 import UsageAnalytics from "./pages/usageanalytics";
+import { Box } from "@mui/material";
 // import ManageAPIKeys from "./pages/manageapikeys";
 // import AddUser from "./pages/adduser";
 // import AdminDashboard from "./pages/admindashboard";
@@ -34,9 +35,21 @@ function App() {
         <Route
           path="/*"
           element={
-            <div className="app">
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: { xs: "column", md: "row" },
+              }}
+            >
               <Sidebar />
-              <main className="content">
+              <Box
+                component="main"
+                sx={{
+                  flexGrow: 1,
+                  width: { xs: "100%", md: "calc(100% - 250px)" },
+                  minHeight: "100vh",
+                }}
+              >
                 <Topbar />
                 <Routes>
                   <Route path="/dashboard" element={<Dashboard />} />
@@ -51,8 +64,8 @@ function App() {
                   <Route path="/usageanalytics" element={<UsageAnalytics />} />
                   {/* Add other dashboard routes here */}
                 </Routes>
-              </main>
-            </div>
+              </Box>
+            </Box>
           }
         />
       </Routes>
