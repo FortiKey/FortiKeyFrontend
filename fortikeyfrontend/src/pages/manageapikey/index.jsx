@@ -39,14 +39,16 @@ const ManageAPIKeys = () => {
               display: "flex",
               flexDirection: "column",
               gap: 3,
+              alignItems: { xs: "flex-end", sm: "flex-start" },
             }}
           >
             <Box
               sx={{
                 display: "flex",
-                flexDirection: { xs: "column", sm: "row" },
+                flexDirection: "column",
                 gap: 2,
-                alignItems: { xs: "stretch", sm: "center" },
+                width: "100%",
+                alignItems: { xs: "flex-end", sm: "flex-start" },
               }}
             >
               <Button
@@ -59,12 +61,12 @@ const ManageAPIKeys = () => {
                   whiteSpace: "nowrap",
                   overflow: "hidden",
                   textOverflow: "ellipsis",
-                  minWidth: 0,
                   width: "100%",
+                  maxWidth: "350px",
                   "&:hover": {
-                    backgroundColor: colors.primary.main,
+                    backgroundColor: "rgba(0, 123, 255, 0.04)",
+                    color: colors.secondary.main,
                     borderColor: colors.secondary.main,
-                    opacity: 0.9,
                   },
                 }}
               >
@@ -79,10 +81,12 @@ const ManageAPIKeys = () => {
                   color: colors.secondary.main,
                   borderColor: colors.secondary.main,
                   whiteSpace: "nowrap",
+                  width: "100%",
+                  maxWidth: "350px",
                   "&:hover": {
-                    backgroundColor: colors.primary.main,
+                    backgroundColor: "rgba(0, 123, 255, 0.04)",
+                    color: colors.secondary.main,
                     borderColor: colors.secondary.main,
-                    opacity: 0.9,
                   },
                 }}
               >
