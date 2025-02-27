@@ -7,7 +7,6 @@ import Sidebar from "./components/Sidebar";
 import Dashboard from "./pages/dashboard";
 import ViewAccounts from "./pages/viewaccounts";
 import CreateUser from "./pages/createuser";
-import GenerateQR from "./pages/generateqr";
 import Landing from "./pages/landing";
 import Login from "./pages/login";
 import SignedOut from "./pages/signedout";
@@ -16,9 +15,6 @@ import AdminDashboard from "./pages/admindashboard";
 import ManageAPIKeys from "./pages/manageapikey";
 import UsageAnalytics from "./pages/usageanalytics";
 import { Box } from "@mui/material";
-// import ManageAPIKeys from "./pages/manageapikeys";
-// import AddUser from "./pages/adduser";
-// import AdminDashboard from "./pages/admindashboard";
 
 function App() {
   return (
@@ -54,7 +50,6 @@ function App() {
                 <Routes>
                   <Route path="/dashboard" element={<Dashboard />} />
                   <Route path="/viewaccounts" element={<ViewAccounts />} />
-                  <Route path="/generateqr" element={<GenerateQR />} />
                   <Route
                     path="/apidocumentation"
                     element={<ApiDocumentation />}

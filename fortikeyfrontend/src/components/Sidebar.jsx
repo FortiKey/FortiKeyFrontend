@@ -238,13 +238,6 @@ const Sidebar = () => {
                 setSelected={setSelected}
               />
               <Item
-                title="Add User"
-                to="/generateqr"
-                icon={<PersonAddAltOutlinedIcon />}
-                selected={selected}
-                setSelected={setSelected}
-              />
-              <Item
                 title="Admin Dashboard"
                 to="/admindashboard"
                 icon={<SupervisorAccountOutlinedIcon />}

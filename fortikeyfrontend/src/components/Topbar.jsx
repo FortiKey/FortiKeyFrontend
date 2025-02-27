@@ -1,15 +1,8 @@
-import {
-  Box,
-  IconButton,
-  Menu,
-  MenuItem,
-  useTheme,
-} from "@mui/material";
+import { Box, IconButton, Menu, MenuItem, useTheme } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import HelpOutlineOutlinedIcon from "@mui/icons-material/HelpOutlineOutlined";
-import PersonAddAlt1OutlinedIcon from "@mui/icons-material/PersonAddAlt1Outlined";
 import { tokens } from "../theme";
 
 const Topbar = () => {
@@ -110,9 +103,6 @@ const Topbar = () => {
         onClick={() => navigate("/apidocumentation")}
       >
         <HelpOutlineOutlinedIcon />
-      </IconButton>
-      <IconButton color="secondary" onClick={() => navigate("/generateqr")}>
-        <PersonAddAlt1OutlinedIcon />
       </IconButton>
     </Box>
   );
