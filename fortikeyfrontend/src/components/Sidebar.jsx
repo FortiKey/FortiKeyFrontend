@@ -43,23 +43,18 @@ const Sidebar = () => {
   const [selected, setSelected] = useState("Dashboard");
   const navigate = useNavigate();
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-  const [sidebarState, setSidebarState] = useState("hidden"); // 'hidden', 'collapsed', 'expanded'
+  const [sidebarState, setSidebarState] = useState("hidden");
 
   useEffect(() => {
     const handleResize = () => {
       const mobile = window.innerWidth < 768;
       setIsMobile(mobile);
-      if (mobile) {
-        setSidebarState("hidden");
-        setIsCollapsed(true);
-      } else {
-        // For desktop, initialize with collapsed sidebar
-        setSidebarState("collapsed");
-      }
+
+      setSidebarState("hidden");
+      setIsCollapsed(true);
     };
 
     window.addEventListener("resize", handleResize);
-    handleResize();
 
     return () => window.removeEventListener("resize", handleResize);
   }, []);
