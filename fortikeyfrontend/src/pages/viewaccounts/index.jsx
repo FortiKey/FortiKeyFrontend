@@ -2,7 +2,7 @@ import { Box, useTheme, Button, Typography } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import Header from "../../components/Header";
 import { mockDataTeam } from "../../data/mockdata";
-import { tokens,} from "../../theme";
+import { tokens } from "../../theme";
 import { ThemeProvider } from "@mui/material/styles";
 
 const ViewAccounts = () => {
@@ -10,7 +10,6 @@ const ViewAccounts = () => {
   const colors = tokens(theme.palette.mode);
   let rows = mockDataTeam;
   let selectedUser = null;
-
 
   const handleNameClick = (user) => {
     selectedUser = user;
@@ -37,11 +36,6 @@ const ViewAccounts = () => {
 
   const columns = [
     {
-      field: "id",
-      headerName: "ID",
-      flex: 0.5,
-    },
-    {
       field: "name",
       headerName: "Name",
       flex: 1,
@@ -59,19 +53,19 @@ const ViewAccounts = () => {
       ),
     },
     {
-      field: "company",
-      headerName: "Company",
+      field: "externalUserId",
+      headerName: "External User ID",
       flex: 1,
     },
     {
-      field: "email",
-      headerName: "Email",
-      flex: 1.5,
-    },
-    {
-      field: "phone",
-      headerName: "Phone",
+      field: "validated",
+      headerName: "Validated",
       flex: 1,
+      renderCell: (params) => (
+        <div style={{ color: params.value ? "green" : "red" }}>
+          {params.value ? "Yes" : "No"}
+        </div>
+      ),
     },
   ];
   return (

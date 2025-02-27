@@ -90,7 +90,7 @@ const CreateUser = () => {
           sx={{
             width: "100%",
             maxWidth: "500px",
-            bgcolor: colors.primary.main,
+            bgcolor: "primary.main",
             borderRadius: "12px",
             padding: "40px",
             boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
@@ -102,7 +102,7 @@ const CreateUser = () => {
               textAlign: "center",
               marginBottom: "32px",
               fontWeight: 600,
-              color: colors.neutral.main,
+              color: "neutral.main",
             }}
           >
             Create Account

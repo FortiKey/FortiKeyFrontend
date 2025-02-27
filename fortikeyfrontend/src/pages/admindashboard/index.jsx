@@ -21,6 +21,23 @@ const AdminDashboard = () => {
   const [staffData, setStaffData] = useState([]);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedStaff, setSelectedStaff] = useState(null);
+  const [companyDeleteDialogOpen, setCompanyDeleteDialogOpen] = useState(false);
+  const [selectedCompanyToDelete, setSelectedCompanyToDelete] = useState(null);
+
+  // Process the data to count staff per company
+  const companyStaffCount = mockDataTeam.reduce((acc, current) => {
+    acc[current.company] = (acc[current.company] || 0) + 1;
+    return acc;
+  }, {});
+
+  // Now initialize rows state with companyStaffCount
+  const [rows, setRows] = useState(
+    Object.entries(companyStaffCount).map(([company, count], index) => ({
+      id: index + 1,
+      company: company,
+      staffCount: count,
+    }))
+  );
 
   const handleOpen = (company) => {
     const filteredStaff = mockDataTeam
@@ -28,8 +45,8 @@ const AdminDashboard = () => {
       .map((staff, index) => ({
         id: index + 1,
         name: staff.name,
-        email: staff.email,
-        phone: staff.phone,
+        externalUserId: staff.externalUserId,
+        validated: staff.validated,
       }));
 
     setSelectedCompany(company);
@@ -57,6 +74,20 @@ const AdminDashboard = () => {
     setSelectedStaff(null);
   };
 
+  const handleCompanyDeleteClick = (company) => {
+    setSelectedCompanyToDelete(company);
+    setCompanyDeleteDialogOpen(true);
+  };
+
+  const handleCompanyDeleteConfirm = () => {
+    const updatedRows = rows.filter(
+      (row) => row.company !== selectedCompanyToDelete
+    );
+    setRows(updatedRows);
+    setCompanyDeleteDialogOpen(false);
+    setSelectedCompanyToDelete(null);
+  };
+
   const columns = [
     {
       field: "company",
@@ -65,15 +96,27 @@ const AdminDashboard = () => {
       sortable: true,
       filterable: true,
       renderCell: (params) => (
-        <div
-          style={{
-            cursor: "pointer",
-            color: colors.text.primary,
-          }}
-          onClick={() => handleOpen(params.value)}
-        >
-          {params.value}
-        </div>
+        <Box display="flex" alignItems="center" gap={2}>
+          <div
+            style={{
+              cursor: "pointer",
+              color: colors.text.primary,
+            }}
+            onClick={() => handleOpen(params.value)}
+          >
+            {params.value}
+          </div>
+          <IconButton
+            size="small"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleCompanyDeleteClick(params.value);
+            }}
+            sx={{ color: theme.palette.error.main }}
+          >
+            ×
+          </IconButton>
+        </Box>
       ),
     },
     {
@@ -107,35 +150,25 @@ const AdminDashboard = () => {
       ),
     },
     {
-      field: "email",
-      headerName: "Email",
+      field: "externalUserId",
+      headerName: "External User ID",
       flex: 1,
       sortable: true,
       filterable: true,
     },
     {
-      field: "phone",
-      headerName: "Phone",
+      field: "validated",
+      headerName: "Validated",
       flex: 1,
       sortable: true,
       filterable: true,
+      renderCell: (params) => (
+        <div style={{ color: params.value ? "green" : "red" }}>
+          {params.value ? "Yes" : "No"}
+        </div>
+      ),
     },
   ];
-
-  // Process the data to count staff per company
-  const companyStaffCount = mockDataTeam.reduce((acc, current) => {
-    acc[current.company] = (acc[current.company] || 0) + 1;
-    return acc;
-  }, {});
-
-  // Convert to array format for DataGrid
-  const rows = Object.entries(companyStaffCount).map(
-    ([company, count], index) => ({
-      id: index + 1,
-      company: company,
-      staffCount: count,
-    })
-  );
 
   return (
     <ThemeProvider theme={theme}>
@@ -191,7 +224,18 @@ const AdminDashboard = () => {
               <Typography variant="h2" color={theme.palette.neutral.main}>
                 Staff List - {selectedCompany}
               </Typography>
-              <IconButton onClick={handleClose}>×</IconButton>
+              <IconButton
+                onClick={handleClose}
+                sx={{
+                  width: "24px",
+                  height: "24px",
+                  padding: "0",
+                  minWidth: "24px",
+                  borderRadius: "50%",
+                }}
+              >
+                ×
+              </IconButton>
             </Box>
           </DialogTitle>
           <Box height="calc(100% - 60px)" width="100%" p={2}>
@@ -279,6 +323,75 @@ const AdminDashboard = () => {
               </Button>
               <Button
                 onClick={handleDeleteConfirm}
+                sx={{
+                  backgroundColor: "#DC3545",
+                  color: "white",
+                  padding: "6px 16px",
+                  textTransform: "uppercase",
+                  borderRadius: "4px",
+                  boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                  "&:hover": { backgroundColor: "#C82333" },
+                }}
+              >
+                Delete
+              </Button>
+            </Box>
+          </Box>
+        </Dialog>
+
+        <Dialog
+          open={companyDeleteDialogOpen}
+          onClose={() => setCompanyDeleteDialogOpen(false)}
+          PaperProps={{
+            style: {
+              backgroundColor: "white",
+              padding: "20px",
+              borderRadius: "12px",
+              maxWidth: "400px",
+              border: `1px solid ${theme.palette.secondary.main}`,
+            },
+          }}
+        >
+          <DialogTitle sx={{ textAlign: "center", pb: 0 }}>
+            <Typography
+              variant="h4"
+              sx={{
+                color: "#007FFF",
+                fontSize: "24px",
+                fontWeight: "bold",
+              }}
+            >
+              Confirm Company Delete
+            </Typography>
+          </DialogTitle>
+          <Box p={2}>
+            <Typography
+              sx={{
+                textAlign: "center",
+                mb: 3,
+                color: "rgba(0, 0, 0, 0.7)",
+                fontSize: "16px",
+              }}
+            >
+              Do you want to delete this company and all its associated staff?
+            </Typography>
+            <Box display="flex" justifyContent="center" gap={2}>
+              <Button
+                onClick={() => setCompanyDeleteDialogOpen(false)}
+                sx={{
+                  backgroundColor: "#007FFF",
+                  color: "white",
+                  padding: "6px 16px",
+                  textTransform: "uppercase",
+                  borderRadius: "4px",
+                  boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                  "&:hover": { backgroundColor: "#0066CC" },
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleCompanyDeleteConfirm}
                 sx={{
                   backgroundColor: "#DC3545",
                   color: "white",

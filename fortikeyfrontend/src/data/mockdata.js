@@ -7,6 +7,8 @@ export const mockDataTeam = [
     company: "TechCorp",
     authorized: true,
     apiKeyUsage: 45,
+    externalUserId: "TC001",
+    validated: true,
   },
   {
     id: 2,
@@ -16,6 +18,8 @@ export const mockDataTeam = [
     company: "DevCo",
     authorized: false,
     apiKeyUsage: 0,
+    externalUserId: "DC001",
+    validated: false,
   },
   {
     id: 3,
@@ -25,6 +29,8 @@ export const mockDataTeam = [
     company: "WebTech",
     authorized: true,
     apiKeyUsage: 32,
+    externalUserId: "WT001",
+    validated: true,
   },
   {
     id: 4,
@@ -34,6 +40,8 @@ export const mockDataTeam = [
     company: "DataSys",
     authorized: false,
     apiKeyUsage: 0,
+    externalUserId: "DS001",
+    validated: false,
   },
   {
     id: 5,
@@ -43,6 +51,8 @@ export const mockDataTeam = [
     company: "CloudNet",
     authorized: true,
     apiKeyUsage: 28,
+    externalUserId: "CN001",
+    validated: true,
   },
   {
     id: 6,
@@ -52,6 +62,8 @@ export const mockDataTeam = [
     company: "FinTech Solutions",
     authorized: false,
     apiKeyUsage: 0,
+    externalUserId: "FS001",
+    validated: false,
   },
   {
     id: 7,
@@ -61,6 +73,8 @@ export const mockDataTeam = [
     company: "SecureIT",
     authorized: true,
     apiKeyUsage: 47,
+    externalUserId: "SI001",
+    validated: true,
   },
   {
     id: 8,
@@ -70,6 +84,8 @@ export const mockDataTeam = [
     company: "DataFlow",
     authorized: false,
     apiKeyUsage: 0,
+    externalUserId: "DF001",
+    validated: false,
   },
   {
     id: 9,
@@ -79,6 +95,8 @@ export const mockDataTeam = [
     company: "CyberShield",
     authorized: true,
     apiKeyUsage: 15,
+    externalUserId: "CS001",
+    validated: true,
   },
   {
     id: 10,
@@ -88,6 +106,8 @@ export const mockDataTeam = [
     company: "InnovateAI",
     authorized: false,
     apiKeyUsage: 0,
+    externalUserId: "IA001",
+    validated: false,
   },
   {
     id: 11,
@@ -97,6 +117,8 @@ export const mockDataTeam = [
     company: "BlockChain Solutions",
     authorized: true,
     apiKeyUsage: 23,
+    externalUserId: "BS001",
+    validated: true,
   },
   {
     id: 12,
@@ -106,6 +128,8 @@ export const mockDataTeam = [
     company: "CloudScale",
     authorized: false,
     apiKeyUsage: 0,
+    externalUserId: "CS001",
+    validated: false,
   },
   {
     id: 13,
@@ -115,6 +139,8 @@ export const mockDataTeam = [
     company: "QuantumTech",
     authorized: true,
     apiKeyUsage: 39,
+    externalUserId: "QT001",
+    validated: true,
   },
   {
     id: 14,
@@ -124,6 +150,8 @@ export const mockDataTeam = [
     company: "SmartSystems",
     authorized: false,
     apiKeyUsage: 0,
+    externalUserId: "SS001",
+    validated: false,
   },
   {
     id: 15,
@@ -133,6 +161,8 @@ export const mockDataTeam = [
     company: "DevOps Pro",
     authorized: true,
     apiKeyUsage: 42,
+    externalUserId: "DP001",
+    validated: true,
   },
   {
     id: 16,
@@ -142,6 +172,8 @@ export const mockDataTeam = [
     company: "DevCo",
     authorized: false,
     apiKeyUsage: 0,
+    externalUserId: "DC002",
+    validated: false,
   },
   {
     id: 17,
@@ -151,6 +183,8 @@ export const mockDataTeam = [
     company: "DevCo",
     authorized: true,
     apiKeyUsage: 18,
+    externalUserId: "DC003",
+    validated: true,
   },
   {
     id: 18,
@@ -160,6 +194,8 @@ export const mockDataTeam = [
     company: "DevCo",
     authorized: false,
     apiKeyUsage: 0,
+    externalUserId: "DC004",
+    validated: false,
   },
   {
     id: 19,
@@ -169,6 +205,8 @@ export const mockDataTeam = [
     company: "DevCo",
     authorized: true,
     apiKeyUsage: 31,
+    externalUserId: "DC005",
+    validated: true,
   },
   {
     id: 20,
@@ -178,6 +216,8 @@ export const mockDataTeam = [
     company: "DevCo",
     authorized: false,
     apiKeyUsage: 0,
+    externalUserId: "DC006",
+    validated: false,
   },
   {
     id: 21,
@@ -187,6 +227,8 @@ export const mockDataTeam = [
     company: "DevCo",
     authorized: true,
     apiKeyUsage: 27,
+    externalUserId: "DC007",
+    validated: true,
   },
   {
     id: 22,
@@ -196,6 +238,8 @@ export const mockDataTeam = [
     company: "DevCo",
     authorized: false,
     apiKeyUsage: 0,
+    externalUserId: "DC008",
+    validated: false,
   },
   {
     id: 23,
@@ -205,6 +249,8 @@ export const mockDataTeam = [
     company: "DevCo",
     authorized: true,
     apiKeyUsage: 35,
+    externalUserId: "DC009",
+    validated: true,
   },
   {
     id: 24,
@@ -214,6 +260,8 @@ export const mockDataTeam = [
     company: "SmartSystems",
     authorized: false,
     apiKeyUsage: 0,
+    externalUserId: "SS002",
+    validated: false,
   },
   {
     id: 25,
@@ -223,6 +271,8 @@ export const mockDataTeam = [
     company: "SmartSystems",
     authorized: true,
     apiKeyUsage: 44,
+    externalUserId: "SS003",
+    validated: true,
   },
   {
     id: 26,
@@ -232,6 +282,8 @@ export const mockDataTeam = [
     company: "SmartSystems",
     authorized: false,
     apiKeyUsage: 0,
+    externalUserId: "SS004",
+    validated: false,
   },
   {
     id: 27,
@@ -241,6 +293,8 @@ export const mockDataTeam = [
     company: "SmartSystems",
     authorized: true,
     apiKeyUsage: 21,
+    externalUserId: "SS005",
+    validated: true,
   },
   {
     id: 28,
@@ -250,6 +304,8 @@ export const mockDataTeam = [
     company: "SmartSystems",
     authorized: false,
     apiKeyUsage: 0,
+    externalUserId: "SS006",
+    validated: false,
   },
   {
     id: 29,
@@ -259,6 +315,8 @@ export const mockDataTeam = [
     company: "SmartSystems",
     authorized: true,
     apiKeyUsage: 33,
+    externalUserId: "SS007",
+    validated: true,
   },
   {
     id: 30,
@@ -268,6 +326,8 @@ export const mockDataTeam = [
     company: "SmartSystems",
     authorized: false,
     apiKeyUsage: 0,
+    externalUserId: "SS008",
+    validated: false,
   },
   {
     id: 31,
@@ -277,6 +337,8 @@ export const mockDataTeam = [
     company: "SmartSystems",
     authorized: true,
     apiKeyUsage: 19,
+    externalUserId: "SS009",
+    validated: true,
   },
   {
     id: 32,
@@ -286,6 +348,8 @@ export const mockDataTeam = [
     company: "TechCorp",
     authorized: false,
     apiKeyUsage: 0,
+    externalUserId: "TC002",
+    validated: false,
   },
   {
     id: 33,
@@ -295,6 +359,8 @@ export const mockDataTeam = [
     company: "WebTech",
     authorized: true,
     apiKeyUsage: 41,
+    externalUserId: "WT002",
+    validated: true,
   },
   {
     id: 34,
@@ -304,6 +370,8 @@ export const mockDataTeam = [
     company: "CloudNet",
     authorized: false,
     apiKeyUsage: 0,
+    externalUserId: "CN002",
+    validated: false,
   },
   {
     id: 35,
@@ -313,6 +381,8 @@ export const mockDataTeam = [
     company: "CyberShield",
     authorized: true,
     apiKeyUsage: 26,
+    externalUserId: "CS002",
+    validated: true,
   },
   {
     id: 36,
@@ -322,6 +392,8 @@ export const mockDataTeam = [
     company: "QuantumTech",
     authorized: false,
     apiKeyUsage: 0,
+    externalUserId: "QT002",
+    validated: false,
   },
   {
     id: 37,
@@ -331,6 +403,8 @@ export const mockDataTeam = [
     company: "BlockChain Solutions",
     authorized: true,
     apiKeyUsage: 37,
+    externalUserId: "BS002",
+    validated: true,
   },
   {
     id: 38,
@@ -340,6 +414,8 @@ export const mockDataTeam = [
     company: "FinTech Solutions",
     authorized: false,
     apiKeyUsage: 0,
+    externalUserId: "FS002",
+    validated: false,
   },
 ];
 
