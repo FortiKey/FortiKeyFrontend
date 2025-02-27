@@ -9,9 +9,8 @@ import PeopleOutlinedIcon from "@mui/icons-material/PeopleOutlined";
 import AnalyticsOutlinedIcon from "@mui/icons-material/AnalyticsOutlined";
 import MenuBookOutlinedIcon from "@mui/icons-material/MenuBookOutlined";
 import ApiOutlinedIcon from "@mui/icons-material/ApiOutlined";
-import PersonAddAltOutlinedIcon from "@mui/icons-material/PersonAddAltOutlined";
 import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
-import SupervisorAccountOutlinedIcon from "@mui/icons-material/SupervisorAccountOutlined";
+import AdminPanelSettingsOutlinedIcon from "@mui/icons-material/AdminPanelSettingsOutlined";
 import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
 
 const Item = ({ title, to, icon, selected, setSelected, onClick }) => {
@@ -240,7 +239,7 @@ const Sidebar = () => {
               <Item
                 title="Admin Dashboard"
                 to="/admindashboard"
-                icon={<SupervisorAccountOutlinedIcon />}
+                icon={<AdminPanelSettingsOutlinedIcon />}
                 selected={selected}
                 setSelected={setSelected}
               />
