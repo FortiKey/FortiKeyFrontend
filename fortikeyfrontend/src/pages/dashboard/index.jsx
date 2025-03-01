@@ -31,6 +31,32 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const { showInfoToast } = useToast();
 
+  // Extract common button styling
+  const navButtonStyle = {
+    backgroundColor: colors.primary.main,
+    color: colors.secondary.main,
+    borderColor: colors.secondary.main,
+    fontSize: "1rem",
+    padding: "15px",
+    height: "60px",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: "4px",
+    textTransform: "uppercase",
+    fontWeight: "bold",
+    transition: "all 0.2s",
+    "&:hover": {
+      backgroundColor: "rgba(0, 123, 255, 0.04)",
+      borderColor: colors.secondary.main,
+    },
+  };
+
+  const quickAccessButtonStyle = {
+    // These buttons use the default MUI styling with color="secondary"
+    // No additional styling needed as they use the theme's secondary color
+  };
+
   /**
    * Navigation buttons configuration
    * Defines the properties for each navigation button including
@@ -125,25 +151,7 @@ const Dashboard = () => {
             <Button
               variant="outlined"
               fullWidth
-              sx={{
-                backgroundColor: colors.primary.main,
-                color: colors.secondary.main,
-                borderColor: colors.secondary.main,
-                fontSize: "1rem",
-                padding: "15px",
-                height: "60px",
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                borderRadius: "4px",
-                textTransform: "uppercase",
-                fontWeight: "bold",
-                transition: "all 0.2s",
-                "&:hover": {
-                  backgroundColor: "rgba(0, 123, 255, 0.04)",
-                  borderColor: colors.secondary.main,
-                },
-              }}
+              sx={navButtonStyle}
               onClick={() => {
                 showInfoToast(`Navigating to ${button.title}`);
                 navigate(button.path);
@@ -181,6 +189,7 @@ const Dashboard = () => {
               variant="contained"
               color="secondary"
               onClick={navigateToManageKeys}
+              sx={quickAccessButtonStyle}
             >
               Manage API Keys
             </Button>
@@ -191,6 +200,7 @@ const Dashboard = () => {
               variant="contained"
               color="secondary"
               onClick={navigateToDocumentation}
+              sx={quickAccessButtonStyle}
             >
               API Documentation
             </Button>
@@ -201,6 +211,7 @@ const Dashboard = () => {
               variant="contained"
               color="secondary"
               onClick={navigateToAnalytics}
+              sx={quickAccessButtonStyle}
             >
               Usage Analytics
             </Button>

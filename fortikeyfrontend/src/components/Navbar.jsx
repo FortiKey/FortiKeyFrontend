@@ -16,6 +16,25 @@ const Navbar = () => {
   const location = useLocation();
   const isLandingPage = location.pathname === "/";
 
+  // Extract common button styling
+  const outlinedButtonStyle = {
+    marginRight: "10px",
+    color: colors.secondary.main,
+    borderColor: colors.secondary.main,
+    "&:hover": {
+      borderColor: "#0056b3",
+      backgroundColor: "rgba(0, 0, 0, 0.04)",
+    },
+  };
+
+  const containedButtonStyle = {
+    backgroundColor: colors.secondary.main,
+    color: colors.primary.main,
+    "&:hover": {
+      backgroundColor: "#0056b3",
+    },
+  };
+
   return (
     <Box
       sx={{
@@ -28,22 +47,24 @@ const Navbar = () => {
       }}
     >
       {isLandingPage ? (
-        // Landing page layout - expanded with company description
+        // Landing page layout - expanded with company info
         <Box
           sx={{
             display: "flex",
-            alignItems: "flex-start",
-            flex: 1,
+            justifyContent: "space-between",
+            alignItems: "center",
+            width: "100%",
           }}
         >
+          {/* Logo and company name */}
           <Box
             sx={{
               display: "flex",
-              flexDirection: { xs: "column", md: "row" },
-              alignItems: { xs: "flex-start", md: "center" },
+              alignItems: "center",
+              cursor: "pointer",
             }}
+            onClick={() => navigate("/")}
           >
-            {/* Company logo */}
             <img
               alt="FortiKey Logo"
               src="/assets/FortiKeyLogo.png"
@@ -52,66 +73,31 @@ const Navbar = () => {
                 marginRight: "10px",
               }}
             />
-
-            {/* Company description - only shown on landing page */}
-            <Box sx={{ maxWidth: "500px" }}>
-              <Typography
-                variant="h3"
-                sx={{
-                  color: colors.neutral.main,
-                  fontWeight: "bold",
-                  mb: 1,
-                }}
-              >
-                FortiKey API Management
-              </Typography>
-              <Typography
-                variant="body1"
-                sx={{
-                  color: colors.text.secondary,
-                  display: { xs: "none", sm: "block" },
-                }}
-              >
-                Secure, scalable API key management for your applications.
-                Monitor usage, control access, and streamline development.
-              </Typography>
-            </Box>
+            <Typography
+              variant="h3"
+              color={colors.neutral.main}
+              sx={{
+                fontWeight: "bold",
+                display: { xs: "none", sm: "block" },
+              }}
+            >
+              FortiKey
+            </Typography>
           </Box>
 
-          {/* Action buttons */}
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "flex-end",
-              alignItems: "center",
-              flex: 1,
-            }}
-          >
+          {/* Authentication buttons */}
+          <Box>
             <Button
               variant="outlined"
               onClick={() => navigate("/login")}
-              sx={{
-                marginRight: "10px",
-                color: colors.secondary.main,
-                borderColor: colors.secondary.main,
-                "&:hover": {
-                  borderColor: "#0056b3",
-                  backgroundColor: "rgba(0, 0, 0, 0.04)",
-                },
-              }}
+              sx={outlinedButtonStyle}
             >
               Login
             </Button>
             <Button
               variant="contained"
               onClick={() => navigate("/createuser")}
-              sx={{
-                backgroundColor: colors.secondary.main,
-                color: colors.primary.main,
-                "&:hover": {
-                  backgroundColor: "#0056b3",
-                },
-              }}
+              sx={containedButtonStyle}
             >
               Get Started
             </Button>
@@ -144,28 +130,14 @@ const Navbar = () => {
             <Button
               variant="outlined"
               onClick={() => navigate("/login")}
-              sx={{
-                marginRight: "10px",
-                color: colors.secondary.main,
-                borderColor: colors.secondary.main,
-                "&:hover": {
-                  borderColor: "#0056b3",
-                  backgroundColor: "rgba(0, 0, 0, 0.04)",
-                },
-              }}
+              sx={outlinedButtonStyle}
             >
               Login
             </Button>
             <Button
               variant="contained"
               onClick={() => navigate("/createuser")}
-              sx={{
-                backgroundColor: colors.secondary.main,
-                color: colors.primary.main,
-                "&:hover": {
-                  backgroundColor: "#0056b3",
-                },
-              }}
+              sx={containedButtonStyle}
             >
               Get Started
             </Button>

@@ -28,6 +28,35 @@ const Login = () => {
   const colors = tokens();
   const { showSuccessToast, showErrorToast } = useToast();
 
+  // Extract common TextField styling to a constant
+  const textFieldStyling = {
+    "& .MuiOutlinedInput-root": {
+      "& fieldset": {
+        borderColor: colors.text.secondary,
+        borderWidth: "1px",
+      },
+      "&:hover fieldset": {
+        borderColor: colors.secondary.main,
+      },
+      "&.Mui-focused fieldset": {
+        borderColor: colors.secondary.main,
+      },
+    },
+    "& .MuiInputLabel-root": {
+      "&.Mui-focused": {
+        color: colors.secondary.main,
+      },
+      bgcolor: colors.primary.main,
+      paddingLeft: "5px",
+      paddingRight: "5px",
+    },
+    "& .MuiInputLabel-shrink": {
+      bgcolor: colors.primary.main,
+      paddingLeft: "5px",
+      paddingRight: "5px",
+    },
+  };
+
   // Form state management
   const [formData, setFormData] = useState({
     email: "",
@@ -159,33 +188,7 @@ const Login = () => {
               onChange={handleChange}
               required
               variant="outlined"
-              sx={{
-                "& .MuiOutlinedInput-root": {
-                  "& fieldset": {
-                    borderColor: colors.text.secondary,
-                    borderWidth: "1px",
-                  },
-                  "&:hover fieldset": {
-                    borderColor: colors.secondary.main,
-                  },
-                  "&.Mui-focused fieldset": {
-                    borderColor: colors.secondary.main,
-                  },
-                },
-                "& .MuiInputLabel-root": {
-                  "&.Mui-focused": {
-                    color: colors.secondary.main,
-                  },
-                  bgcolor: colors.primary.main,
-                  paddingLeft: "5px",
-                  paddingRight: "5px",
-                },
-                "& .MuiInputLabel-shrink": {
-                  bgcolor: colors.primary.main,
-                  paddingLeft: "5px",
-                  paddingRight: "5px",
-                },
-              }}
+              sx={textFieldStyling}
             />
 
             <TextField
@@ -197,33 +200,7 @@ const Login = () => {
               onChange={handleChange}
               required
               variant="outlined"
-              sx={{
-                "& .MuiOutlinedInput-root": {
-                  "& fieldset": {
-                    borderColor: colors.text.secondary,
-                    borderWidth: "1px",
-                  },
-                  "&:hover fieldset": {
-                    borderColor: colors.secondary.main,
-                  },
-                  "&.Mui-focused fieldset": {
-                    borderColor: colors.secondary.main,
-                  },
-                },
-                "& .MuiInputLabel-root": {
-                  "&.Mui-focused": {
-                    color: colors.secondary.main,
-                  },
-                  bgcolor: colors.primary.main,
-                  paddingLeft: "5px",
-                  paddingRight: "5px",
-                },
-                "& .MuiInputLabel-shrink": {
-                  bgcolor: colors.primary.main,
-                  paddingLeft: "5px",
-                  paddingRight: "5px",
-                },
-              }}
+              sx={textFieldStyling}
             />
 
             <Button

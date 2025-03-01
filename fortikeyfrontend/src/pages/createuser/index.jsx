@@ -31,6 +31,35 @@ const CreateUser = () => {
   const colors = tokens();
   const { showSuccessToast, showErrorToast } = useToast();
 
+  // Extract common TextField styling to a constant
+  const textFieldStyling = {
+    "& .MuiOutlinedInput-root": {
+      "& fieldset": {
+        borderColor: colors.text.secondary,
+        borderWidth: "1px",
+      },
+      "&:hover fieldset": {
+        borderColor: colors.secondary.main,
+      },
+      "&.Mui-focused fieldset": {
+        borderColor: colors.secondary.main,
+      },
+    },
+    "& .MuiInputLabel-root": {
+      "&.Mui-focused": {
+        color: colors.secondary.main,
+      },
+      bgcolor: colors.primary.main,
+      paddingLeft: "5px",
+      paddingRight: "5px",
+    },
+    "& .MuiInputLabel-shrink": {
+      bgcolor: colors.primary.main,
+      paddingLeft: "5px",
+      paddingRight: "5px",
+    },
+  };
+
   // Form state management
   const [formData, setFormData] = useState({
     firstName: "",
@@ -211,33 +240,7 @@ const CreateUser = () => {
                   onChange={handleChange}
                   required
                   variant="outlined"
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      "& fieldset": {
-                        borderColor: colors.text.secondary,
-                        borderWidth: "1px",
-                      },
-                      "&:hover fieldset": {
-                        borderColor: colors.secondary.main,
-                      },
-                      "&.Mui-focused fieldset": {
-                        borderColor: colors.secondary.main,
-                      },
-                    },
-                    "& .MuiInputLabel-root": {
-                      "&.Mui-focused": {
-                        color: colors.secondary.main,
-                      },
-                      bgcolor: colors.primary.main,
-                      paddingLeft: "5px",
-                      paddingRight: "5px",
-                    },
-                    "& .MuiInputLabel-shrink": {
-                      bgcolor: colors.primary.main,
-                      paddingLeft: "5px",
-                      paddingRight: "5px",
-                    },
-                  }}
+                  sx={textFieldStyling}
                 />
 
                 {/* Last name input field */}
@@ -249,33 +252,7 @@ const CreateUser = () => {
                   onChange={handleChange}
                   required
                   variant="outlined"
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      "& fieldset": {
-                        borderColor: colors.text.secondary,
-                        borderWidth: "1px",
-                      },
-                      "&:hover fieldset": {
-                        borderColor: colors.secondary.main,
-                      },
-                      "&.Mui-focused fieldset": {
-                        borderColor: colors.secondary.main,
-                      },
-                    },
-                    "& .MuiInputLabel-root": {
-                      "&.Mui-focused": {
-                        color: colors.secondary.main,
-                      },
-                      bgcolor: colors.primary.main,
-                      paddingLeft: "5px",
-                      paddingRight: "5px",
-                    },
-                    "& .MuiInputLabel-shrink": {
-                      bgcolor: colors.primary.main,
-                      paddingLeft: "5px",
-                      paddingRight: "5px",
-                    },
-                  }}
+                  sx={textFieldStyling}
                 />
               </Box>
 
@@ -289,33 +266,7 @@ const CreateUser = () => {
                 onChange={handleChange}
                 required
                 variant="outlined"
-                sx={{
-                  "& .MuiOutlinedInput-root": {
-                    "& fieldset": {
-                      borderColor: colors.text.secondary,
-                      borderWidth: "1px",
-                    },
-                    "&:hover fieldset": {
-                      borderColor: colors.secondary.main,
-                    },
-                    "&.Mui-focused fieldset": {
-                      borderColor: colors.secondary.main,
-                    },
-                  },
-                  "& .MuiInputLabel-root": {
-                    "&.Mui-focused": {
-                      color: colors.secondary.main,
-                    },
-                    bgcolor: colors.primary.main,
-                    paddingLeft: "5px",
-                    paddingRight: "5px",
-                  },
-                  "& .MuiInputLabel-shrink": {
-                    bgcolor: colors.primary.main,
-                    paddingLeft: "5px",
-                    paddingRight: "5px",
-                  },
-                }}
+                sx={textFieldStyling}
               />
 
               {/* Company input field */}
@@ -327,33 +278,7 @@ const CreateUser = () => {
                 onChange={handleChange}
                 required
                 variant="outlined"
-                sx={{
-                  "& .MuiOutlinedInput-root": {
-                    "& fieldset": {
-                      borderColor: colors.text.secondary,
-                      borderWidth: "1px",
-                    },
-                    "&:hover fieldset": {
-                      borderColor: colors.secondary.main,
-                    },
-                    "&.Mui-focused fieldset": {
-                      borderColor: colors.secondary.main,
-                    },
-                  },
-                  "& .MuiInputLabel-root": {
-                    "&.Mui-focused": {
-                      color: colors.secondary.main,
-                    },
-                    bgcolor: colors.primary.main,
-                    paddingLeft: "5px",
-                    paddingRight: "5px",
-                  },
-                  "& .MuiInputLabel-shrink": {
-                    bgcolor: colors.primary.main,
-                    paddingLeft: "5px",
-                    paddingRight: "5px",
-                  },
-                }}
+                sx={textFieldStyling}
               />
 
               {/* Password input field */}
@@ -366,33 +291,7 @@ const CreateUser = () => {
                 onChange={handleChange}
                 required
                 variant="outlined"
-                sx={{
-                  "& .MuiOutlinedInput-root": {
-                    "& fieldset": {
-                      borderColor: colors.text.secondary,
-                      borderWidth: "1px",
-                    },
-                    "&:hover fieldset": {
-                      borderColor: colors.secondary.main,
-                    },
-                    "&.Mui-focused fieldset": {
-                      borderColor: colors.secondary.main,
-                    },
-                  },
-                  "& .MuiInputLabel-root": {
-                    "&.Mui-focused": {
-                      color: colors.secondary.main,
-                    },
-                    bgcolor: colors.primary.main,
-                    paddingLeft: "5px",
-                    paddingRight: "5px",
-                  },
-                  "& .MuiInputLabel-shrink": {
-                    bgcolor: colors.primary.main,
-                    paddingLeft: "5px",
-                    paddingRight: "5px",
-                  },
-                }}
+                sx={textFieldStyling}
               />
 
               {/* Confirm password input field */}
@@ -405,33 +304,7 @@ const CreateUser = () => {
                 onChange={handleChange}
                 required
                 variant="outlined"
-                sx={{
-                  "& .MuiOutlinedInput-root": {
-                    "& fieldset": {
-                      borderColor: colors.text.secondary,
-                      borderWidth: "1px",
-                    },
-                    "&:hover fieldset": {
-                      borderColor: colors.secondary.main,
-                    },
-                    "&.Mui-focused fieldset": {
-                      borderColor: colors.secondary.main,
-                    },
-                  },
-                  "& .MuiInputLabel-root": {
-                    "&.Mui-focused": {
-                      color: colors.secondary.main,
-                    },
-                    bgcolor: colors.primary.main,
-                    paddingLeft: "5px",
-                    paddingRight: "5px",
-                  },
-                  "& .MuiInputLabel-shrink": {
-                    bgcolor: colors.primary.main,
-                    paddingLeft: "5px",
-                    paddingRight: "5px",
-                  },
-                }}
+                sx={textFieldStyling}
               />
 
               {/* Submit button */}

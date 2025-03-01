@@ -20,6 +20,32 @@ const SignedOut = () => {
   const navigate = useNavigate();
   const colors = tokens();
 
+  // Extract common button styling
+  const primaryButtonStyle = {
+    bgcolor: "secondary.main",
+    color: "primary.main",
+    py: 1.5,
+    px: 3,
+    fontSize: "16px",
+    fontWeight: "bold",
+    "&:hover": {
+      bgcolor: "#0069d9",
+    },
+  };
+
+  const secondaryButtonStyle = {
+    borderColor: "secondary.main",
+    color: "secondary.main",
+    py: 1.5,
+    px: 3,
+    fontSize: "16px",
+    fontWeight: "bold",
+    "&:hover": {
+      borderColor: "#0069d9",
+      bgcolor: "rgba(0, 123, 255, 0.04)",
+    },
+  };
+
   /**
    * Navigate to login page
    * Redirects the user to the login screen
@@ -102,17 +128,7 @@ const SignedOut = () => {
             <Button
               variant="contained"
               onClick={handleLoginClick}
-              sx={{
-                bgcolor: "secondary.main",
-                color: "primary.main",
-                py: 1.5,
-                px: 3,
-                fontSize: "16px",
-                fontWeight: "bold",
-                "&:hover": {
-                  bgcolor: "#0069d9",
-                },
-              }}
+              sx={primaryButtonStyle}
             >
               Return to Login
             </Button>
@@ -121,18 +137,7 @@ const SignedOut = () => {
             <Button
               variant="outlined"
               onClick={handleHomeClick}
-              sx={{
-                borderColor: "secondary.main",
-                color: "secondary.main",
-                py: 1.5,
-                px: 3,
-                fontSize: "16px",
-                fontWeight: "bold",
-                "&:hover": {
-                  borderColor: "#0069d9",
-                  bgcolor: "rgba(0, 123, 255, 0.04)",
-                },
-              }}
+              sx={secondaryButtonStyle}
             >
               Return to Home
             </Button>
