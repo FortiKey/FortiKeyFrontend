@@ -8,7 +8,7 @@ import authService from "../services/authservice";
 
 const Topbar = () => {
   const theme = useTheme();
-  const colors = tokens(theme.palette.mode);
+  const colors = tokens();
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
@@ -52,7 +52,7 @@ const Topbar = () => {
     <Box
       display="flex"
       justifyContent="flex-end"
-      p={3}
+      p={{ xs: 2, sm: 3 }}
       sx={{
         backgroundColor: colors.primary.main,
       }}

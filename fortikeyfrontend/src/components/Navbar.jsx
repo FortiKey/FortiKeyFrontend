@@ -4,7 +4,7 @@ import { tokens } from "../theme";
 
 const Navbar = () => {
   const theme = useTheme();
-  const colors = tokens(theme.palette.mode);
+  const colors = tokens();
   const navigate = useNavigate();
   const location = useLocation();
   const isLandingPage = location.pathname === "/";
@@ -12,7 +12,7 @@ const Navbar = () => {
   return (
     <Box
       sx={{
-        padding: "20px 40px",
+        padding: { xs: "15px 20px", sm: "20px 40px" },
         display: "flex",
         justifyContent: "space-between",
         alignItems: "center",

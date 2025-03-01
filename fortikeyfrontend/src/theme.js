@@ -1,5 +1,6 @@
 import { createTheme } from "@mui/material/styles";
 
+// Simplified tokens function that doesn't need a mode parameter
 export const tokens = () => ({
   primary: { main: "#ffffff" }, // Primary color
   secondary: { main: "#007BFF" }, // Secondary color
@@ -15,7 +16,7 @@ export const tokens = () => ({
   },
 });
 
-// Add this themeSettings object
+// Theme settings using the tokens
 const themeSettings = {
   palette: {
     ...tokens(),

@@ -4,11 +4,13 @@ import { theme } from "../../theme";
 import Header from "../../components/Header";
 import { tokens } from "../../theme";
 import { useState } from "react";
+import { useToast } from "../../context";
 
 const ManageAPIKeys = () => {
   const colors = tokens();
   const actualKey = "fk_live_3x7abcdef1234567890"; // What gets copied
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
+  const { showSuccessToast, showErrorToast } = useToast();
 
   const handleGenerateNewKey = () => {
     setConfirmDialogOpen(true);
@@ -18,12 +20,19 @@ const ManageAPIKeys = () => {
     // Add API key generation logic here
     console.log("Generating new API key...");
     setConfirmDialogOpen(false);
+    showSuccessToast("New API key generated successfully!");
   };
 
   const handleCopyKey = () => {
-    navigator.clipboard.writeText(actualKey).catch((err) => {
-      console.error("Failed to copy API key:", err);
-    });
+    navigator.clipboard
+      .writeText(actualKey)
+      .then(() => {
+        showSuccessToast("API key copied to clipboard!");
+      })
+      .catch((err) => {
+        console.error("Failed to copy API key:", err);
+        showErrorToast("Failed to copy API key. Please try again.");
+      });
   };
 
   return (

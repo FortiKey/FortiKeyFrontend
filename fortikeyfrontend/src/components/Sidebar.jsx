@@ -16,7 +16,7 @@ import authService from "../services/authservice";
 
 const Item = ({ title, to, icon, selected, setSelected, onClick }) => {
   const theme = useTheme();
-  const colors = tokens(theme.palette.mode);
+  const colors = tokens();
 
   return (
     <MenuItem
@@ -38,7 +38,7 @@ const Item = ({ title, to, icon, selected, setSelected, onClick }) => {
 
 const Sidebar = () => {
   const theme = useTheme();
-  const colors = tokens(theme.palette.mode);
+  const colors = tokens();
   const [isCollapsed, setIsCollapsed] = useState(true);
   const [selected, setSelected] = useState("Dashboard");
   const navigate = useNavigate();

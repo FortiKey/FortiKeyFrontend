@@ -2,12 +2,11 @@ import { Box, Button, Typography, useTheme } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../../components/Navbar";
 import { tokens } from "../../theme";
-import { theme } from "../../theme";  
 
 const SignedOut = () => {
   const navigate = useNavigate();
   const theme = useTheme();
-  const colors = tokens(theme.palette.mode);
+  const colors = tokens();
 
   return (
     <Box
@@ -27,7 +26,7 @@ const SignedOut = () => {
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          padding: "40px 20px",
+          padding: { xs: "20px 10px", sm: "40px 20px" },
         }}
       >
         <Box
@@ -36,7 +35,7 @@ const SignedOut = () => {
             maxWidth: "500px",
             bgcolor: "primary.main",
             borderRadius: 3,
-            p: 5,
+            p: { xs: 3, sm: 5 },
             boxShadow: 1,
             textAlign: "center",
           }}

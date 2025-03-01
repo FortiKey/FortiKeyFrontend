@@ -8,10 +8,12 @@ import VpnKeyOutlinedIcon from "@mui/icons-material/VpnKeyOutlined";
 import BarChartOutlinedIcon from "@mui/icons-material/BarChartOutlined";
 import AdminPanelSettingsOutlinedIcon from "@mui/icons-material/AdminPanelSettingsOutlined";
 import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
+import { useToast } from "../../context";
 
 const Dashboard = () => {
-  const colors = tokens(); // Call tokens() as a function to get color values
+  const colors = tokens();
   const navigate = useNavigate();
+  const { showInfoToast } = useToast();
 
   // Navigation buttons configuration
   const navButtons = [
@@ -46,6 +48,21 @@ const Dashboard = () => {
       color: colors.pieChart.unauthorized,
     },
   ];
+
+  const navigateToManageKeys = () => {
+    showInfoToast("Navigating to API Key Management");
+    navigate("/manageapikey");
+  };
+
+  const navigateToDocumentation = () => {
+    showInfoToast("Opening API Documentation");
+    navigate("/apidocumentation");
+  };
+
+  const navigateToAnalytics = () => {
+    showInfoToast("Viewing usage analytics");
+    navigate("/usageanalytics");
+  };
 
   return (
     <Box
@@ -94,7 +111,10 @@ const Dashboard = () => {
                   borderColor: colors.secondary.main,
                 },
               }}
-              onClick={() => navigate(button.path)}
+              onClick={() => {
+                showInfoToast(`Navigating to ${button.title}`);
+                navigate(button.path);
+              }}
             >
               {button.title}
             </Button>
@@ -117,6 +137,41 @@ const Dashboard = () => {
         <Box height="300px">
           <PieChart />
         </Box>
+      </Box>
+
+      <Box mt={4}>
+        <Grid container spacing={2}>
+          <Grid item xs={12} md={4}>
+            <Button
+              fullWidth
+              variant="contained"
+              color="secondary"
+              onClick={navigateToManageKeys}
+            >
+              Manage API Keys
+            </Button>
+          </Grid>
+          <Grid item xs={12} md={4}>
+            <Button
+              fullWidth
+              variant="contained"
+              color="secondary"
+              onClick={navigateToDocumentation}
+            >
+              API Documentation
+            </Button>
+          </Grid>
+          <Grid item xs={12} md={4}>
+            <Button
+              fullWidth
+              variant="contained"
+              color="secondary"
+              onClick={navigateToAnalytics}
+            >
+              Usage Analytics
+            </Button>
+          </Grid>
+        </Grid>
       </Box>
     </Box>
   );

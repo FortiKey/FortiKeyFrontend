@@ -1,15 +1,29 @@
-import { Box, useTheme, Typography, Button } from "@mui/material";
+import {
+  Box,
+  useTheme,
+  Typography,
+  Button,
+  useMediaQuery,
+} from "@mui/material";
 import { tokens } from "../../theme";
 import Header from "../../components/Header";
 import { Accordion, AccordionSummary, AccordionDetails } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
+import { useToast } from "../../context";
+
 const ApiDocumentation = () => {
   const theme = useTheme();
-  const colors = tokens(theme.palette.mode);
+  const colors = tokens();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const { showSuccessToast } = useToast();
+
+  const handleDownload = (part) => {
+    showSuccessToast(`Documentation Part ${part} download started`);
+  };
 
   return (
-    <Box m="20px">
+    <Box m={{ xs: "10px", sm: "20px" }}>
       <Header
         title="API Documentation"
         subtitle="How to use the FortiKey API"
@@ -19,7 +33,11 @@ const ApiDocumentation = () => {
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
           <Typography
             variant="h5"
-            sx={{ color: colors.neutral.main, fontWeight: "bold" }}
+            sx={{
+              color: colors.neutral.main,
+              fontWeight: "bold",
+              fontSize: { xs: "1.1rem", sm: "1.5rem" },
+            }}
           >
             Part 1: Getting Started with FortiKey API
           </Typography>
@@ -36,9 +54,12 @@ const ApiDocumentation = () => {
             href="/assets/apidocument1.pdf"
             download="apidocument1.pdf"
             type="application/pdf"
+            fullWidth={isMobile}
+            onClick={() => handleDownload(1)}
             sx={{
               color: colors.secondary.main,
               borderColor: colors.secondary.main,
+              padding: { xs: "10px 15px", sm: "8px 22px" },
               "&:hover": {
                 borderColor: colors.secondary.main,
                 backgroundColor: "rgba(0, 123, 255, 0.04)",
@@ -54,7 +75,11 @@ const ApiDocumentation = () => {
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
           <Typography
             variant="h5"
-            sx={{ color: colors.neutral.main, fontWeight: "bold" }}
+            sx={{
+              color: colors.neutral.main,
+              fontWeight: "bold",
+              fontSize: { xs: "1.1rem", sm: "1.5rem" },
+            }}
           >
             Part 2: Advanced API Features
           </Typography>
@@ -68,12 +93,15 @@ const ApiDocumentation = () => {
             variant="outlined"
             startIcon={<OpenInNewIcon />}
             component="a"
-            href="/assets/apidocument 2.pdf"
-            download="apidocument 2.pdf"
+            href="/assets/apidocument2.pdf"
+            download="apidocument2.pdf"
             type="application/pdf"
+            fullWidth={isMobile}
+            onClick={() => handleDownload(2)}
             sx={{
               color: colors.secondary.main,
               borderColor: colors.secondary.main,
+              padding: { xs: "10px 15px", sm: "8px 22px" },
               "&:hover": {
                 borderColor: colors.secondary.main,
                 backgroundColor: "rgba(0, 123, 255, 0.04)",

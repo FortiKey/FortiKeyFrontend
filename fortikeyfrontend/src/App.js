@@ -17,67 +17,70 @@ import UsageAnalytics from "./pages/usageanalytics";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminRoute from "./components/AdminRoute";
 import { Box } from "@mui/material";
+import { ToastProvider } from "./context";
 
 function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Routes>
-        {/* Public Pages */}
-        <Route path="/" element={<Landing />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/createuser" element={<CreateUser />} />
-        <Route path="/signedout" element={<SignedOut />} />
+      <ToastProvider>
+        <Routes>
+          {/* Public Pages */}
+          <Route path="/" element={<Landing />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/createuser" element={<CreateUser />} />
+          <Route path="/signedout" element={<SignedOut />} />
 
-        {/* Dashboard Layout - All protected */}
-        <Route
-          path="/*"
-          element={
-            <ProtectedRoute>
-              <Box
-                sx={{
-                  display: "flex",
-                  flexDirection: { xs: "column", md: "row" },
-                }}
-              >
-                <Sidebar />
+          {/* Dashboard Layout - All protected */}
+          <Route
+            path="/*"
+            element={
+              <ProtectedRoute>
                 <Box
-                  component="main"
                   sx={{
-                    flexGrow: 1,
-                    width: { xs: "100%", md: "calc(100% - 250px)" },
-                    minHeight: "100vh",
+                    display: "flex",
+                    flexDirection: { xs: "column", md: "row" },
                   }}
                 >
-                  <Topbar />
-                  <Routes>
-                    <Route path="/dashboard" element={<Dashboard />} />
-                    <Route path="/viewaccounts" element={<ViewAccounts />} />
-                    <Route
-                      path="/apidocumentation"
-                      element={<ApiDocumentation />}
-                    />
-                    <Route
-                      path="/admindashboard"
-                      element={
-                        <AdminRoute>
-                          <AdminDashboard />
-                        </AdminRoute>
-                      }
-                    />
-                    <Route path="/manageapikey" element={<ManageAPIKeys />} />
-                    <Route
-                      path="/usageanalytics"
-                      element={<UsageAnalytics />}
-                    />
-                    {/* Add other dashboard routes here */}
-                  </Routes>
+                  <Sidebar />
+                  <Box
+                    component="main"
+                    sx={{
+                      flexGrow: 1,
+                      width: { xs: "100%", md: "calc(100% - 250px)" },
+                      minHeight: "100vh",
+                    }}
+                  >
+                    <Topbar />
+                    <Routes>
+                      <Route path="/dashboard" element={<Dashboard />} />
+                      <Route path="/viewaccounts" element={<ViewAccounts />} />
+                      <Route
+                        path="/apidocumentation"
+                        element={<ApiDocumentation />}
+                      />
+                      <Route
+                        path="/admindashboard"
+                        element={
+                          <AdminRoute>
+                            <AdminDashboard />
+                          </AdminRoute>
+                        }
+                      />
+                      <Route path="/manageapikey" element={<ManageAPIKeys />} />
+                      <Route
+                        path="/usageanalytics"
+                        element={<UsageAnalytics />}
+                      />
+                      {/* Add other dashboard routes here */}
+                    </Routes>
+                  </Box>
                 </Box>
-              </Box>
-            </ProtectedRoute>
-          }
-        />
-      </Routes>
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
+      </ToastProvider>
     </ThemeProvider>
   );
 }
