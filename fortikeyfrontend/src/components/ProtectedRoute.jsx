@@ -7,38 +7,46 @@ import { tokens } from "../theme";
 /**
  * Protected Route Component
  *
- * Secures routes by checking user authentication status.
- * Redirects unauthenticated users to the login page.
- * Shows a loading indicator while checking authentication.
+ * Secures routes by checking user authorization status.
+ * Redirects unauthorized users to the specified redirect path.
+ * Shows a loading indicator while checking authorization.
  *
  * @param {Object} props - Component props
- * @param {JSX.Element} props.children - Child components to render if authenticated
+ * @param {Function} props.authCheck - Function that returns a promise resolving to a boolean
+ * @param {string} props.redirectPath - Path to redirect to if not authorized
+ * @param {JSX.Element} props.children - Child components to render if authorized
  * @returns {JSX.Element} Protected route content or redirect
  */
-const ProtectedRoute = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(null);
+const ProtectedRoute = ({
+  authCheck = async () => {
+    const user = await authService.getCurrentUser();
+    return !!user;
+  },
+  redirectPath = "/login",
+  children,
+}) => {
+  const [isAuthorized, setIsAuthorized] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const colors = tokens();
 
-  // Check authentication status on component mount
+  // Check authorization status on component mount
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        // Attempt to get the current user from auth service
-        const user = await authService.getCurrentUser();
-        setIsAuthenticated(!!user); // Convert to boolean
+        const authorized = await authCheck();
+        setIsAuthorized(authorized);
       } catch (error) {
-        console.error("Authentication check failed:", error);
-        setIsAuthenticated(false);
+        console.error("Authorization check failed:", error);
+        setIsAuthorized(false);
       } finally {
         setIsLoading(false);
       }
     };
 
     checkAuth();
-  }, []);
+  }, [authCheck]);
 
-  // Show loading spinner while checking authentication
+  // Show loading spinner while checking authorization
   if (isLoading) {
     return (
       <Box
@@ -55,12 +63,12 @@ const ProtectedRoute = ({ children }) => {
     );
   }
 
-  // Redirect to login if not authenticated
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+  // Redirect if not authorized
+  if (!isAuthorized) {
+    return <Navigate to={redirectPath} replace />;
   }
 
-  // Render children if authenticated
+  // Render children if authorized
   return children;
 };
 

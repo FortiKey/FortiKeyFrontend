@@ -28,32 +28,49 @@ const Login = () => {
   const colors = tokens();
   const { showSuccessToast, showErrorToast } = useToast();
 
-  // Extract common TextField styling to a constant
-  const textFieldStyling = {
-    "& .MuiOutlinedInput-root": {
-      "& fieldset": {
-        borderColor: colors.text.secondary,
-        borderWidth: "1px",
+  // Common form styling constants
+  const formStyles = {
+    textField: {
+      "& .MuiOutlinedInput-root": {
+        "& fieldset": {
+          borderColor: colors.text.secondary,
+          borderWidth: "1px",
+        },
+        "&:hover fieldset": {
+          borderColor: colors.secondary.main,
+        },
+        "&.Mui-focused fieldset": {
+          borderColor: colors.secondary.main,
+        },
       },
-      "&:hover fieldset": {
-        borderColor: colors.secondary.main,
+      "& .MuiInputLabel-root": {
+        "&.Mui-focused": {
+          color: colors.secondary.main,
+        },
+        bgcolor: colors.primary.main,
+        paddingLeft: "5px",
+        paddingRight: "5px",
       },
-      "&.Mui-focused fieldset": {
-        borderColor: colors.secondary.main,
+      "& .MuiInputLabel-shrink": {
+        bgcolor: colors.primary.main,
+        paddingLeft: "5px",
+        paddingRight: "5px",
       },
     },
-    "& .MuiInputLabel-root": {
-      "&.Mui-focused": {
-        color: colors.secondary.main,
+    button: {
+      fontSize: "16px",
+      padding: "12px 24px",
+      "&:hover": {
+        opacity: 0.9,
       },
-      bgcolor: colors.primary.main,
-      paddingLeft: "5px",
-      paddingRight: "5px",
     },
-    "& .MuiInputLabel-shrink": {
+    container: {
+      width: "100%",
+      maxWidth: "400px",
       bgcolor: colors.primary.main,
-      paddingLeft: "5px",
-      paddingRight: "5px",
+      borderRadius: "12px",
+      padding: "40px",
+      boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
     },
   };
 
@@ -64,6 +81,29 @@ const Login = () => {
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // Enhanced error handling
+  const handleApiError = (
+    error,
+    defaultMessage = "An unexpected error occurred"
+  ) => {
+    console.error("API Error:", error);
+
+    let errorMessage = defaultMessage;
+
+    // Handle network errors
+    if (!error.response) {
+      errorMessage = "Network error. Please check your connection.";
+    }
+    // Handle API errors with response
+    else if (error.response?.data?.message) {
+      errorMessage = error.response.data.message;
+    }
+
+    setError(errorMessage);
+    showErrorToast(errorMessage);
+    return errorMessage;
+  };
 
   /**
    * Handle form input changes
@@ -92,9 +132,7 @@ const Login = () => {
       showSuccessToast("Login successful!");
       navigate("/dashboard");
     } catch (error) {
-      console.error("Login error:", error);
-      setError("Invalid email or password. Please try again.");
-      showErrorToast("Login failed. Please check your credentials.");
+      handleApiError(error, "Invalid email or password. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -116,8 +154,10 @@ const Login = () => {
       setError("Password reset link sent to your email!");
       showSuccessToast("Password reset link sent to your email!");
     } catch (err) {
-      setError("Failed to send password reset email. Please try again.");
-      showErrorToast("Failed to send password reset email. Please try again.");
+      handleApiError(
+        err,
+        "Failed to send password reset email. Please try again."
+      );
     } finally {
       setLoading(false);
     }
@@ -143,18 +183,7 @@ const Login = () => {
           padding: "40px 20px",
         }}
       >
-        <Box
-          component="form"
-          onSubmit={handleSubmit}
-          sx={{
-            width: "100%",
-            maxWidth: "400px",
-            bgcolor: colors.primary.main,
-            borderRadius: "12px",
-            padding: "40px",
-            boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-          }}
-        >
+        <Box component="form" onSubmit={handleSubmit} sx={formStyles.container}>
           <Typography
             variant="h3"
             color={colors.neutral.main}
@@ -187,8 +216,7 @@ const Login = () => {
               value={formData.email}
               onChange={handleChange}
               required
-              variant="outlined"
-              sx={textFieldStyling}
+              sx={formStyles.textField}
             />
 
             <TextField
@@ -199,8 +227,7 @@ const Login = () => {
               value={formData.password}
               onChange={handleChange}
               required
-              variant="outlined"
-              sx={textFieldStyling}
+              sx={formStyles.textField}
             />
 
             <Button
@@ -209,62 +236,39 @@ const Login = () => {
               variant="contained"
               color="secondary"
               disabled={loading}
-              sx={{
-                padding: "12px",
-                fontSize: "1rem",
-                textTransform: "none",
-                "&:hover": {
-                  opacity: 0.9,
-                },
-              }}
+              sx={formStyles.button}
             >
               {loading ? (
                 <CircularProgress size={24} color="inherit" />
               ) : (
-                "Sign In"
+                "Log In"
               )}
             </Button>
-          </Box>
 
-          <Box sx={{ textAlign: "center", marginTop: "24px" }}>
-            <Typography
-              variant="h5"
-              color={colors.text.secondary}
-              sx={{ display: "inline" }}
-            >
-              Don't have an account?{" "}
-            </Typography>
             <Button
-              onClick={() => navigate("/createuser")}
-              sx={{
-                textTransform: "none",
-                color: colors.secondary.main,
-                "&:hover": {
-                  backgroundColor: "transparent",
-                  textDecoration: "underline",
-                },
-              }}
-            >
-              Sign Up
-            </Button>
-          </Box>
-
-          {/* Forgot Password Link */}
-          <Box sx={{ textAlign: "center", marginTop: "16px" }}>
-            <Button
+              type="button"
+              variant="text"
+              color="secondary"
               onClick={handleForgotPassword}
               disabled={loading}
-              sx={{
-                textTransform: "none",
-                color: colors.secondary.main,
-                "&:hover": {
-                  backgroundColor: "transparent",
-                  textDecoration: "underline",
-                },
-              }}
+              sx={{ textTransform: "none" }}
             >
               Forgot Password?
             </Button>
+
+            <Box sx={{ textAlign: "center", mt: 2 }}>
+              <Typography variant="body2" color={colors.text.secondary}>
+                Don't have an account?{" "}
+                <Button
+                  variant="text"
+                  color="secondary"
+                  onClick={() => navigate("/createuser")}
+                  sx={{ textTransform: "none", p: 0, minWidth: "auto" }}
+                >
+                  Sign Up
+                </Button>
+              </Typography>
+            </Box>
           </Box>
         </Box>
       </Box>

@@ -31,32 +31,53 @@ const CreateUser = () => {
   const colors = tokens();
   const { showSuccessToast, showErrorToast } = useToast();
 
-  // Extract common TextField styling to a constant
-  const textFieldStyling = {
-    "& .MuiOutlinedInput-root": {
-      "& fieldset": {
-        borderColor: colors.text.secondary,
-        borderWidth: "1px",
+  // Common form styling constants
+  const formStyles = {
+    textField: {
+      "& .MuiOutlinedInput-root": {
+        "& fieldset": {
+          borderColor: colors.text.secondary,
+          borderWidth: "1px",
+        },
+        "&:hover fieldset": {
+          borderColor: colors.secondary.main,
+        },
+        "&.Mui-focused fieldset": {
+          borderColor: colors.secondary.main,
+        },
       },
-      "&:hover fieldset": {
-        borderColor: colors.secondary.main,
+      "& .MuiInputLabel-root": {
+        "&.Mui-focused": {
+          color: colors.secondary.main,
+        },
+        bgcolor: colors.primary.main,
+        paddingLeft: "5px",
+        paddingRight: "5px",
       },
-      "&.Mui-focused fieldset": {
-        borderColor: colors.secondary.main,
+      "& .MuiInputLabel-shrink": {
+        bgcolor: colors.primary.main,
+        paddingLeft: "5px",
+        paddingRight: "5px",
       },
     },
-    "& .MuiInputLabel-root": {
-      "&.Mui-focused": {
-        color: colors.secondary.main,
+    button: {
+      backgroundColor: colors.secondary.main,
+      color: colors.primary.main,
+      padding: "12px",
+      fontSize: "16px",
+      fontWeight: "bold",
+      marginTop: "10px",
+      "&:hover": {
+        backgroundColor: "#0069d9",
       },
-      bgcolor: colors.primary.main,
-      paddingLeft: "5px",
-      paddingRight: "5px",
     },
-    "& .MuiInputLabel-shrink": {
+    container: {
+      width: "100%",
+      maxWidth: "500px",
       bgcolor: colors.primary.main,
-      paddingLeft: "5px",
-      paddingRight: "5px",
+      borderRadius: "12px",
+      padding: "40px",
+      boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
     },
   };
 
@@ -71,6 +92,29 @@ const CreateUser = () => {
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // Enhanced error handling
+  const handleApiError = (
+    error,
+    defaultMessage = "An unexpected error occurred"
+  ) => {
+    console.error("API Error:", error);
+
+    let errorMessage = defaultMessage;
+
+    // Handle network errors
+    if (!error.response) {
+      errorMessage = "Network error. Please check your connection.";
+    }
+    // Handle API errors with response
+    else if (error.response?.data?.message) {
+      errorMessage = error.response.data.message;
+    }
+
+    setError(errorMessage);
+    showErrorToast(errorMessage);
+    return errorMessage;
+  };
 
   /**
    * Handle form input changes
@@ -142,28 +186,17 @@ const CreateUser = () => {
     setError("");
 
     try {
-      await authService.register(
-        formData.firstName,
-        formData.lastName,
-        formData.email,
-        formData.password,
-        formData.company
-      );
+      await authService.register({
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        password: formData.password,
+        company: formData.company,
+      });
       showSuccessToast("Account created successfully! Please log in.");
       navigate("/login");
     } catch (error) {
-      console.error("Registration error:", error);
-      if (
-        error.response &&
-        error.response.data &&
-        error.response.data.message
-      ) {
-        setError(error.response.data.message);
-        showErrorToast(error.response.data.message);
-      } else {
-        setError("Failed to create account. Please try again.");
-        showErrorToast("Failed to create account. Please try again.");
-      }
+      handleApiError(error, "Failed to create account. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -195,14 +228,7 @@ const CreateUser = () => {
           <Box
             component="form"
             onSubmit={handleSubmit}
-            sx={{
-              width: "100%",
-              maxWidth: "500px",
-              bgcolor: colors.primary.main,
-              borderRadius: "12px",
-              padding: "40px",
-              boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-            }}
+            sx={formStyles.container}
           >
             {/* Form header */}
             <Typography
@@ -240,7 +266,7 @@ const CreateUser = () => {
                   onChange={handleChange}
                   required
                   variant="outlined"
-                  sx={textFieldStyling}
+                  sx={formStyles.textField}
                 />
 
                 {/* Last name input field */}
@@ -252,7 +278,7 @@ const CreateUser = () => {
                   onChange={handleChange}
                   required
                   variant="outlined"
-                  sx={textFieldStyling}
+                  sx={formStyles.textField}
                 />
               </Box>
 
@@ -266,7 +292,7 @@ const CreateUser = () => {
                 onChange={handleChange}
                 required
                 variant="outlined"
-                sx={textFieldStyling}
+                sx={formStyles.textField}
               />
 
               {/* Company input field */}
@@ -278,7 +304,7 @@ const CreateUser = () => {
                 onChange={handleChange}
                 required
                 variant="outlined"
-                sx={textFieldStyling}
+                sx={formStyles.textField}
               />
 
               {/* Password input field */}
@@ -291,7 +317,7 @@ const CreateUser = () => {
                 onChange={handleChange}
                 required
                 variant="outlined"
-                sx={textFieldStyling}
+                sx={formStyles.textField}
               />
 
               {/* Confirm password input field */}
@@ -304,7 +330,7 @@ const CreateUser = () => {
                 onChange={handleChange}
                 required
                 variant="outlined"
-                sx={textFieldStyling}
+                sx={formStyles.textField}
               />
 
               {/* Submit button */}
@@ -312,17 +338,7 @@ const CreateUser = () => {
                 type="submit"
                 variant="contained"
                 disabled={loading}
-                sx={{
-                  backgroundColor: colors.secondary.main,
-                  color: colors.primary.main,
-                  padding: "12px",
-                  fontSize: "16px",
-                  fontWeight: "bold",
-                  marginTop: "10px",
-                  "&:hover": {
-                    backgroundColor: "#0069d9",
-                  },
-                }}
+                sx={formStyles.button}
               >
                 {loading ? (
                   <CircularProgress size={24} color="inherit" />
