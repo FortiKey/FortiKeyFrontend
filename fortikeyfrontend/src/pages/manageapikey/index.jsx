@@ -19,6 +19,43 @@ const ManageAPIKeys = () => {
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const { showSuccessToast, showErrorToast } = useToast();
 
+  // Extract common button styling
+  const apiKeyButtonStyle = {
+    backgroundColor: colors.primary.main,
+    color: colors.secondary.main,
+    borderColor: colors.secondary.main,
+    whiteSpace: "nowrap",
+    width: "100%",
+    maxWidth: "350px",
+    "&:hover": {
+      backgroundColor: "rgba(0, 123, 255, 0.04)",
+      color: colors.secondary.main,
+      borderColor: colors.secondary.main,
+    },
+  };
+
+  // Extract dialog button styling
+  const dialogButtonStyle = {
+    padding: "6px 16px",
+    textTransform: "uppercase",
+    borderRadius: "4px",
+    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+  };
+
+  const cancelButtonStyle = {
+    ...dialogButtonStyle,
+    backgroundColor: "#007FFF",
+    color: "white",
+    "&:hover": { backgroundColor: "#0066CC" },
+  };
+
+  const generateButtonStyle = {
+    ...dialogButtonStyle,
+    backgroundColor: "#DC3545",
+    color: "white",
+    "&:hover": { backgroundColor: "#C82333" },
+  };
+
   /**
    * Opens the confirmation dialog for generating a new API key
    */
@@ -85,19 +122,9 @@ const ManageAPIKeys = () => {
                 variant="outlined"
                 onClick={handleCopyKey}
                 sx={{
-                  backgroundColor: colors.primary.main,
-                  color: colors.secondary.main,
-                  borderColor: colors.secondary.main,
-                  whiteSpace: "nowrap",
+                  ...apiKeyButtonStyle,
                   overflow: "hidden",
                   textOverflow: "ellipsis",
-                  width: "100%",
-                  maxWidth: "350px",
-                  "&:hover": {
-                    backgroundColor: "rgba(0, 123, 255, 0.04)",
-                    color: colors.secondary.main,
-                    borderColor: colors.secondary.main,
-                  },
                 }}
               >
                 {actualKey}
@@ -107,19 +134,7 @@ const ManageAPIKeys = () => {
               <Button
                 variant="outlined"
                 onClick={handleGenerateNewKey}
-                sx={{
-                  backgroundColor: colors.primary.main,
-                  color: colors.secondary.main,
-                  borderColor: colors.secondary.main,
-                  whiteSpace: "nowrap",
-                  width: "100%",
-                  maxWidth: "350px",
-                  "&:hover": {
-                    backgroundColor: "rgba(0, 123, 255, 0.04)",
-                    color: colors.secondary.main,
-                    borderColor: colors.secondary.main,
-                  },
-                }}
+                sx={apiKeyButtonStyle}
               >
                 Generate New API Key
               </Button>
@@ -170,31 +185,12 @@ const ManageAPIKeys = () => {
               {/* Cancel button */}
               <Button
                 onClick={() => setConfirmDialogOpen(false)}
-                sx={{
-                  backgroundColor: "#007FFF",
-                  color: "white",
-                  padding: "6px 16px",
-                  textTransform: "uppercase",
-                  borderRadius: "4px",
-                  boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-                  "&:hover": { backgroundColor: "#0066CC" },
-                }}
+                sx={cancelButtonStyle}
               >
                 Cancel
               </Button>
               {/* Generate button */}
-              <Button
-                onClick={handleGenerateConfirm}
-                sx={{
-                  backgroundColor: "#DC3545",
-                  color: "white",
-                  padding: "6px 16px",
-                  textTransform: "uppercase",
-                  borderRadius: "4px",
-                  boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-                  "&:hover": { backgroundColor: "#C82333" },
-                }}
-              >
+              <Button onClick={handleGenerateConfirm} sx={generateButtonStyle}>
                 Generate
               </Button>
             </Box>

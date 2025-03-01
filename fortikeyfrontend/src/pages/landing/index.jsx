@@ -7,6 +7,15 @@ const Landing = () => {
   const navigate = useNavigate();
   const colors = tokens();
 
+  // Extract button styling to a constant
+  const primaryButtonStyle = {
+    fontSize: "16px",
+    padding: "12px 24px",
+    "&:hover": {
+      opacity: 0.9,
+    },
+  };
+
   return (
     <Box
       sx={{
@@ -55,13 +64,7 @@ const Landing = () => {
           variant="contained"
           color="secondary"
           onClick={() => navigate("/createuser")}
-          sx={{
-            fontSize: "16px",
-            padding: "12px 24px",
-            "&:hover": {
-              opacity: 0.9,
-            },
-          }}
+          sx={primaryButtonStyle}
         >
           GET STARTED
         </Button>
