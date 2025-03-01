@@ -2,7 +2,6 @@ import { Box, Button, Typography, useTheme } from "@mui/material";
 import { useNavigate, useLocation } from "react-router-dom";
 import { tokens } from "../theme";
 
-
 const Navbar = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);

@@ -1,8 +1,16 @@
-import { Box, Button, TextField, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  TextField,
+  Typography,
+  Alert,
+  CircularProgress,
+} from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import Navbar from "../../components/Navbar";
 import { tokens } from "../../theme";
+import authService from "../../services/authservice";
 
 const CreateUser = () => {
   const navigate = useNavigate();
@@ -15,6 +23,8 @@ const CreateUser = () => {
     password: "",
     confirmPassword: "",
   });
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -24,16 +34,55 @@ const CreateUser = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // TODO: Add validation to ensure passwords match
+
+    // Validate passwords match
     if (formData.password !== formData.confirmPassword) {
-      alert("Passwords do not match!");
+      setError("Passwords do not match!");
       return;
     }
-    // TODO: Add actual registration logic here
-    console.log("Registration attempt with:", formData);
-    navigate("/dashboard");
+
+    setLoading(true);
+    setError("");
+
+    try {
+      // Prepare user data for registration
+      const userData = {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        companyName: formData.companyName,
+        email: formData.email,
+        password: formData.password,
+      };
+
+      // Register the user
+      await authService.register(userData);
+
+      // Redirect to dashboard
+      navigate("/dashboard");
+    } catch (err) {
+      // Handle different error scenarios
+      if (err.response) {
+        if (err.response.status === 409) {
+          setError(
+            "This email is already registered. Please use a different email or try logging in."
+          );
+        } else {
+          setError(
+            err.response.data?.message ||
+              "Registration failed. Please try again."
+          );
+        }
+      } else if (err.request) {
+        setError("Network error. Please check your connection and try again.");
+      } else {
+        setError("An unexpected error occurred. Please try again.");
+      }
+      console.error("Registration error:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const textFieldStyles = {
@@ -107,6 +156,13 @@ const CreateUser = () => {
           >
             Create Account
           </Typography>
+
+          {/* Display error message if there is one */}
+          {error && (
+            <Alert severity="error" sx={{ marginBottom: "20px" }}>
+              {error}
+            </Alert>
+          )}
 
           <Box sx={{ display: "flex", flexDirection: "column", gap: "20px" }}>
             <Box sx={{ display: "flex", gap: "20px" }}>
@@ -184,6 +240,7 @@ const CreateUser = () => {
               fullWidth
               variant="contained"
               color="secondary"
+              disabled={loading}
               sx={{
                 padding: "12px",
                 fontSize: "1rem",
@@ -193,7 +250,11 @@ const CreateUser = () => {
                 },
               }}
             >
-              Create Account
+              {loading ? (
+                <CircularProgress size={24} color="inherit" />
+              ) : (
+                "Create Account"
+              )}
             </Button>
           </Box>
 

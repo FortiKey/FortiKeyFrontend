@@ -12,6 +12,7 @@ import ApiOutlinedIcon from "@mui/icons-material/ApiOutlined";
 import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
 import AdminPanelSettingsOutlinedIcon from "@mui/icons-material/AdminPanelSettingsOutlined";
 import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
+import authService from "../services/authservice";
 
 const Item = ({ title, to, icon, selected, setSelected, onClick }) => {
   const theme = useTheme();
@@ -43,6 +44,7 @@ const Sidebar = () => {
   const navigate = useNavigate();
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [sidebarState, setSidebarState] = useState("hidden");
+  const [isFortiKeyStaff, setIsFortiKeyStaff] = useState(false);
 
   useEffect(() => {
     const handleResize = () => {
@@ -55,8 +57,31 @@ const Sidebar = () => {
 
     window.addEventListener("resize", handleResize);
 
+    // Check if the user is FortiKey staff
+    const checkUserRole = async () => {
+      try {
+        const user = await authService.getCurrentUser();
+        // Assuming your user object has a role or isFortiKeyStaff property
+        setIsFortiKeyStaff(user?.isFortiKeyStaff || user?.role === "admin");
+      } catch (error) {
+        console.error("Error checking user role:", error);
+        setIsFortiKeyStaff(false);
+      }
+    };
+
+    checkUserRole();
+
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+
+  const handleLogout = async () => {
+    try {
+      await authService.logout();
+      navigate("/signedout");
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
+  };
 
   const toggleSidebar = () => {
     switch (sidebarState) {
@@ -236,13 +261,17 @@ const Sidebar = () => {
                 selected={selected}
                 setSelected={setSelected}
               />
-              <Item
-                title="Admin Dashboard"
-                to="/admindashboard"
-                icon={<AdminPanelSettingsOutlinedIcon />}
-                selected={selected}
-                setSelected={setSelected}
-              />
+
+              {/* Only show Admin Dashboard if user is FortiKey staff */}
+              {isFortiKeyStaff && (
+                <Item
+                  title="Admin Dashboard"
+                  to="/admindashboard"
+                  icon={<AdminPanelSettingsOutlinedIcon />}
+                  selected={selected}
+                  setSelected={setSelected}
+                />
+              )}
             </Box>
             <Box paddingLeft={isCollapsed ? undefined : "10%"} marginTop="auto">
               <Item
@@ -251,9 +280,7 @@ const Sidebar = () => {
                 icon={<LogoutOutlinedIcon />}
                 selected={selected}
                 setSelected={setSelected}
-                onClick={() => {
-                  navigate("/signedout");
-                }}
+                onClick={handleLogout}
               />
             </Box>
           </Menu>

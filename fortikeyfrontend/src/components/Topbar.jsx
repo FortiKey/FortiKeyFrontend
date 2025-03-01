@@ -1,9 +1,10 @@
 import { Box, IconButton, Menu, MenuItem, useTheme } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import HelpOutlineOutlinedIcon from "@mui/icons-material/HelpOutlineOutlined";
 import { tokens } from "../theme";
+import authService from "../services/authservice";
 
 const Topbar = () => {
   const theme = useTheme();
@@ -11,9 +12,23 @@ const Topbar = () => {
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
+  const [userName, setUserName] = useState("User");
 
-  // TODO: Replace with actual user data from your auth system
-  const userName = "John Doe";
+  useEffect(() => {
+    // Get current user data when component mounts
+    const fetchUserData = async () => {
+      try {
+        const user = await authService.getCurrentUser();
+        if (user) {
+          setUserName(`${user.firstName} ${user.lastName}`);
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    };
+
+    fetchUserData();
+  }, []);
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -23,10 +38,14 @@ const Topbar = () => {
     setAnchorEl(null);
   };
 
-  const handleSignOut = () => {
-    // TODO: Add sign out logic here
-    handleClose();
-    navigate("/signedout");
+  const handleSignOut = async () => {
+    try {
+      await authService.logout();
+      handleClose();
+      navigate("/signedout");
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
   };
 
   return (

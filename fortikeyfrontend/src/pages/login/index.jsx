@@ -1,10 +1,19 @@
-import { Box, Button, TextField, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  TextField,
+  Typography,
+  Alert,
+  CircularProgress,
+} from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
 import { theme } from "../../theme";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import Navbar from "../../components/Navbar";
 import { tokens } from "../../theme";
+import authService from "../../services/authservice";
+
 const Login = () => {
   const navigate = useNavigate();
   const colors = tokens();
@@ -12,6 +21,8 @@ const Login = () => {
     email: "",
     password: "",
   });
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -21,11 +32,40 @@ const Login = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // TODO: Add actual login logic here
-    console.log("Login attempt with:", formData);
-    navigate("/dashboard");
+    setLoading(true);
+    setError("");
+
+    try {
+      await authService.login(formData.email, formData.password);
+      navigate("/dashboard");
+    } catch (error) {
+      console.error("Login error:", error);
+      setError("Invalid email or password. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleForgotPassword = async () => {
+    if (!formData.email) {
+      setError("Please enter your email address to reset your password.");
+      return;
+    }
+
+    setLoading(true);
+    setError("");
+
+    try {
+      await authService.requestPasswordReset(formData.email);
+      // Show success message instead of error
+      setError("Password reset link sent to your email!");
+    } catch (err) {
+      setError("Failed to send password reset email. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -71,6 +111,18 @@ const Login = () => {
             >
               Welcome Back
             </Typography>
+
+            {/* Display error message if there is one */}
+            {error && (
+              <Alert
+                severity={
+                  error.includes("sent to your email") ? "success" : "error"
+                }
+                sx={{ marginBottom: "20px" }}
+              >
+                {error}
+              </Alert>
+            )}
 
             <Box sx={{ display: "flex", flexDirection: "column", gap: "20px" }}>
               <TextField
@@ -154,6 +206,7 @@ const Login = () => {
                 fullWidth
                 variant="contained"
                 color="secondary"
+                disabled={loading}
                 sx={{
                   padding: "12px",
                   fontSize: "1rem",
@@ -163,7 +216,11 @@ const Login = () => {
                   },
                 }}
               >
-                Sign In
+                {loading ? (
+                  <CircularProgress size={24} color="inherit" />
+                ) : (
+                  "Sign In"
+                )}
               </Button>
             </Box>
 
@@ -187,6 +244,24 @@ const Login = () => {
                 }}
               >
                 Sign Up
+              </Button>
+            </Box>
+
+            {/* Forgot Password Link */}
+            <Box sx={{ textAlign: "center", marginTop: "16px" }}>
+              <Button
+                onClick={handleForgotPassword}
+                disabled={loading}
+                sx={{
+                  textTransform: "none",
+                  color: colors.secondary.main,
+                  "&:hover": {
+                    backgroundColor: "transparent",
+                    textDecoration: "underline",
+                  },
+                }}
+              >
+                Forgot Password?
               </Button>
             </Box>
           </Box>

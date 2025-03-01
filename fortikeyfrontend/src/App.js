@@ -14,6 +14,8 @@ import ApiDocumentation from "./pages/apidocumentation";
 import AdminDashboard from "./pages/admindashboard";
 import ManageAPIKeys from "./pages/manageapikey";
 import UsageAnalytics from "./pages/usageanalytics";
+import ProtectedRoute from "./components/ProtectedRoute";
+import AdminRoute from "./components/AdminRoute";
 import { Box } from "@mui/material";
 
 function App() {
@@ -27,40 +29,52 @@ function App() {
         <Route path="/createuser" element={<CreateUser />} />
         <Route path="/signedout" element={<SignedOut />} />
 
-        {/* Dashboard Layout */}
+        {/* Dashboard Layout - All protected */}
         <Route
           path="/*"
           element={
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: { xs: "column", md: "row" },
-              }}
-            >
-              <Sidebar />
+            <ProtectedRoute>
               <Box
-                component="main"
                 sx={{
-                  flexGrow: 1,
-                  width: { xs: "100%", md: "calc(100% - 250px)" },
-                  minHeight: "100vh",
+                  display: "flex",
+                  flexDirection: { xs: "column", md: "row" },
                 }}
               >
-                <Topbar />
-                <Routes>
-                  <Route path="/dashboard" element={<Dashboard />} />
-                  <Route path="/viewaccounts" element={<ViewAccounts />} />
-                  <Route
-                    path="/apidocumentation"
-                    element={<ApiDocumentation />}
-                  />
-                  <Route path="/admindashboard" element={<AdminDashboard />} />
-                  <Route path="/manageapikey" element={<ManageAPIKeys />} />
-                  <Route path="/usageanalytics" element={<UsageAnalytics />} />
-                  {/* Add other dashboard routes here */}
-                </Routes>
+                <Sidebar />
+                <Box
+                  component="main"
+                  sx={{
+                    flexGrow: 1,
+                    width: { xs: "100%", md: "calc(100% - 250px)" },
+                    minHeight: "100vh",
+                  }}
+                >
+                  <Topbar />
+                  <Routes>
+                    <Route path="/dashboard" element={<Dashboard />} />
+                    <Route path="/viewaccounts" element={<ViewAccounts />} />
+                    <Route
+                      path="/apidocumentation"
+                      element={<ApiDocumentation />}
+                    />
+                    <Route
+                      path="/admindashboard"
+                      element={
+                        <AdminRoute>
+                          <AdminDashboard />
+                        </AdminRoute>
+                      }
+                    />
+                    <Route path="/manageapikey" element={<ManageAPIKeys />} />
+                    <Route
+                      path="/usageanalytics"
+                      element={<UsageAnalytics />}
+                    />
+                    {/* Add other dashboard routes here */}
+                  </Routes>
+                </Box>
               </Box>
-            </Box>
+            </ProtectedRoute>
           }
         />
       </Routes>
