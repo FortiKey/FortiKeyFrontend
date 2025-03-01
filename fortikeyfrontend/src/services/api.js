@@ -1,8 +1,9 @@
 import axios from "axios";
+import config from "../config";
 
 // Create an axios instance
 const api = axios.create({
-  baseURL: process.env.REACT_APP_API_URL,
+  baseURL: config.apiUrl,
   headers: {
     "Content-Type": "application/json",
   },
@@ -30,16 +31,16 @@ api.interceptors.response.use(
     return response;
   },
   (error) => {
-    if (error.response && error.response.status === 401) {
-      // Token expired or invalid
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
-      window.location.href = "/login";
-    }
     // Handle common errors
     if (error.response) {
       // Handle specific status codes
       switch (error.response.status) {
+        case 401:
+          // Unauthorized - redirect to login
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+          window.location.href = "/login";
+          break;
         case 403:
           // Forbidden
           console.error("Access forbidden");
