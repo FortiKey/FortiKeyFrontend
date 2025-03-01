@@ -2,16 +2,24 @@ import React from "react";
 import { Pie } from "react-chartjs-2";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, Title } from "chart.js";
 import { mockDataTeam } from "../data/mockdata";
-import { Box, useTheme } from "@mui/material";
+import { Box } from "@mui/material";
 import { tokens } from "../theme";
-// Register Chart.js components
+
+// Register Chart.js components needed for pie chart
 ChartJS.register(ArcElement, Tooltip, Legend, Title);
 
+/**
+ * PieChart Component
+ *
+ * Displays a pie chart visualization of user authorization status and API usage.
+ * Uses mock data to calculate percentages for each category.
+ *
+ * @returns {JSX.Element} A pie chart visualization
+ */
 const PieChart = () => {
-  const theme = useTheme();
   const colors = tokens();
 
-  // Calculate totals
+  // Calculate totals from mock data
   const authorizedCount = mockDataTeam.filter((user) => user.authorized).length;
   const unauthorizedCount = mockDataTeam.filter(
     (user) => !user.authorized
@@ -21,12 +29,13 @@ const PieChart = () => {
     0
   );
 
-  // Calculate percentages
+  // Calculate percentages for the chart
   const total = authorizedCount + unauthorizedCount + totalApiUsage;
   const authorizedPercentage = Math.round((authorizedCount / total) * 100);
   const unauthorizedPercentage = Math.round((unauthorizedCount / total) * 100);
   const apiUsagePercentage = Math.round((totalApiUsage / total) * 100);
 
+  // Chart data configuration
   const data = {
     labels: ["Authorized Users", "Unauthorized Users", "API Key Usage"],
     datasets: [
@@ -51,6 +60,7 @@ const PieChart = () => {
     ],
   };
 
+  // Chart display options
   const options = {
     responsive: true,
     maintainAspectRatio: false,
@@ -63,6 +73,7 @@ const PieChart = () => {
       },
       tooltip: {
         callbacks: {
+          // Custom tooltip to show percentage values
           label: function (context) {
             return `${context.label}: ${context.raw}%`;
           },

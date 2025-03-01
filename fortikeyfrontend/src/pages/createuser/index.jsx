@@ -15,21 +15,38 @@ import { tokens } from "../../theme";
 import authService from "../../services/authservice";
 import { useToast } from "../../context";
 
+/**
+ * Create User (Registration) Page Component
+ *
+ * Provides user registration functionality with:
+ * - Form for user details (name, email, password, company)
+ * - Password confirmation and strength validation
+ * - Email format validation
+ * - Error handling and user feedback
+ * - Loading state management
+ * - Redirect to login on successful registration
+ */
 const CreateUser = () => {
   const navigate = useNavigate();
   const colors = tokens();
   const { showSuccessToast, showErrorToast } = useToast();
 
+  // Form state management
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
     email: "",
+    company: "",
     password: "",
     confirmPassword: "",
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  /**
+   * Handle form input changes
+   * Updates the form state as the user types
+   */
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -38,6 +55,12 @@ const CreateUser = () => {
     }));
   };
 
+  /**
+   * Validate form inputs before submission
+   * Checks password strength, matching passwords, and email format
+   *
+   * @returns {boolean} True if validation passes, false otherwise
+   */
   const validateForm = () => {
     // Check if passwords match
     if (formData.password !== formData.confirmPassword) {
@@ -64,9 +87,20 @@ const CreateUser = () => {
       return false;
     }
 
+    // Check if company is provided
+    if (!formData.company.trim()) {
+      setError("Please enter your company name");
+      showErrorToast("Company name is required");
+      return false;
+    }
+
     return true;
   };
 
+  /**
+   * Handle form submission
+   * Validates inputs and registers the user if validation passes
+   */
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -83,7 +117,8 @@ const CreateUser = () => {
         formData.firstName,
         formData.lastName,
         formData.email,
-        formData.password
+        formData.password,
+        formData.company
       );
       showSuccessToast("Account created successfully! Please log in.");
       navigate("/login");
@@ -115,8 +150,10 @@ const CreateUser = () => {
           bgcolor: colors.otherColor.main,
         }}
       >
+        {/* Navigation bar */}
         <Navbar />
 
+        {/* Registration form container */}
         <Box
           sx={{
             flex: 1,
@@ -138,6 +175,7 @@ const CreateUser = () => {
               boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
             }}
           >
+            {/* Form header */}
             <Typography
               variant="h3"
               color={colors.neutral.main}
@@ -149,7 +187,7 @@ const CreateUser = () => {
               Create an Account
             </Typography>
 
-            {/* Display error message if there is one */}
+            {/* Error message display */}
             {error && (
               <Alert severity="error" sx={{ marginBottom: "20px" }}>
                 {error}
@@ -164,6 +202,7 @@ const CreateUser = () => {
                   gap: "20px",
                 }}
               >
+                {/* First name input field */}
                 <TextField
                   fullWidth
                   label="First Name"
@@ -201,6 +240,7 @@ const CreateUser = () => {
                   }}
                 />
 
+                {/* Last name input field */}
                 <TextField
                   fullWidth
                   label="Last Name"
@@ -239,6 +279,7 @@ const CreateUser = () => {
                 />
               </Box>
 
+              {/* Email input field */}
               <TextField
                 fullWidth
                 label="Email"
@@ -277,6 +318,45 @@ const CreateUser = () => {
                 }}
               />
 
+              {/* Company input field */}
+              <TextField
+                fullWidth
+                label="Company"
+                name="company"
+                value={formData.company}
+                onChange={handleChange}
+                required
+                variant="outlined"
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    "& fieldset": {
+                      borderColor: colors.text.secondary,
+                      borderWidth: "1px",
+                    },
+                    "&:hover fieldset": {
+                      borderColor: colors.secondary.main,
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderColor: colors.secondary.main,
+                    },
+                  },
+                  "& .MuiInputLabel-root": {
+                    "&.Mui-focused": {
+                      color: colors.secondary.main,
+                    },
+                    bgcolor: colors.primary.main,
+                    paddingLeft: "5px",
+                    paddingRight: "5px",
+                  },
+                  "& .MuiInputLabel-shrink": {
+                    bgcolor: colors.primary.main,
+                    paddingLeft: "5px",
+                    paddingRight: "5px",
+                  },
+                }}
+              />
+
+              {/* Password input field */}
               <TextField
                 fullWidth
                 label="Password"
@@ -315,6 +395,7 @@ const CreateUser = () => {
                 }}
               />
 
+              {/* Confirm password input field */}
               <TextField
                 fullWidth
                 label="Confirm Password"
@@ -353,18 +434,20 @@ const CreateUser = () => {
                 }}
               />
 
+              {/* Submit button */}
               <Button
                 type="submit"
-                fullWidth
                 variant="contained"
-                color="secondary"
                 disabled={loading}
                 sx={{
+                  backgroundColor: colors.secondary.main,
+                  color: colors.primary.main,
                   padding: "12px",
-                  fontSize: "1rem",
-                  textTransform: "none",
+                  fontSize: "16px",
+                  fontWeight: "bold",
+                  marginTop: "10px",
                   "&:hover": {
-                    opacity: 0.9,
+                    backgroundColor: "#0069d9",
                   },
                 }}
               >
@@ -374,29 +457,33 @@ const CreateUser = () => {
                   "Create Account"
                 )}
               </Button>
-            </Box>
 
-            <Box sx={{ textAlign: "center", marginTop: "24px" }}>
-              <Typography
-                variant="h5"
-                color={colors.text.secondary}
-                sx={{ display: "inline" }}
-              >
-                Already have an account?{" "}
-              </Typography>
-              <Button
-                onClick={() => navigate("/login")}
+              {/* Login link */}
+              <Box
                 sx={{
-                  textTransform: "none",
-                  color: colors.secondary.main,
-                  "&:hover": {
-                    backgroundColor: "transparent",
-                    textDecoration: "underline",
-                  },
+                  display: "flex",
+                  justifyContent: "center",
+                  marginTop: "20px",
                 }}
               >
-                Sign In
-              </Button>
+                <Typography variant="body1" color={colors.text.secondary}>
+                  Already have an account?{" "}
+                  <Typography
+                    component="span"
+                    sx={{
+                      color: colors.secondary.main,
+                      cursor: "pointer",
+                      fontWeight: "bold",
+                      "&:hover": {
+                        textDecoration: "underline",
+                      },
+                    }}
+                    onClick={() => navigate("/login")}
+                  >
+                    Log In
+                  </Typography>
+                </Typography>
+              </Box>
             </Box>
           </Box>
         </Box>

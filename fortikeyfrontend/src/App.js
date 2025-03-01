@@ -19,19 +19,30 @@ import AdminRoute from "./components/AdminRoute";
 import { Box } from "@mui/material";
 import { ToastProvider } from "./context";
 
+/**
+ * Main Application Component
+ *
+ * Sets up the application structure including:
+ * - Theme provider for consistent styling
+ * - Toast notifications for user feedback
+ * - Routing configuration with public and protected routes
+ * - Layout structure with sidebar and topbar for authenticated routes
+ */
 function App() {
   return (
     <ThemeProvider theme={theme}>
-      <CssBaseline />
+      <CssBaseline /> {/* Normalizes CSS across browsers */}
       <ToastProvider>
+        {" "}
+        {/* Provides toast notification functionality */}
         <Routes>
-          {/* Public Pages */}
+          {/* Public Routes - Accessible without authentication */}
           <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
           <Route path="/createuser" element={<CreateUser />} />
           <Route path="/signedout" element={<SignedOut />} />
 
-          {/* Dashboard Layout - All protected */}
+          {/* Protected Routes - Require authentication */}
           <Route
             path="/*"
             element={
@@ -42,7 +53,7 @@ function App() {
                     flexDirection: { xs: "column", md: "row" },
                   }}
                 >
-                  <Sidebar />
+                  <Sidebar /> {/* Navigation sidebar */}
                   <Box
                     component="main"
                     sx={{
@@ -51,14 +62,21 @@ function App() {
                       minHeight: "100vh",
                     }}
                   >
-                    <Topbar />
+                    <Topbar /> {/* Top navigation bar */}
                     <Routes>
+                      {/* Dashboard - Main landing page after login */}
                       <Route path="/dashboard" element={<Dashboard />} />
+
+                      {/* User management */}
                       <Route path="/viewaccounts" element={<ViewAccounts />} />
+
+                      {/* API documentation */}
                       <Route
                         path="/apidocumentation"
                         element={<ApiDocumentation />}
                       />
+
+                      {/* Admin-only route */}
                       <Route
                         path="/admindashboard"
                         element={
@@ -67,12 +85,15 @@ function App() {
                           </AdminRoute>
                         }
                       />
+
+                      {/* API key management */}
                       <Route path="/manageapikey" element={<ManageAPIKeys />} />
+
+                      {/* Usage analytics */}
                       <Route
                         path="/usageanalytics"
                         element={<UsageAnalytics />}
                       />
-                      {/* Add other dashboard routes here */}
                     </Routes>
                   </Box>
                 </Box>

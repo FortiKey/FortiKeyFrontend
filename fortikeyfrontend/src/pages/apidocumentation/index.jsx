@@ -12,23 +12,41 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import { useToast } from "../../context";
 
+/**
+ * API Documentation Page Component
+ *
+ * Provides comprehensive documentation for using the FortiKey API.
+ * Features:
+ * - Organized sections with expandable accordions
+ * - Downloadable PDF documentation
+ * - Responsive design for mobile and desktop
+ * - User feedback via toast notifications
+ */
 const ApiDocumentation = () => {
   const theme = useTheme();
   const colors = tokens();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const { showSuccessToast } = useToast();
 
+  /**
+   * Handle documentation download
+   * Shows a success toast notification when download starts
+   *
+   * @param {number} part - The documentation part number being downloaded
+   */
   const handleDownload = (part) => {
     showSuccessToast(`Documentation Part ${part} download started`);
   };
 
   return (
     <Box m={{ xs: "10px", sm: "20px" }}>
+      {/* Page header */}
       <Header
         title="API Documentation"
         subtitle="How to use the FortiKey API"
       />
 
+      {/* Getting Started documentation section */}
       <Accordion defaultExpanded={true} sx={{ mb: 2, boxShadow: 3 }}>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
           <Typography
@@ -43,10 +61,13 @@ const ApiDocumentation = () => {
           </Typography>
         </AccordionSummary>
         <AccordionDetails>
+          {/* Section description */}
           <Typography sx={{ mb: 2 }}>
             This section covers the basics of getting started with the FortiKey
             API, including authentication, basic requests, and common use cases.
           </Typography>
+
+          {/* Download button with responsive styling */}
           <Button
             variant="outlined"
             startIcon={<OpenInNewIcon />}
@@ -71,6 +92,7 @@ const ApiDocumentation = () => {
         </AccordionDetails>
       </Accordion>
 
+      {/* Advanced Features documentation section */}
       <Accordion defaultExpanded={true} sx={{ boxShadow: 3 }}>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
           <Typography
@@ -85,10 +107,13 @@ const ApiDocumentation = () => {
           </Typography>
         </AccordionSummary>
         <AccordionDetails>
+          {/* Section description */}
           <Typography sx={{ mb: 2 }}>
             This section covers advanced features of the FortiKey API, including
             detailed endpoint references, error handling, and best practices.
           </Typography>
+
+          {/* Download button with responsive styling */}
           <Button
             variant="outlined"
             startIcon={<OpenInNewIcon />}

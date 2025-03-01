@@ -5,12 +5,31 @@ import { mockDataTeam } from "../../data/mockdata";
 import { tokens } from "../../theme";
 import { ThemeProvider } from "@mui/material/styles";
 
+/**
+ * View Accounts Page Component
+ *
+ * Provides administrative interface for managing user accounts.
+ * Features:
+ * - Data grid with user account information
+ * - Name column with click functionality for account deletion
+ * - Confirmation dialog for delete actions
+ * - Visual indicators for validation status
+ *
+ * This component is only accessible to administrators and provides
+ * basic user management capabilities.
+ */
 const ViewAccounts = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   let rows = mockDataTeam;
   let selectedUser = null;
 
+  /**
+   * Handle name column click
+   * Sets the selected user and displays the confirmation dialog
+   *
+   * @param {Object} user - The user that was clicked
+   */
   const handleNameClick = (user) => {
     selectedUser = user;
     const dialog = document.getElementById("confirmDialog");
@@ -19,6 +38,10 @@ const ViewAccounts = () => {
     }
   };
 
+  /**
+   * Handle delete confirmation
+   * Removes the selected user from the data set and closes the dialog
+   */
   const handleDelete = () => {
     rows = rows.filter((row) => row.id !== selectedUser.id);
     const dialog = document.getElementById("confirmDialog");
@@ -27,6 +50,10 @@ const ViewAccounts = () => {
     }
   };
 
+  /**
+   * Handle dialog close
+   * Closes the confirmation dialog without taking action
+   */
   const handleClose = () => {
     const dialog = document.getElementById("confirmDialog");
     if (dialog) {
@@ -34,6 +61,10 @@ const ViewAccounts = () => {
     }
   };
 
+  /**
+   * DataGrid column definitions
+   * Configures the display and behavior of each column
+   */
   const columns = [
     {
       field: "name",
@@ -71,7 +102,10 @@ const ViewAccounts = () => {
   return (
     <ThemeProvider theme={theme}>
       <Box m="20px">
+        {/* Page header */}
         <Header title="View Accounts" subtitle="Manage Accounts" />
+
+        {/* User data grid */}
         <Box height="75vh" sx={{ width: "100%" }}>
           <DataGrid
             rows={mockDataTeam}
@@ -98,7 +132,7 @@ const ViewAccounts = () => {
           />
         </Box>
 
-        {/* Custom Dialog */}
+        {/* Custom confirmation dialog */}
         <div
           id="confirmDialog"
           style={{

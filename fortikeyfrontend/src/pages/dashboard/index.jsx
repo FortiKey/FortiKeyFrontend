@@ -10,12 +10,32 @@ import AdminPanelSettingsOutlinedIcon from "@mui/icons-material/AdminPanelSettin
 import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import { useToast } from "../../context";
 
+/**
+ * Dashboard Component
+ *
+ * Main landing page after user login. Provides navigation to all major
+ * application features and displays a summary of key metrics.
+ *
+ * Features:
+ * - Navigation grid with icons for all main application sections
+ * - Key status overview with pie chart visualization
+ * - Quick access buttons for frequently used features
+ * - Toast notifications for navigation feedback
+ *
+ * This component serves as the central hub of the application,
+ * providing users with an overview of their API key status and
+ * easy access to all functionality.
+ */
 const Dashboard = () => {
   const colors = tokens();
   const navigate = useNavigate();
   const { showInfoToast } = useToast();
 
-  // Navigation buttons configuration
+  /**
+   * Navigation buttons configuration
+   * Defines the properties for each navigation button including
+   * title, path, icon, and color styling
+   */
   const navButtons = [
     {
       title: "Manage API Keys",
@@ -49,16 +69,28 @@ const Dashboard = () => {
     },
   ];
 
+  /**
+   * Navigate to API Key Management page
+   * Shows a toast notification during navigation
+   */
   const navigateToManageKeys = () => {
     showInfoToast("Navigating to API Key Management");
     navigate("/manageapikey");
   };
 
+  /**
+   * Navigate to API Documentation page
+   * Shows a toast notification during navigation
+   */
   const navigateToDocumentation = () => {
     showInfoToast("Opening API Documentation");
     navigate("/apidocumentation");
   };
 
+  /**
+   * Navigate to Usage Analytics page
+   * Shows a toast notification during navigation
+   */
   const navigateToAnalytics = () => {
     showInfoToast("Viewing usage analytics");
     navigate("/usageanalytics");
@@ -71,6 +103,7 @@ const Dashboard = () => {
         bgcolor: colors.primary.main,
       }}
     >
+      {/* Header section with title and subtitle */}
       <Box
         sx={{
           display: "flex",
@@ -85,7 +118,7 @@ const Dashboard = () => {
         />
       </Box>
 
-      {/* Navigation Buttons */}
+      {/* Navigation Buttons Grid */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
         {navButtons.map((button) => (
           <Grid item xs={12} sm={6} md={4} key={button.path}>
@@ -122,7 +155,7 @@ const Dashboard = () => {
         ))}
       </Grid>
 
-      {/* Pie Chart Section */}
+      {/* Pie Chart Section - Key Status Overview */}
       <Box
         sx={{
           backgroundColor: colors.otherColor.main,
@@ -139,6 +172,7 @@ const Dashboard = () => {
         </Box>
       </Box>
 
+      {/* Quick Access Buttons */}
       <Box mt={4}>
         <Grid container spacing={2}>
           <Grid item xs={12} md={4}>

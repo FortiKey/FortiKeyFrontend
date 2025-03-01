@@ -13,11 +13,22 @@ import { tokens } from "../../theme";
 import authService from "../../services/authservice";
 import { useToast } from "../../context";
 
+/**
+ * Login Page Component
+ *
+ * Provides user authentication functionality with:
+ * - Email and password form
+ * - Form validation
+ * - Error handling
+ * - Loading state management
+ * - Redirect to dashboard on successful login
+ */
 const Login = () => {
   const navigate = useNavigate();
   const colors = tokens();
   const { showSuccessToast, showErrorToast } = useToast();
 
+  // Form state management
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -25,6 +36,10 @@ const Login = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  /**
+   * Handle form input changes
+   * Updates the form state as the user types
+   */
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -33,13 +48,18 @@ const Login = () => {
     }));
   };
 
+  /**
+   * Handle form submission
+   * Authenticates the user and navigates to dashboard on success
+   */
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError("");
 
     try {
-      await authService.login(formData.email, formData.password);
+      // Attempt to log in with provided credentials
+      await authService.login(formData);
       showSuccessToast("Login successful!");
       navigate("/dashboard");
     } catch (error) {

@@ -1,4 +1,4 @@
-import { Box, IconButton, Menu, MenuItem, useTheme } from "@mui/material";
+import { Box, IconButton, Menu, MenuItem } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
@@ -6,16 +6,26 @@ import HelpOutlineOutlinedIcon from "@mui/icons-material/HelpOutlineOutlined";
 import { tokens } from "../theme";
 import authService from "../services/authservice";
 
+/**
+ * Top navigation bar component
+ *
+ * Displays at the top of all authenticated pages and provides:
+ * - User profile menu with sign out functionality
+ * - Help button for quick access to documentation
+ * - Current user name display
+ *
+ * This component handles user session management and navigation
+ * to key areas of the application.
+ */
 const Topbar = () => {
-  const theme = useTheme();
   const colors = tokens();
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
   const [userName, setUserName] = useState("User");
 
+  // Fetch current user data on component mount
   useEffect(() => {
-    // Get current user data when component mounts
     const fetchUserData = async () => {
       try {
         const user = await authService.getCurrentUser();
@@ -30,14 +40,17 @@ const Topbar = () => {
     fetchUserData();
   }, []);
 
+  // Handle profile menu open
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
 
+  // Handle profile menu close
   const handleClose = () => {
     setAnchorEl(null);
   };
 
+  // Handle user sign out
   const handleSignOut = async () => {
     try {
       await authService.logout();
@@ -57,6 +70,7 @@ const Topbar = () => {
         backgroundColor: colors.primary.main,
       }}
     >
+      {/* User profile button */}
       <IconButton
         color="secondary"
         onClick={handleClick}
@@ -66,6 +80,8 @@ const Topbar = () => {
       >
         <PersonOutlinedIcon />
       </IconButton>
+
+      {/* Profile dropdown menu */}
       <Menu
         id="profile-menu"
         anchorEl={anchorEl}
@@ -96,6 +112,7 @@ const Topbar = () => {
           },
         }}
       >
+        {/* User name display (non-clickable) */}
         <MenuItem
           sx={{
             pointerEvents: "none",
@@ -105,6 +122,8 @@ const Topbar = () => {
         >
           {userName}
         </MenuItem>
+
+        {/* Sign out option */}
         <MenuItem
           onClick={handleSignOut}
           sx={{
@@ -117,6 +136,8 @@ const Topbar = () => {
           Sign Out
         </MenuItem>
       </Menu>
+
+      {/* Help button - navigates to API documentation */}
       <IconButton
         color="secondary"
         onClick={() => navigate("/apidocumentation")}

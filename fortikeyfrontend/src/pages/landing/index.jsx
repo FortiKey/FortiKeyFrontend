@@ -1,11 +1,10 @@
-import { Box, Button, Typography, useTheme } from "@mui/material";
+import { Box, Button, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../../components/Navbar";
 import { tokens } from "../../theme";
 
 const Landing = () => {
   const navigate = useNavigate();
-  const theme = useTheme();
   const colors = tokens();
 
   return (

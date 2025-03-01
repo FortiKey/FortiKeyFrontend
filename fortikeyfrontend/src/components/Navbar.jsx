@@ -1,9 +1,16 @@
-import { Box, Button, Typography, useTheme } from "@mui/material";
+import { Box, Button, Typography } from "@mui/material";
 import { useNavigate, useLocation } from "react-router-dom";
 import { tokens } from "../theme";
 
+/**
+ * Navigation bar component for public pages
+ *
+ * Displays at the top of unauthenticated pages like landing page and login.
+ * Adapts its layout based on the current page:
+ * - Landing page: Shows expanded layout with company info
+ * - Other pages: Shows compact layout with login/signup buttons
+ */
 const Navbar = () => {
-  const theme = useTheme();
   const colors = tokens();
   const navigate = useNavigate();
   const location = useLocation();
@@ -21,7 +28,7 @@ const Navbar = () => {
       }}
     >
       {isLandingPage ? (
-        // Landing page layout
+        // Landing page layout - expanded with company description
         <Box
           sx={{
             display: "flex",
@@ -32,87 +39,88 @@ const Navbar = () => {
           <Box
             sx={{
               display: "flex",
-              alignItems: "center",
-              height: "100%",
-              paddingTop: "8px",
+              flexDirection: { xs: "column", md: "row" },
+              alignItems: { xs: "flex-start", md: "center" },
             }}
           >
+            {/* Company logo */}
             <img
               alt="FortiKey Logo"
               src="/assets/FortiKeyLogo.png"
               style={{
-                height: "120px",
-                marginRight: "20px",
+                height: "100px",
+                marginRight: "10px",
               }}
             />
+
+            {/* Company description - only shown on landing page */}
+            <Box sx={{ maxWidth: "500px" }}>
+              <Typography
+                variant="h3"
+                sx={{
+                  color: colors.neutral.main,
+                  fontWeight: "bold",
+                  mb: 1,
+                }}
+              >
+                FortiKey API Management
+              </Typography>
+              <Typography
+                variant="body1"
+                sx={{
+                  color: colors.text.secondary,
+                  display: { xs: "none", sm: "block" },
+                }}
+              >
+                Secure, scalable API key management for your applications.
+                Monitor usage, control access, and streamline development.
+              </Typography>
+            </Box>
           </Box>
-          <Box sx={{ flex: 1 }}>
-            <Box sx={{ marginBottom: "8px" }}>
-              <Typography
-                variant="h4"
-                sx={{ fontWeight: "bold", color: colors.text.primary }}
-              >
-                FORTIKEY
-              </Typography>
-              <Typography
-                variant="subtitle1"
-                sx={{ color: colors.text.secondary }}
-              >
-                Secure. Simple. Scalable.
-              </Typography>
-            </Box>
-            <Typography
-              variant="body1"
+
+          {/* Action buttons */}
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "flex-end",
+              alignItems: "center",
+              flex: 1,
+            }}
+          >
+            <Button
+              variant="outlined"
+              onClick={() => navigate("/login")}
               sx={{
-                color: colors.text.secondary,
-                maxWidth: "600px",
-                marginBottom: "20px",
+                marginRight: "10px",
+                color: colors.secondary.main,
+                borderColor: colors.secondary.main,
+                "&:hover": {
+                  borderColor: "#0056b3",
+                  backgroundColor: "rgba(0, 0, 0, 0.04)",
+                },
               }}
             >
-              Enhance security effortlessly with our plug-and-play 2FA platform.
-              Seamlessly integrate, manage with ease, and protect user accounts
-              with an intuitive dashboard and robust API.
-            </Typography>
-            <Box
+              Login
+            </Button>
+            <Button
+              variant="contained"
+              onClick={() => navigate("/createuser")}
               sx={{
-                display: "flex",
-                alignItems: "center",
+                backgroundColor: colors.secondary.main,
+                color: colors.primary.main,
+                "&:hover": {
+                  backgroundColor: "#0056b3",
+                },
               }}
             >
-              <Button
-                variant="outlined"
-                onClick={() => navigate("/login")}
-                sx={{
-                  marginRight: "10px",
-                  color: colors.secondary.main,
-                  borderColor: colors.secondary.main,
-                  "&:hover": {
-                    borderColor: "#0056b3",
-                    backgroundColor: "rgba(0, 0, 0, 0.04)",
-                  },
-                }}
-              >
-                Login
-              </Button>
-              <Button
-                variant="contained"
-                onClick={() => navigate("/createuser")}
-                sx={{
-                  backgroundColor: colors.secondary.main,
-                  color: colors.primary.main,
-                  "&:hover": {
-                    backgroundColor: "#0056b3",
-                  },
-                }}
-              >
-                Get Started
-              </Button>
-            </Box>
+              Get Started
+            </Button>
           </Box>
         </Box>
       ) : (
-        // Regular layout for other pages
+        // Non-landing page layout - compact with logo and buttons
         <>
+          {/* Logo with home navigation */}
           <Box
             sx={{
               display: "flex",
@@ -130,6 +138,8 @@ const Navbar = () => {
               }}
             />
           </Box>
+
+          {/* Authentication buttons */}
           <Box>
             <Button
               variant="outlined"

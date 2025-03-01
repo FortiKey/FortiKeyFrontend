@@ -1,73 +1,120 @@
-import React, { createContext, useState, useContext } from "react";
+import React, { createContext, useContext, useState } from "react";
 import { Snackbar, Alert } from "@mui/material";
 
-// Create the context
+/**
+ * Toast Context
+ *
+ * Provides a global notification system for the application.
+ * Allows components to display toast messages without managing their own state.
+ */
 const ToastContext = createContext();
 
-// Toast provider component
+/**
+ * Toast Provider Component
+ *
+ * Wraps the application to provide toast notification functionality.
+ * Manages the state and rendering of toast notifications.
+ *
+ * @param {Object} props - Component props
+ * @param {React.ReactNode} props.children - Child components that will have access to toast context
+ */
 export const ToastProvider = ({ children }) => {
-  const [toast, setToast] = useState({
-    open: false,
-    message: "",
-    severity: "info", // 'success', 'error', 'warning', 'info'
-    duration: 6000,
-  });
+  // State for toast visibility and configuration
+  const [open, setOpen] = useState(false);
+  const [message, setMessage] = useState("");
+  const [severity, setSeverity] = useState("info"); // "success", "error", "warning", "info"
 
-  const showToast = (message, severity = "info", duration = 6000) => {
-    setToast({
-      open: true,
-      message,
-      severity,
-      duration,
-    });
+  /**
+   * Close the currently displayed toast
+   *
+   * @param {React.SyntheticEvent} event - The event that triggered the close
+   * @param {string} reason - Reason for closing the toast
+   */
+  const handleClose = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+    setOpen(false);
   };
 
-  const hideToast = () => {
-    setToast({ ...toast, open: false });
+  /**
+   * Show a success toast notification
+   *
+   * @param {string} msg - Message to display in the toast
+   */
+  const showSuccessToast = (msg) => {
+    setMessage(msg);
+    setSeverity("success");
+    setOpen(true);
   };
 
-  // Convenience methods for different toast types
-  const showSuccessToast = (message, duration) =>
-    showToast(message, "success", duration);
-  const showErrorToast = (message, duration) =>
-    showToast(message, "error", duration);
-  const showWarningToast = (message, duration) =>
-    showToast(message, "warning", duration);
-  const showInfoToast = (message, duration) =>
-    showToast(message, "info", duration);
+  /**
+   * Show an error toast notification
+   *
+   * @param {string} msg - Message to display in the toast
+   */
+  const showErrorToast = (msg) => {
+    setMessage(msg);
+    setSeverity("error");
+    setOpen(true);
+  };
+
+  /**
+   * Show a warning toast notification
+   *
+   * @param {string} msg - Message to display in the toast
+   */
+  const showWarningToast = (msg) => {
+    setMessage(msg);
+    setSeverity("warning");
+    setOpen(true);
+  };
+
+  /**
+   * Show an info toast notification
+   *
+   * @param {string} msg - Message to display in the toast
+   */
+  const showInfoToast = (msg) => {
+    setMessage(msg);
+    setSeverity("info");
+    setOpen(true);
+  };
+
+  // Context value containing toast control functions
+  const contextValue = {
+    showSuccessToast,
+    showErrorToast,
+    showWarningToast,
+    showInfoToast,
+  };
 
   return (
-    <ToastContext.Provider
-      value={{
-        showToast,
-        showSuccessToast,
-        showErrorToast,
-        showWarningToast,
-        showInfoToast,
-      }}
-    >
+    <ToastContext.Provider value={contextValue}>
       {children}
+      {/* Toast notification component */}
       <Snackbar
-        open={toast.open}
-        autoHideDuration={toast.duration}
-        onClose={hideToast}
-        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+        open={open}
+        autoHideDuration={6000}
+        onClose={handleClose}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
       >
-        <Alert
-          onClose={hideToast}
-          severity={toast.severity}
-          sx={{ width: "100%" }}
-          elevation={6}
-          variant="filled"
-        >
-          {toast.message}
+        <Alert onClose={handleClose} severity={severity} sx={{ width: "100%" }}>
+          {message}
         </Alert>
       </Snackbar>
     </ToastContext.Provider>
   );
 };
 
-// Custom hook to use the toast context
+/**
+ * Custom hook to use the toast context
+ *
+ * Provides easy access to toast notification functions from any component.
+ *
+ * @returns {Object} Toast notification functions
+ * @throws {Error} If used outside of a ToastProvider
+ */
 export const useToast = () => {
   const context = useContext(ToastContext);
   if (!context) {

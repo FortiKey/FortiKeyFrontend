@@ -6,16 +6,30 @@ import { tokens } from "../../theme";
 import { useState } from "react";
 import { useToast } from "../../context";
 
+/**
+ * Manage API Keys Page Component
+ *
+ * Provides functionality to view, copy, and generate API keys.
+ * Includes a confirmation dialog for generating new keys.
+ * Uses the toast notification system for user feedback.
+ */
 const ManageAPIKeys = () => {
   const colors = tokens();
   const actualKey = "fk_live_3x7abcdef1234567890"; // What gets copied
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const { showSuccessToast, showErrorToast } = useToast();
 
+  /**
+   * Opens the confirmation dialog for generating a new API key
+   */
   const handleGenerateNewKey = () => {
     setConfirmDialogOpen(true);
   };
 
+  /**
+   * Handles the confirmation to generate a new API key
+   * In a production environment, this would call an API
+   */
   const handleGenerateConfirm = () => {
     // Add API key generation logic here
     console.log("Generating new API key...");
@@ -23,6 +37,10 @@ const ManageAPIKeys = () => {
     showSuccessToast("New API key generated successfully!");
   };
 
+  /**
+   * Copies the API key to the clipboard
+   * Provides user feedback via toast notifications
+   */
   const handleCopyKey = () => {
     navigator.clipboard
       .writeText(actualKey)
@@ -39,6 +57,7 @@ const ManageAPIKeys = () => {
     <ThemeProvider theme={theme}>
       <Box sx={{ backgroundColor: colors.primary.main, minHeight: "100vh" }}>
         <Box m="20px">
+          {/* Page header */}
           <Header
             title="Manage API Key"
             subtitle="View and manage your API key for FortiKey integration"
@@ -61,6 +80,7 @@ const ManageAPIKeys = () => {
                 alignItems: { xs: "flex-end", sm: "flex-start" },
               }}
             >
+              {/* API key display with copy functionality */}
               <Button
                 variant="outlined"
                 onClick={handleCopyKey}
@@ -83,6 +103,7 @@ const ManageAPIKeys = () => {
                 {actualKey}
               </Button>
 
+              {/* Generate new key button */}
               <Button
                 variant="outlined"
                 onClick={handleGenerateNewKey}
@@ -133,6 +154,7 @@ const ManageAPIKeys = () => {
             </Typography>
           </DialogTitle>
           <Box p={2}>
+            {/* Dialog content with warning message */}
             <Typography
               sx={{
                 textAlign: "center",
@@ -145,6 +167,7 @@ const ManageAPIKeys = () => {
               cannot be undone.
             </Typography>
             <Box display="flex" justifyContent="center" gap={2}>
+              {/* Cancel button */}
               <Button
                 onClick={() => setConfirmDialogOpen(false)}
                 sx={{
@@ -159,6 +182,7 @@ const ManageAPIKeys = () => {
               >
                 Cancel
               </Button>
+              {/* Generate button */}
               <Button
                 onClick={handleGenerateConfirm}
                 sx={{

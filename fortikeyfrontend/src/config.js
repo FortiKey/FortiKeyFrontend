@@ -1,25 +1,58 @@
 /**
- * Application configuration
- * Centralizes access to environment variables
+ * Application Configuration
+ *
+ * Centralizes configuration settings for the application.
+ * Uses environment variables with fallbacks for local development.
+ * Provides consistent access to configuration values throughout the app.
  */
+
 const config = {
-  // API Configuration
-  apiUrl: process.env.REACT_APP_API_URL || "http://localhost:3000/api/v1",
+  /**
+   * API base URL
+   * Uses environment variable in production or falls back to localhost for development
+   */
+  apiUrl: process.env.REACT_APP_API_URL || "http://localhost:5000/api",
 
-  // Authentication
-  tokenExpiry: parseInt(process.env.REACT_APP_TOKEN_EXPIRY || "86400000", 10),
+  /**
+   * Application name
+   * Used for document titles, headers, etc.
+   */
+  appName: "FortiKey API Management",
 
-  // Feature Flags
-  enableAnalytics: process.env.REACT_APP_ENABLE_ANALYTICS === "true",
-  enableNotifications: process.env.REACT_APP_ENABLE_NOTIFICATIONS === "true",
+  /**
+   * Default pagination settings
+   * Used for tables and lists throughout the application
+   */
+  pagination: {
+    defaultPageSize: 10,
+    pageSizeOptions: [5, 10, 25, 50],
+  },
 
-  // Application Info
-  version: process.env.REACT_APP_VERSION || "1.0.0",
+  /**
+   * Authentication settings
+   * Token expiration time, storage keys, etc.
+   */
+  auth: {
+    tokenStorageKey: "token",
+    userStorageKey: "user",
+    refreshTokenStorageKey: "refreshToken",
+  },
 
-  // Environment
-  isDevelopment: process.env.NODE_ENV === "development",
-  isProduction: process.env.NODE_ENV === "production",
-  isTest: process.env.NODE_ENV === "test",
+  /**
+   * Feature flags
+   * Enable/disable features based on environment or deployment
+   */
+  features: {
+    enableAnalytics: process.env.REACT_APP_ENABLE_ANALYTICS === "true" || false,
+    enableNotifications:
+      process.env.REACT_APP_ENABLE_NOTIFICATIONS === "true" || true,
+    debugMode: process.env.NODE_ENV === "development",
+  },
+
+  /**
+   * API request timeout in milliseconds
+   */
+  apiTimeout: 30000, // 30 seconds
 };
 
 export default config;

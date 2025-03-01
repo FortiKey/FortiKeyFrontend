@@ -1,12 +1,40 @@
-import { Box, Button, Typography, useTheme } from "@mui/material";
+import { Box, Button, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../../components/Navbar";
 import { tokens } from "../../theme";
 
+/**
+ * Signed Out Page Component
+ *
+ * Displays a confirmation page after user logout.
+ * Features:
+ * - Clear logout confirmation message
+ * - Options to return to login or landing page
+ * - Consistent styling with the application theme
+ * - Responsive layout for different screen sizes
+ *
+ * This page serves as a clean transition point after authentication
+ * has been terminated, providing clear navigation options for the user.
+ */
 const SignedOut = () => {
   const navigate = useNavigate();
-  const theme = useTheme();
   const colors = tokens();
+
+  /**
+   * Navigate to login page
+   * Redirects the user to the login screen
+   */
+  const handleLoginClick = () => {
+    navigate("/login");
+  };
+
+  /**
+   * Navigate to landing page
+   * Redirects the user to the main landing page
+   */
+  const handleHomeClick = () => {
+    navigate("/");
+  };
 
   return (
     <Box
@@ -17,8 +45,10 @@ const SignedOut = () => {
         backgroundColor: colors.otherColor.main,
       }}
     >
+      {/* Navigation bar */}
       <Navbar />
 
+      {/* Main content container */}
       <Box
         sx={{
           flex: 1,
@@ -29,6 +59,7 @@ const SignedOut = () => {
           padding: { xs: "20px 10px", sm: "40px 20px" },
         }}
       >
+        {/* Sign out confirmation card */}
         <Box
           sx={{
             width: "100%",
@@ -40,47 +71,66 @@ const SignedOut = () => {
             textAlign: "center",
           }}
         >
-          <Typography variant="h3" color="text.primary" sx={{ mb: 2 }}>
+          {/* Sign out message */}
+          <Typography
+            variant="h2"
+            color="secondary.main"
+            sx={{ mb: 2, fontWeight: "bold" }}
+          >
             You've Been Signed Out
           </Typography>
 
-          <Typography variant="h5" color="text.secondary" sx={{ mb: 4 }}>
+          <Typography
+            variant="body1"
+            color="text.secondary"
+            sx={{ mb: 4, fontSize: "18px" }}
+          >
             Thank you for using FortiKey. You have been successfully signed out
             of your account.
           </Typography>
 
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+          {/* Navigation buttons */}
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: { xs: "column", sm: "row" },
+              justifyContent: "center",
+              gap: 2,
+            }}
+          >
+            {/* Return to login button */}
             <Button
-              fullWidth
               variant="contained"
-              onClick={() => navigate("/login")}
+              onClick={handleLoginClick}
               sx={{
                 bgcolor: "secondary.main",
                 color: "primary.main",
                 py: 1.5,
-                fontSize: "1rem",
-                textTransform: "none",
+                px: 3,
+                fontSize: "16px",
+                fontWeight: "bold",
                 "&:hover": {
-                  bgcolor: "secondary.dark",
+                  bgcolor: "#0069d9",
                 },
               }}
             >
-              Sign In Again
+              Return to Login
             </Button>
 
+            {/* Return to home button */}
             <Button
-              fullWidth
               variant="outlined"
-              onClick={() => navigate("/")}
+              onClick={handleHomeClick}
               sx={{
                 borderColor: "secondary.main",
                 color: "secondary.main",
                 py: 1.5,
-                fontSize: "1rem",
-                textTransform: "none",
+                px: 3,
+                fontSize: "16px",
+                fontWeight: "bold",
                 "&:hover": {
-                  borderColor: "secondary.dark",
-                  bgcolor: "secondary.lighter",
+                  borderColor: "#0069d9",
+                  bgcolor: "rgba(0, 123, 255, 0.04)",
                 },
               }}
             >
