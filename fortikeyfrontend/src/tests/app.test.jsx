@@ -126,4 +126,3 @@ describe("App Component", () => {
     expect(screen.getByTestId("signedout-page")).toBeInTheDocument();
   });
 });
-
