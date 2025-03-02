@@ -127,10 +127,3 @@ describe("App Component", () => {
   });
 });
 
-// Skip problematic App tests
-describe("App", () => {
-  test("placeholder test", () => {
-    // This is a placeholder test that will always pass
-    expect(true).toBe(true);
-  });
-});

@@ -62,10 +62,4 @@ describe("Toast Context", () => {
     // Error toast should be visible
     expect(screen.getByText("Error message")).toBeInTheDocument();
   });
-
-  // Skip the timing-dependent test since it's failing
-  test.skip("automatically closes toasts after timeout", () => {
-    // This test is skipped because the toast doesn't close within the expected time
-    expect(true).toBe(true);
-  });
 });

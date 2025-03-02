@@ -59,20 +59,21 @@ describe("Landing Page", () => {
     }
   });
 
-  // Optional test - only runs if your component has this feature
-  test("scrolls to features section when Learn More button is clicked", () => {
-    renderWithProviders(<LandingPage />);
-
-    const learnMoreButton = screen.queryByRole("button", {
-      name: /Learn More/i,
-    });
-
-    if (learnMoreButton) {
-      fireEvent.click(learnMoreButton);
-      expect(mockScrollIntoView).toHaveBeenCalled();
-    } else {
-      // Skip test if button doesn't exist
-      console.log("Learn More button not found - test skipped");
-    }
-  });
+  // REMOVE THIS TEST - it's looking for a "Learn More" button that won't be implemented
+  // test("navigates to learn more section when Learn More button is clicked", () => {
+  //   renderWithProviders(<LandingPage />);
+  //
+  //   // Try to find the Learn More button
+  //   const learnMoreButton = screen.queryByRole("button", { name: /Learn More/i });
+  //
+  //   // Skip test if button not found
+  //   if (!learnMoreButton) {
+  //     console.log("Learn More button not found - test skipped");
+  //     return;
+  //   }
+  //
+  //   // Click the button and check if scrollIntoView was called
+  //   fireEvent.click(learnMoreButton);
+  //   expect(mockScrollIntoView).toHaveBeenCalled();
+  // });
 });
