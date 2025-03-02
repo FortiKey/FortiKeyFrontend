@@ -308,7 +308,7 @@ const Sidebar = ({ isAdmin }) => {
                 />
                 <Item
                   title="Admin Dashboard"
-                  to="/admindashboard"
+                  to="/admin"
                   icon={<AdminPanelSettingsOutlinedIcon />}
                   selected={selected}
                   setSelected={setSelected}
