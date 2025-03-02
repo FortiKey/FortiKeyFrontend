@@ -58,23 +58,30 @@ describe("Topbar Component", () => {
     expect(mockNavigate).toHaveBeenCalledWith("/signedout");
   });
 
-  test("opens user profile menu when profile icon is clicked", () => {
+  test("opens user profile menu when profile icon is clicked", async () => {
     renderWithProviders(<Topbar />);
 
-    // Find profile button by icon or data-testid
-    const profileButton =
-      screen.queryByTestId("PersonOutlinedIcon") ||
-      screen.queryByTestId("user-icon") ||
-      screen.getAllByRole("button")[0];
+    // Find the button that contains the PersonOutlinedIcon
+    const profileButton = screen
+      .getByTestId("PersonOutlinedIcon")
+      .closest("button");
+    expect(profileButton).toBeInTheDocument();
 
-    if (profileButton) {
-      fireEvent.click(profileButton);
+    // Click the button
+    fireEvent.click(profileButton);
 
-      // The test can check for the appearance of a menu or any other appropriate behavior
-      // This is a placeholder check - adjust based on your component's actual behavior
-      expect(true).toBeTruthy();
-    } else {
-      console.log("Profile button not found - test skipped");
-    }
+    // Check that a menu appears
+    await waitFor(() => {
+      const menu = screen.getByRole("menu");
+      expect(menu).toBeInTheDocument();
+
+      // Check that the menu has items
+      const menuItems = screen.getAllByRole("menuitem");
+      expect(menuItems.length).toBeGreaterThan(0);
+
+      // Check for the Sign Out option
+      const signOutItem = screen.getByText("Sign Out");
+      expect(signOutItem).toBeInTheDocument();
+    });
   });
 });

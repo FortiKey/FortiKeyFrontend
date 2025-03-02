@@ -117,6 +117,9 @@ describe("AdminRoute Component", () => {
     await waitFor(() => {
       expect(screen.getByTestId("dashboard-page")).toBeInTheDocument();
     });
+
+    // Verify admin content is not rendered
+    expect(screen.queryByTestId("admin-content")).not.toBeInTheDocument();
   });
 
   test("redirects to login when user is not authenticated", async () => {
@@ -145,5 +148,8 @@ describe("AdminRoute Component", () => {
     await waitFor(() => {
       expect(screen.getByTestId("login-page")).toBeInTheDocument();
     });
+
+    // Verify admin content is not rendered
+    expect(screen.queryByTestId("admin-content")).not.toBeInTheDocument();
   });
 });

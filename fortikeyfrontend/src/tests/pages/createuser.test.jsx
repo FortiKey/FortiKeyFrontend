@@ -45,10 +45,51 @@ describe("CreateUser Component", () => {
     ).toBeInTheDocument();
   });
 
-  // Skip the test that's failing
-  test.skip("submits the form with user data", async () => {
-    // This test is skipped due to issues with finding form inputs
-    // Should be fixed when form component structure is better understood
+  test("submits the form with user data", async () => {
+    // Mock successful registration
+    authService.register.mockResolvedValue({ success: true });
+
+    renderWithProviders(<CreateUser />);
+
+    // Fill out the form with valid data
+    fireEvent.change(screen.getByLabelText(/First Name/i), {
+      target: { value: "John" },
+    });
+    fireEvent.change(screen.getByLabelText(/Last Name/i), {
+      target: { value: "Doe" },
+    });
+    fireEvent.change(screen.getByLabelText(/Email/i), {
+      target: { value: "john@example.com" },
+    });
+
+    // Get all password fields and use the first one (the password field)
+    const passwordFields = screen.getAllByLabelText(/Password/i);
+    fireEvent.change(passwordFields[0], {
+      target: { value: "Password123!" },
+    });
+    fireEvent.change(screen.getByLabelText(/Confirm Password/i), {
+      target: { value: "Password123!" },
+    });
+    fireEvent.change(screen.getByLabelText(/Company/i), {
+      target: { value: "Test Company" },
+    });
+
+    // Submit the form
+    fireEvent.click(screen.getByRole("button", { name: /Create Account/i }));
+
+    // Check that register was called with the correct data
+    await waitFor(() => {
+      expect(authService.register).toHaveBeenCalledWith({
+        firstName: "John",
+        lastName: "Doe",
+        email: "john@example.com",
+        password: "Password123!",
+        company: "Test Company",
+      });
+    });
+
+    // Check that navigation occurred after successful registration
+    expect(mockNavigate).toHaveBeenCalledWith("/login");
   });
 
   test("shows error when passwords do not match", async () => {
