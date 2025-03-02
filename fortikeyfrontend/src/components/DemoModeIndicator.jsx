@@ -18,7 +18,7 @@ const DemoModeIndicator = () => {
         position: "sticky",
         top: 0,
         zIndex: 9999,
-        width: "100%"
+        width: "100%",
       }}
     >
       <Typography variant="body2" fontWeight="medium">

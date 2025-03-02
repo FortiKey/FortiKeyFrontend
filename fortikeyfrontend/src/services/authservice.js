@@ -2,7 +2,8 @@ import axios from "axios";
 import config from "../config"; // Add this import
 
 // API base URL from environment variables and config
-const API_URL = config.apiUrl || process.env.REACT_APP_API_URL || "http://localhost:5000/api";
+const API_URL =
+  config.apiUrl || process.env.REACT_APP_API_URL || "http://localhost:5000/api";
 const USE_MOCK = config.features.useMockServices;
 
 /**
@@ -34,10 +35,10 @@ const authService = {
   register: async (userData) => {
     if (USE_MOCK) {
       console.log("Mock register:", userData);
-      await new Promise(resolve => setTimeout(resolve, 800)); // Simulate network delay
+      await new Promise((resolve) => setTimeout(resolve, 800)); // Simulate network delay
       return { success: true };
     }
-    
+
     try {
       const response = await axios.post(`${API_URL}/users/register`, userData);
       return response.data;
@@ -61,22 +62,22 @@ const authService = {
   login: async (credentials) => {
     if (USE_MOCK) {
       console.log("Mock login:", credentials);
-      await new Promise(resolve => setTimeout(resolve, 800));
-      
-      const mockUser = { 
-        id: "mock-123", 
+      await new Promise((resolve) => setTimeout(resolve, 800));
+
+      const mockUser = {
+        id: "mock-123",
         email: credentials.email,
         firstName: "Demo",
-        lastName: "User"
+        lastName: "User",
       };
-      
+
       // Store mock data in localStorage for other methods to use
       localStorage.setItem("token", "mock-jwt-token");
       localStorage.setItem("user", JSON.stringify(mockUser));
-      
+
       return { user: mockUser, token: "mock-jwt-token" };
     }
-    
+
     try {
       const response = await axios.post(`${API_URL}/users/login`, credentials);
       if (response.data.token) {
@@ -115,11 +116,11 @@ const authService = {
       if (!userStr) return null;
       return JSON.parse(userStr);
     }
-    
+
     try {
       const token = localStorage.getItem("token");
       if (!token) return null;
-      
+
       const response = await axios.get(`${API_URL}/users/me`, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -177,8 +178,8 @@ const authService = {
   updateProfile: async (userData) => {
     if (USE_MOCK) {
       console.log("Mock update profile:", userData);
-      await new Promise(resolve => setTimeout(resolve, 800));
-      
+      await new Promise((resolve) => setTimeout(resolve, 800));
+
       // Update mock user data in localStorage
       const userStr = localStorage.getItem("user");
       if (userStr) {
@@ -189,7 +190,7 @@ const authService = {
       }
       return userData;
     }
-    
+
     try {
       const token = localStorage.getItem("token");
 
@@ -253,12 +254,17 @@ const authService = {
   requestPasswordReset: async (email) => {
     if (USE_MOCK) {
       console.log("Mock password reset for:", email);
-      await new Promise(resolve => setTimeout(resolve, 800));
-      return { success: true, message: "If the email exists, a reset link has been sent." };
+      await new Promise((resolve) => setTimeout(resolve, 800));
+      return {
+        success: true,
+        message: "If the email exists, a reset link has been sent.",
+      };
     }
-    
+
     try {
-      const response = await axios.post(`${API_URL}/users/reset-password`, { email });
+      const response = await axios.post(`${API_URL}/users/reset-password`, {
+        email,
+      });
       return response.data;
     } catch (error) {
       throw error.response?.data || error;

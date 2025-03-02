@@ -3,11 +3,13 @@ import Header from "../../components/Header";
 import { tokens } from "../../theme";
 import PieChart from "../../components/PieChart";
 import { useNavigate } from "react-router-dom";
-import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
+import { useState, useEffect } from "react";
 import VpnKeyOutlinedIcon from "@mui/icons-material/VpnKeyOutlined";
 import BarChartOutlinedIcon from "@mui/icons-material/BarChartOutlined";
+import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
 import AdminPanelSettingsOutlinedIcon from "@mui/icons-material/AdminPanelSettingsOutlined";
 import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
+import authService from "../../services/authservice";
 import { useToast } from "../../context";
 
 /**
@@ -30,39 +32,25 @@ const Dashboard = () => {
   const colors = tokens();
   const navigate = useNavigate();
   const { showInfoToast } = useToast();
+  const [isFortiKeyUser, setIsFortiKeyUser] = useState(false);
 
-  // Extract common button styling
-  const navButtonStyle = {
-    backgroundColor: colors.primary.main,
-    color: colors.secondary.main,
-    borderColor: colors.secondary.main,
-    fontSize: "1rem",
-    padding: "15px",
-    height: "60px",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    borderRadius: "4px",
-    textTransform: "uppercase",
-    fontWeight: "bold",
-    transition: "all 0.2s",
-    "&:hover": {
-      backgroundColor: "rgba(0, 123, 255, 0.04)",
-      borderColor: colors.secondary.main,
-    },
-  };
+  useEffect(() => {
+    // Check if the user is from FortiKey
+    const checkUserOrganization = async () => {
+      try {
+        const user = await authService.getCurrentUser();
+        setIsFortiKeyUser(user && user.organization === "FortiKey");
+      } catch (error) {
+        console.error("Error checking user organization:", error);
+        setIsFortiKeyUser(false);
+      }
+    };
 
-  const quickAccessButtonStyle = {
-    // These buttons use the default MUI styling with color="secondary"
-    // No additional styling needed as they use the theme's secondary color
-  };
+    checkUserOrganization();
+  }, []);
 
-  /**
-   * Navigation buttons configuration
-   * Defines the properties for each navigation button including
-   * title, path, icon, and color styling
-   */
-  const navButtons = [
+  // Define navigation buttons
+  const baseButtons = [
     {
       title: "Manage API Keys",
       path: "/manageapikey",
@@ -70,7 +58,7 @@ const Dashboard = () => {
       color: colors.secondary.main,
     },
     {
-      title: "User Accounts",
+      title: "View Accounts",
       path: "/viewaccounts",
       icon: <AccountCircleOutlinedIcon sx={{ fontSize: 40 }} />,
       color: colors.pieChart.authorized,
@@ -82,12 +70,6 @@ const Dashboard = () => {
       color: colors.pieChart.apiUsage,
     },
     {
-      title: "Admin Dashboard",
-      path: "/admindashboard",
-      icon: <AdminPanelSettingsOutlinedIcon sx={{ fontSize: 40 }} />,
-      color: colors.neutral.main,
-    },
-    {
       title: "API Documentation",
       path: "/apidocumentation",
       icon: <DescriptionOutlinedIcon sx={{ fontSize: 40 }} />,
@@ -95,32 +77,18 @@ const Dashboard = () => {
     },
   ];
 
-  /**
-   * Navigate to API Key Management page
-   * Shows a toast notification during navigation
-   */
-  const navigateToManageKeys = () => {
-    showInfoToast("Navigating to API Key Management");
-    navigate("/manageapikey");
-  };
-
-  /**
-   * Navigate to API Documentation page
-   * Shows a toast notification during navigation
-   */
-  const navigateToDocumentation = () => {
-    showInfoToast("Opening API Documentation");
-    navigate("/apidocumentation");
-  };
-
-  /**
-   * Navigate to Usage Analytics page
-   * Shows a toast notification during navigation
-   */
-  const navigateToAnalytics = () => {
-    showInfoToast("Viewing usage analytics");
-    navigate("/usageanalytics");
-  };
+  // Add admin button only for FortiKey users
+  const navButtons = isFortiKeyUser
+    ? [
+        ...baseButtons,
+        {
+          title: "Admin Dashboard",
+          path: "/admindashboard",
+          icon: <AdminPanelSettingsOutlinedIcon sx={{ fontSize: 40 }} />,
+          color: colors.neutral.main,
+        },
+      ]
+    : baseButtons;
 
   return (
     <Box
@@ -151,7 +119,25 @@ const Dashboard = () => {
             <Button
               variant="outlined"
               fullWidth
-              sx={navButtonStyle}
+              sx={{
+                backgroundColor: colors.primary.main,
+                color: colors.secondary.main,
+                borderColor: colors.secondary.main,
+                fontSize: "1rem",
+                padding: "15px",
+                height: "60px",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                borderRadius: "4px",
+                textTransform: "uppercase",
+                fontWeight: "bold",
+                transition: "all 0.2s",
+                "&:hover": {
+                  backgroundColor: "rgba(0, 123, 255, 0.04)",
+                  borderColor: colors.secondary.main,
+                },
+              }}
               onClick={() => {
                 showInfoToast(`Navigating to ${button.title}`);
                 navigate(button.path);
@@ -170,6 +156,7 @@ const Dashboard = () => {
           p: 3,
           borderRadius: "4px",
           boxShadow: "0px 2px 10px rgba(0, 0, 0, 0.1)",
+          mb: 5, // Add bottom margin to ensure we don't have space for buttons
         }}
       >
         <Typography variant="h5" sx={{ mb: 2, color: colors.text.secondary }}>
@@ -180,44 +167,8 @@ const Dashboard = () => {
         </Box>
       </Box>
 
-      {/* Quick Access Buttons */}
-      <Box mt={4}>
-        <Grid container spacing={2}>
-          <Grid item xs={12} md={4}>
-            <Button
-              fullWidth
-              variant="contained"
-              color="secondary"
-              onClick={navigateToManageKeys}
-              sx={quickAccessButtonStyle}
-            >
-              Manage API Keys
-            </Button>
-          </Grid>
-          <Grid item xs={12} md={4}>
-            <Button
-              fullWidth
-              variant="contained"
-              color="secondary"
-              onClick={navigateToDocumentation}
-              sx={quickAccessButtonStyle}
-            >
-              API Documentation
-            </Button>
-          </Grid>
-          <Grid item xs={12} md={4}>
-            <Button
-              fullWidth
-              variant="contained"
-              color="secondary"
-              onClick={navigateToAnalytics}
-              sx={quickAccessButtonStyle}
-            >
-              Usage Analytics
-            </Button>
-          </Grid>
-        </Grid>
-      </Box>
+      {/* Explicitly set bottom margin to prevent any additional content */}
+      <Box sx={{ mb: 5 }} />
     </Box>
   );
 };

@@ -10,7 +10,11 @@ import { act } from "@testing-library/react";
 // Silence React Router warnings
 const originalConsoleWarn = console.warn;
 console.warn = (...args) => {
-  if (args[0] && typeof args[0] === 'string' && args[0].includes('React Router')) {
+  if (
+    args[0] &&
+    typeof args[0] === "string" &&
+    args[0].includes("React Router")
+  ) {
     return;
   }
   originalConsoleWarn(...args);
