@@ -69,6 +69,7 @@ const Sidebar = () => {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [sidebarState, setSidebarState] = useState("hidden");
   const [isFortiKeyUser, setIsFortiKeyUser] = useState(false);
+  const [companyName, setCompanyName] = useState("Company Name");
 
   useEffect(() => {
     const handleResize = () => {
@@ -90,6 +91,9 @@ const Sidebar = () => {
       try {
         const user = await authService.getCurrentUser();
         setIsFortiKeyUser(user && user.organization === "FortiKey");
+        setCompanyName(
+          user && user.organization ? user.organization : "Company Name"
+        );
       } catch (error) {
         console.error("Error checking user organization:", error);
         setIsFortiKeyUser(false);
@@ -240,7 +244,7 @@ const Sidebar = () => {
                     color="#007BFF"
                     sx={{ fontWeight: "500" }}
                   >
-                    Company Name
+                    {companyName}
                   </Typography>
                 </Box>
               </Box>

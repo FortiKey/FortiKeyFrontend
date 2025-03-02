@@ -1,9 +1,17 @@
-import { Box, useTheme, Button, Typography } from "@mui/material";
+import {
+  Box,
+  useTheme,
+  Button,
+  Typography,
+  Dialog,
+  DialogTitle,
+} from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import Header from "../../components/Header";
 import { mockDataTeam } from "../../data/mockdata";
 import { tokens } from "../../theme";
 import { ThemeProvider } from "@mui/material/styles";
+import { useState } from "react";
 
 /**
  * View Accounts Page Component
@@ -21,8 +29,9 @@ import { ThemeProvider } from "@mui/material/styles";
 const ViewAccounts = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
-  let rows = mockDataTeam;
-  let selectedUser = null;
+  const [rows, setRows] = useState(mockDataTeam);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   /**
    * Handle name column click
@@ -31,11 +40,8 @@ const ViewAccounts = () => {
    * @param {Object} user - The user that was clicked
    */
   const handleNameClick = (user) => {
-    selectedUser = user;
-    const dialog = document.getElementById("confirmDialog");
-    if (dialog) {
-      dialog.style.display = "block";
-    }
+    setSelectedUser(user);
+    setDeleteDialogOpen(true);
   };
 
   /**
@@ -43,11 +49,8 @@ const ViewAccounts = () => {
    * Removes the selected user from the data set and closes the dialog
    */
   const handleDelete = () => {
-    rows = rows.filter((row) => row.id !== selectedUser.id);
-    const dialog = document.getElementById("confirmDialog");
-    if (dialog) {
-      dialog.style.display = "none";
-    }
+    setRows(rows.filter((row) => row.id !== selectedUser.id));
+    setDeleteDialogOpen(false);
   };
 
   /**
@@ -55,10 +58,7 @@ const ViewAccounts = () => {
    * Closes the confirmation dialog without taking action
    */
   const handleClose = () => {
-    const dialog = document.getElementById("confirmDialog");
-    if (dialog) {
-      dialog.style.display = "none";
-    }
+    setDeleteDialogOpen(false);
   };
 
   /**
@@ -108,7 +108,7 @@ const ViewAccounts = () => {
         {/* User data grid */}
         <Box height="75vh" sx={{ width: "100%" }}>
           <DataGrid
-            rows={mockDataTeam}
+            rows={rows}
             columns={columns}
             sx={{
               border: "none",
@@ -132,74 +132,75 @@ const ViewAccounts = () => {
           />
         </Box>
 
-        {/* Custom confirmation dialog */}
-        <div
-          id="confirmDialog"
-          style={{
-            display: "none",
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: "rgba(0, 0, 0, 0.5)",
-            zIndex: 9999,
+        {/* Material UI Dialog for confirmation */}
+        <Dialog
+          open={deleteDialogOpen}
+          onClose={handleClose}
+          PaperProps={{
+            style: {
+              backgroundColor: "white",
+              padding: "20px",
+              borderRadius: "12px",
+              maxWidth: "400px",
+              border: `1px solid ${theme.palette.secondary.main}`,
+            },
           }}
         >
-          <div
-            style={{
-              position: "absolute",
-              top: "50%",
-              left: "50%",
-              transform: "translate(-50%, -50%)",
-              backgroundColor: colors.primary.main,
-              padding: "20px",
-              borderRadius: "4px",
-              border: `1px solid ${colors.secondary.main}`,
-              boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
-              width: "300px",
-              textAlign: "center",
-            }}
-          >
-            <Typography variant="h3" color={colors.text.primary} sx={{ mb: 2 }}>
+          <DialogTitle sx={{ textAlign: "center", pb: 0 }}>
+            <Typography
+              variant="h4"
+              sx={{
+                color: "#007FFF",
+                fontSize: "24px",
+                fontWeight: "bold",
+              }}
+            >
               Confirm Delete
             </Typography>
-
+          </DialogTitle>
+          <Box p={2}>
             <Typography
-              variant="h5"
-              color={colors.text.secondary}
-              sx={{ mb: 2 }}
+              sx={{
+                textAlign: "center",
+                mb: 3,
+                color: "rgba(0, 0, 0, 0.7)",
+                fontSize: "16px",
+              }}
             >
               Do you want to delete this account?
             </Typography>
-
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "center",
-                gap: "10px",
-                marginTop: "20px",
-              }}
-            >
+            <Box display="flex" justifyContent="center" gap={2}>
               <Button
                 onClick={handleClose}
-                variant="contained"
                 sx={{
-                  backgroundColor: colors.secondary.main,
-                  color: colors.primary.main,
-                  "&:hover": {
-                    backgroundColor: "#0056b3",
-                  },
+                  backgroundColor: "#007FFF",
+                  color: "white",
+                  padding: "6px 16px",
+                  textTransform: "uppercase",
+                  borderRadius: "4px",
+                  boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                  "&:hover": { backgroundColor: "#0066CC" },
                 }}
               >
                 Cancel
               </Button>
-              <Button onClick={handleDelete} variant="contained" color="error">
+              <Button
+                onClick={handleDelete}
+                sx={{
+                  backgroundColor: "#DC3545",
+                  color: "white",
+                  padding: "6px 16px",
+                  textTransform: "uppercase",
+                  borderRadius: "4px",
+                  boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                  "&:hover": { backgroundColor: "#C82333" },
+                }}
+              >
                 Delete
               </Button>
-            </div>
-          </div>
-        </div>
+            </Box>
+          </Box>
+        </Dialog>
       </Box>
     </ThemeProvider>
   );
