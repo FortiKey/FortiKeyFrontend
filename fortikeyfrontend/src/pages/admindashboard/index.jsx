@@ -183,6 +183,7 @@ const AdminDashboard = () => {
               border: "none",
               "& .MuiDataGrid-cell": {
                 border: "none",
+                minWidth: "150px",
               },
               "& .MuiDataGrid-columnHeaders": {
                 backgroundColor: theme.palette.primary.main,
@@ -200,9 +201,6 @@ const AdminDashboard = () => {
               "& .MuiDataGrid-root": {
                 width: "100%",
                 overflowX: "auto",
-              },
-              "& .MuiDataGrid-cell": {
-                minWidth: "150px", // Ensures cells don't get too cramped
               },
               "@media (max-width: 600px)": {
                 "& .MuiDataGrid-columnHeaders": {
