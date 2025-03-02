@@ -43,11 +43,15 @@ describe("Topbar Component", () => {
   });
 
   test("logs out and navigates to signedout page when logout function is called", async () => {
-    renderWithProviders(<Topbar />);
+    await act(async () => {
+      renderWithProviders(<Topbar />);
+    });
 
     // Directly call the logout function instead of UI interaction
-    authService.logout();
-    mockNavigate("/signedout");
+    await act(async () => {
+      authService.logout();
+      mockNavigate("/signedout");
+    });
 
     // Verify logout was called
     expect(authService.logout).toHaveBeenCalled();

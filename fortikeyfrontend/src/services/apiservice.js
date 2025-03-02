@@ -4,6 +4,11 @@
  * Tests can mock these functions as needed.
  */
 
+import config from "../config";
+
+const USE_MOCK = config.features.useMockServices;
+const API_URL = config.apiUrl;
+
 /**
  * Get API keys for the authenticated user
  * @returns {Promise<Array>} List of API keys
@@ -19,8 +24,18 @@ export const getApiKeys = async () => {
  * @returns {Promise<Object>} The created key
  */
 export const createApiKey = async (name) => {
+  if (USE_MOCK) {
+    console.log("Mock createApiKey:", name);
+    await new Promise(resolve => setTimeout(resolve, 800));
+    return { 
+      id: `mock-${Date.now()}`, 
+      name, 
+      key: `fk_${Math.random().toString(36).substring(2, 15)}` 
+    };
+  }
+  
   // This would create a key on the backend when implemented
-  return { id: "mock-id", name, key: "mock-key" };
+  // Your real implementation here
 };
 
 /**

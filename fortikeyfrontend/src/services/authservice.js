@@ -1,7 +1,9 @@
 import axios from "axios";
+import config from "../config"; // Add this import
 
-// API base URL from environment variables
-const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
+// API base URL from environment variables and config
+const API_URL = config.apiUrl || process.env.REACT_APP_API_URL || "http://localhost:5000/api";
+const USE_MOCK = config.features.useMockServices;
 
 /**
  * Authentication Service
@@ -30,6 +32,12 @@ const authService = {
    * @throws {Error} If registration fails (email already exists, invalid data, etc.)
    */
   register: async (userData) => {
+    if (USE_MOCK) {
+      console.log("Mock register:", userData);
+      await new Promise(resolve => setTimeout(resolve, 800)); // Simulate network delay
+      return { success: true };
+    }
+    
     try {
       const response = await axios.post(`${API_URL}/users/register`, userData);
       return response.data;
@@ -51,15 +59,30 @@ const authService = {
    * @throws {Error} If authentication fails (invalid credentials, account locked, etc.)
    */
   login: async (credentials) => {
+    if (USE_MOCK) {
+      console.log("Mock login:", credentials);
+      await new Promise(resolve => setTimeout(resolve, 800));
+      
+      const mockUser = { 
+        id: "mock-123", 
+        email: credentials.email,
+        firstName: "Demo",
+        lastName: "User"
+      };
+      
+      // Store mock data in localStorage for other methods to use
+      localStorage.setItem("token", "mock-jwt-token");
+      localStorage.setItem("user", JSON.stringify(mockUser));
+      
+      return { user: mockUser, token: "mock-jwt-token" };
+    }
+    
     try {
       const response = await axios.post(`${API_URL}/users/login`, credentials);
-
-      // Store token in localStorage for subsequent API calls
       if (response.data.token) {
         localStorage.setItem("token", response.data.token);
         localStorage.setItem("user", JSON.stringify(response.data.user));
       }
-
       return response.data;
     } catch (error) {
       throw error.response?.data || error;
@@ -87,24 +110,23 @@ const authService = {
    * @throws {Error} If the API request fails for reasons other than authentication
    */
   getCurrentUser: async () => {
+    if (USE_MOCK) {
+      const userStr = localStorage.getItem("user");
+      if (!userStr) return null;
+      return JSON.parse(userStr);
+    }
+    
     try {
       const token = localStorage.getItem("token");
-
-      // If no token, user is not authenticated
-      if (!token) {
-        return null;
-      }
-
-      // Get user data from API with token
+      if (!token) return null;
+      
       const response = await axios.get(`${API_URL}/users/me`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-
       return response.data;
     } catch (error) {
-      // If token is invalid or expired, clear localStorage
       if (error.response?.status === 401) {
         localStorage.removeItem("token");
         localStorage.removeItem("user");
@@ -153,6 +175,21 @@ const authService = {
    * @throws {Error} If update fails or user is not authenticated
    */
   updateProfile: async (userData) => {
+    if (USE_MOCK) {
+      console.log("Mock update profile:", userData);
+      await new Promise(resolve => setTimeout(resolve, 800));
+      
+      // Update mock user data in localStorage
+      const userStr = localStorage.getItem("user");
+      if (userStr) {
+        const user = JSON.parse(userStr);
+        const updatedUser = { ...user, ...userData };
+        localStorage.setItem("user", JSON.stringify(updatedUser));
+        return updatedUser;
+      }
+      return userData;
+    }
+    
     try {
       const token = localStorage.getItem("token");
 
@@ -197,6 +234,31 @@ const authService = {
         }
       );
 
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error;
+    }
+  },
+
+  /**
+   * Request password reset
+   *
+   * Sends a request to initiate the password reset process for a user.
+   * An email with reset instructions will be sent to the provided address.
+   *
+   * @param {string} email - User's email address
+   * @returns {Promise<Object>} Success response from the server
+   * @throws {Error} If the request fails (email not found, server error, etc.)
+   */
+  requestPasswordReset: async (email) => {
+    if (USE_MOCK) {
+      console.log("Mock password reset for:", email);
+      await new Promise(resolve => setTimeout(resolve, 800));
+      return { success: true, message: "If the email exists, a reset link has been sent." };
+    }
+    
+    try {
+      const response = await axios.post(`${API_URL}/users/reset-password`, { email });
       return response.data;
     } catch (error) {
       throw error.response?.data || error;

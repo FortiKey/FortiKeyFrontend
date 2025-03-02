@@ -13,6 +13,7 @@ jest.mock("react-router-dom", () => ({
 
 jest.mock("../../services/authservice", () => ({
   login: jest.fn(),
+  requestPasswordReset: jest.fn(),
 }));
 
 jest.mock("../../context", () => ({

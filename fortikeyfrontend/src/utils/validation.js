@@ -1,7 +1,10 @@
 /**
  * Email validation
- * @param {string} email - Email to validate
- * @returns {boolean} True if valid
+ * Checks if a string is a properly formatted email address
+ * Uses a regular expression to verify proper email format
+ *
+ * @param {string} email - Email address to validate
+ * @returns {boolean} True if valid email format
  */
 export const validateEmail = (email) => {
   const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -21,20 +24,31 @@ export const validateEmail = (email) => {
  * @returns {boolean} True if valid
  */
 export const validatePassword = (password) => {
-  if (!password || password.length < 8) return false;
-
-  // Check for uppercase
-  if (!/[A-Z]/.test(password)) return false;
-
-  // Check for lowercase
-  if (!/[a-z]/.test(password)) return false;
-
-  // Check for numbers
-  if (!/[0-9]/.test(password)) return false;
-
-  // Check for special characters
-  if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) return false;
-
+  // Check for minimum length (8 characters)
+  if (password.length < 8) {
+    return false;
+  }
+  
+  // Check for at least one uppercase letter
+  if (!/[A-Z]/.test(password)) {
+    return false;
+  }
+  
+  // Check for at least one lowercase letter
+  if (!/[a-z]/.test(password)) {
+    return false;
+  }
+  
+  // Check for at least one number
+  if (!/[0-9]/.test(password)) {
+    return false;
+  }
+  
+  // Check for at least one special character
+  if (!/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password)) {
+    return false;
+  }
+  
   return true;
 };
 

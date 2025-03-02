@@ -7,6 +7,15 @@ import { theme } from "../theme";
 import { BrowserRouter } from "react-router-dom";
 import { act } from "@testing-library/react";
 
+// Silence React Router warnings
+const originalConsoleWarn = console.warn;
+console.warn = (...args) => {
+  if (args[0] && typeof args[0] === 'string' && args[0].includes('React Router')) {
+    return;
+  }
+  originalConsoleWarn(...args);
+};
+
 // Add future flags to silence warnings
 const routerOptions = {
   future: {
@@ -21,7 +30,7 @@ const routerOptions = {
  */
 export function renderWithProviders(ui, options = {}) {
   return render(
-    <BrowserRouter {...routerOptions}>
+    <BrowserRouter>
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <ToastProvider>{ui}</ToastProvider>

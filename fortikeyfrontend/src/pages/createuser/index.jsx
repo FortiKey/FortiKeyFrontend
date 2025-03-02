@@ -14,6 +14,7 @@ import Navbar from "../../components/Navbar";
 import { tokens } from "../../theme";
 import authService from "../../services/authservice";
 import { useToast } from "../../context";
+import { validateEmail, validatePassword } from "../../utils/validation";
 
 /**
  * Create User (Registration) Page Component
@@ -142,19 +143,17 @@ const CreateUser = () => {
       return false;
     }
 
-    // Check password strength (at least 8 characters, including a number and special character)
-    const passwordRegex = /^(?=.*[0-9])(?=.*[!@#$%^&*])(?=.{8,})/;
-    if (!passwordRegex.test(formData.password)) {
+    // Use the imported validatePassword function
+    if (!validatePassword(formData.password)) {
       setError(
-        "Password must be at least 8 characters long and include at least one number and one special character"
+        "Password must be at least 8 characters long and include uppercase, lowercase, number, and special character"
       );
       showErrorToast("Password doesn't meet security requirements");
       return false;
     }
 
-    // Check email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(formData.email)) {
+    // Use the imported validateEmail function
+    if (!validateEmail(formData.email)) {
       setError("Please enter a valid email address");
       showErrorToast("Please enter a valid email address");
       return false;
