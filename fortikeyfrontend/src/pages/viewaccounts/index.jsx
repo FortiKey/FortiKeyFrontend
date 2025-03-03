@@ -28,7 +28,7 @@ import { useState } from "react";
  */
 const ViewAccounts = () => {
   const theme = useTheme();
-  const colors = tokens(theme.palette.mode);
+  const colors = tokens();
   const [rows, setRows] = useState(mockDataTeam);
   const [selectedUser, setSelectedUser] = useState(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);

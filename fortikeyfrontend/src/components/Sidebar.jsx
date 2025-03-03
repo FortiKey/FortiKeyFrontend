@@ -15,8 +15,7 @@ import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
 import authService from "../services/authservice";
 
 const Item = ({ title, to, icon, selected, setSelected, onClick }) => {
-  const theme = useTheme();
-  const colors = tokens(theme.palette.mode);
+  const colors = tokens();
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   // Access the sidebar's collapsed state
