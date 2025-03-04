@@ -1,10 +1,19 @@
-import { Box, Button, Typography, Dialog, DialogTitle } from "@mui/material";
+import {
+  Box,
+  Button,
+  Typography,
+  Dialog,
+  DialogTitle,
+  CircularProgress,
+  Alert,
+} from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
 import { theme } from "../../theme";
 import Header from "../../components/Header";
 import { tokens } from "../../theme";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useToast } from "../../context";
+import apiService from "../../services/apiservice";
 
 /**
  * Manage API Keys Page Component
@@ -15,9 +24,37 @@ import { useToast } from "../../context";
  */
 const ManageAPIKeys = () => {
   const colors = tokens();
-  const actualKey = "fk_live_3x7abcdef1234567890"; // What gets copied
-  const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const { showSuccessToast, showErrorToast } = useToast();
+
+  // State management
+  const [apiKey, setApiKey] = useState("");
+  const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [generating, setGenerating] = useState(false);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    // Fetch the current API key on component mount
+    fetchApiKey();
+  }, []);
+
+  /**
+   * Fetches the current API key from the backend
+   */
+  const fetchApiKey = async () => {
+    try {
+      setLoading(true);
+      setError("");
+      const key = await apiService.getCurrentKey();
+      setApiKey(key);
+    } catch (error) {
+      console.error("Failed to fetch API key:", error);
+      setError("Failed to load your API key. Please try again.");
+      showErrorToast("Failed to load your API key");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Extract common button styling
   const apiKeyButtonStyle = {
@@ -65,13 +102,23 @@ const ManageAPIKeys = () => {
 
   /**
    * Handles the confirmation to generate a new API key
-   * In a production environment, this would call an API
+   * Makes an API call to generate a new key
    */
-  const handleGenerateConfirm = () => {
-    // Add API key generation logic here
-    console.log("Generating new API key...");
-    setConfirmDialogOpen(false);
-    showSuccessToast("New API key generated successfully!");
+  const handleGenerateConfirm = async () => {
+    try {
+      setGenerating(true);
+      setError("");
+      const newKey = await apiService.generateNewKey();
+      setApiKey(newKey);
+      setConfirmDialogOpen(false);
+      showSuccessToast("New API key generated successfully!");
+    } catch (error) {
+      console.error("Failed to generate new API key:", error);
+      setError("Failed to generate new API key. Please try again.");
+      showErrorToast("Failed to generate new API key");
+    } finally {
+      setGenerating(false);
+    }
   };
 
   /**
@@ -80,7 +127,7 @@ const ManageAPIKeys = () => {
    */
   const handleCopyKey = () => {
     navigator.clipboard
-      .writeText(actualKey)
+      .writeText(apiKey)
       .then(() => {
         showSuccessToast("API key copied to clipboard!");
       })
@@ -99,6 +146,14 @@ const ManageAPIKeys = () => {
             title="Manage API Key"
             subtitle="View and manage your API key for FortiKey integration"
           />
+
+          {/* Error message if present */}
+          {error && (
+            <Alert severity="error" sx={{ mb: 3 }}>
+              {error}
+            </Alert>
+          )}
+
           <Box
             sx={{
               p: { xs: 2, sm: 4 },
@@ -117,27 +172,45 @@ const ManageAPIKeys = () => {
                 alignItems: { xs: "flex-end", sm: "flex-start" },
               }}
             >
-              {/* API key display with copy functionality */}
-              <Button
-                variant="outlined"
-                onClick={handleCopyKey}
-                sx={{
-                  ...apiKeyButtonStyle,
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                }}
-              >
-                {actualKey}
-              </Button>
+              {/* Loading state */}
+              {loading ? (
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "center",
+                    width: "100%",
+                    maxWidth: "350px",
+                    p: 2,
+                  }}
+                >
+                  <CircularProgress size={30} color="secondary" />
+                </Box>
+              ) : (
+                <>
+                  {/* API key display with copy functionality */}
+                  <Button
+                    variant="outlined"
+                    onClick={handleCopyKey}
+                    sx={{
+                      ...apiKeyButtonStyle,
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
+                    {apiKey || "No API key available"}
+                  </Button>
 
-              {/* Generate new key button */}
-              <Button
-                variant="outlined"
-                onClick={handleGenerateNewKey}
-                sx={apiKeyButtonStyle}
-              >
-                Generate New API Key
-              </Button>
+                  {/* Generate new key button */}
+                  <Button
+                    variant="outlined"
+                    onClick={handleGenerateNewKey}
+                    sx={apiKeyButtonStyle}
+                    disabled={loading}
+                  >
+                    Generate New API Key
+                  </Button>
+                </>
+              )}
             </Box>
           </Box>
         </Box>
@@ -145,7 +218,7 @@ const ManageAPIKeys = () => {
         {/* Confirmation Dialog */}
         <Dialog
           open={confirmDialogOpen}
-          onClose={() => setConfirmDialogOpen(false)}
+          onClose={() => !generating && setConfirmDialogOpen(false)}
           PaperProps={{
             style: {
               backgroundColor: "white",
@@ -186,12 +259,21 @@ const ManageAPIKeys = () => {
               <Button
                 onClick={() => setConfirmDialogOpen(false)}
                 sx={cancelButtonStyle}
+                disabled={generating}
               >
                 Cancel
               </Button>
               {/* Generate button */}
-              <Button onClick={handleGenerateConfirm} sx={generateButtonStyle}>
-                Generate
+              <Button
+                onClick={handleGenerateConfirm}
+                sx={generateButtonStyle}
+                disabled={generating}
+              >
+                {generating ? (
+                  <CircularProgress size={24} color="inherit" />
+                ) : (
+                  "Generate"
+                )}
               </Button>
             </Box>
           </Box>

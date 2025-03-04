@@ -5,33 +5,76 @@ import {
   Typography,
   Dialog,
   DialogTitle,
+  CircularProgress,
+  Alert,
 } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import Header from "../../components/Header";
-import { mockDataTeam } from "../../data/mockdata";
 import { tokens } from "../../theme";
 import { ThemeProvider } from "@mui/material/styles";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import authService from "../../services/authservice";
+import { useToast } from "../../context";
 
 /**
  * View Accounts Page Component
  *
  * Provides administrative interface for managing user accounts.
  * Features:
- * - Data grid with user account information
+ * - Data grid with user account information from backend API
  * - Name column with click functionality for account deletion
  * - Confirmation dialog for delete actions
  * - Visual indicators for validation status
- *
- * This component is only accessible to administrators and provides
- * basic user management capabilities.
+ * - Loading and error states
+ * - Server-side pagination
  */
 const ViewAccounts = () => {
   const theme = useTheme();
   const colors = tokens();
-  const [rows, setRows] = useState(mockDataTeam);
+  const { showSuccessToast, showErrorToast } = useToast();
+
+  // State management
+  const [rows, setRows] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [selectedUser, setSelectedUser] = useState(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deletingUser, setDeletingUser] = useState(false);
+
+  // Pagination state
+  const [paginationModel, setPaginationModel] = useState({
+    page: 0,
+    pageSize: 10,
+  });
+  const [rowCount, setRowCount] = useState(0);
+
+  /**
+   * Fetch users from the backend API
+   * Uses pagination parameters for server-side pagination
+   */
+  const fetchUsers = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const { page, pageSize } = paginationModel;
+      const response = await authService.getUsers(page, pageSize);
+
+      setRows(response.data);
+      setRowCount(response.total);
+    } catch (error) {
+      console.error("Failed to fetch users:", error);
+      setError("Unable to load user accounts. Please try again.");
+      showErrorToast("Failed to load user accounts");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch users when component mounts or pagination changes
+  useEffect(() => {
+    fetchUsers();
+  }, [paginationModel.page, paginationModel.pageSize]);
 
   /**
    * Handle name column click
@@ -46,11 +89,26 @@ const ViewAccounts = () => {
 
   /**
    * Handle delete confirmation
-   * Removes the selected user from the data set and closes the dialog
+   * Calls the API to delete the user and updates the UI on success
    */
-  const handleDelete = () => {
-    setRows(rows.filter((row) => row.id !== selectedUser.id));
-    setDeleteDialogOpen(false);
+  const handleDelete = async () => {
+    if (!selectedUser) return;
+
+    try {
+      setDeletingUser(true);
+      await authService.deleteUser(selectedUser.id);
+
+      // Update the local state by refetching
+      await fetchUsers();
+
+      showSuccessToast(`User ${selectedUser.name} deleted successfully`);
+    } catch (error) {
+      console.error("Failed to delete user:", error);
+      showErrorToast("Failed to delete user. Please try again.");
+    } finally {
+      setDeletingUser(false);
+      setDeleteDialogOpen(false);
+    }
   };
 
   /**
@@ -58,7 +116,9 @@ const ViewAccounts = () => {
    * Closes the confirmation dialog without taking action
    */
   const handleClose = () => {
-    setDeleteDialogOpen(false);
+    if (!deletingUser) {
+      setDeleteDialogOpen(false);
+    }
   };
 
   /**
@@ -99,17 +159,33 @@ const ViewAccounts = () => {
       ),
     },
   ];
+
   return (
     <ThemeProvider theme={theme}>
       <Box m="20px">
         {/* Page header */}
         <Header title="View Accounts" subtitle="Manage Accounts" />
 
+        {/* Error display */}
+        {error && (
+          <Alert severity="error" sx={{ mb: 3 }}>
+            {error}
+          </Alert>
+        )}
+
         {/* User data grid */}
         <Box height="75vh" sx={{ width: "100%" }}>
           <DataGrid
             rows={rows}
             columns={columns}
+            pagination
+            paginationMode="server"
+            paginationModel={paginationModel}
+            onPaginationModelChange={setPaginationModel}
+            pageSizeOptions={[5, 10, 25, 50]}
+            rowCount={rowCount}
+            loading={loading}
+            disableRowSelectionOnClick
             sx={{
               border: "none",
               "& .MuiDataGrid-cell": {
@@ -167,11 +243,18 @@ const ViewAccounts = () => {
                 fontSize: "16px",
               }}
             >
-              Do you want to delete this account?
+              {selectedUser && (
+                <>
+                  Do you want to delete the account for{" "}
+                  <strong>{selectedUser.name}</strong>? This action cannot be
+                  undone.
+                </>
+              )}
             </Typography>
             <Box display="flex" justifyContent="center" gap={2}>
               <Button
                 onClick={handleClose}
+                disabled={deletingUser}
                 sx={{
                   backgroundColor: "#007FFF",
                   color: "white",
@@ -186,6 +269,7 @@ const ViewAccounts = () => {
               </Button>
               <Button
                 onClick={handleDelete}
+                disabled={deletingUser}
                 sx={{
                   backgroundColor: "#DC3545",
                   color: "white",
@@ -196,7 +280,11 @@ const ViewAccounts = () => {
                   "&:hover": { backgroundColor: "#C82333" },
                 }}
               >
-                Delete
+                {deletingUser ? (
+                  <CircularProgress size={24} color="inherit" />
+                ) : (
+                  "Delete"
+                )}
               </Button>
             </Box>
           </Box>

@@ -1,4 +1,11 @@
-import { Box, Button, Grid, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  Grid,
+  Typography,
+  CircularProgress,
+  Alert,
+} from "@mui/material";
 import Header from "../../components/Header";
 import { tokens } from "../../theme";
 import PieChart from "../../components/PieChart";
@@ -31,23 +38,50 @@ import { useToast } from "../../context";
 const Dashboard = () => {
   const colors = tokens();
   const navigate = useNavigate();
-  const { showInfoToast } = useToast();
+  const { showInfoToast, showErrorToast } = useToast();
+
+  // State management
   const [isFortiKeyUser, setIsFortiKeyUser] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [chartError, setChartError] = useState(false);
 
   useEffect(() => {
     // Check if the user is from FortiKey
     const checkUserOrganization = async () => {
       try {
+        setLoading(true);
+        setError(null);
+
         const user = await authService.getCurrentUser();
-        setIsFortiKeyUser(user && user.organization === "FortiKey");
+
+        // More robust check with fallbacks for different property names
+        const organization = user?.organization || user?.company || "";
+        setIsFortiKeyUser(organization === "FortiKey");
       } catch (error) {
         console.error("Error checking user organization:", error);
         setIsFortiKeyUser(false);
+        setError(
+          "Unable to load user information. Some features may be limited."
+        );
+
+        // Only show toast for non-network errors (to avoid double notifications)
+        if (error.response) {
+          showErrorToast("Failed to load user data");
+        }
+      } finally {
+        setLoading(false);
       }
     };
 
     checkUserOrganization();
-  }, []);
+  }, [showErrorToast]);
+
+  // Handle chart error
+  const handleChartError = () => {
+    setChartError(true);
+    showErrorToast("Failed to load chart data");
+  };
 
   // Define navigation buttons
   const baseButtons = [
@@ -90,6 +124,20 @@ const Dashboard = () => {
       ]
     : baseButtons;
 
+  // Show loading state
+  if (loading) {
+    return (
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        height="80vh"
+      >
+        <CircularProgress size={60} color="secondary" />
+      </Box>
+    );
+  }
+
   return (
     <Box
       sx={{
@@ -97,6 +145,13 @@ const Dashboard = () => {
         bgcolor: colors.primary.main,
       }}
     >
+      {/* Display error if present */}
+      {error && (
+        <Alert severity="warning" sx={{ mb: 3 }}>
+          {error}
+        </Alert>
+      )}
+
       {/* Header section with title and subtitle */}
       <Box
         sx={{
@@ -156,18 +211,21 @@ const Dashboard = () => {
           p: 3,
           borderRadius: "4px",
           boxShadow: "0px 2px 10px rgba(0, 0, 0, 0.1)",
-          mb: 5, // Add bottom margin to ensure we don't have space for buttons
+          mb: 5,
         }}
       >
         <Typography variant="h5" sx={{ mb: 2, color: colors.text.secondary }}>
           Key Status Overview
         </Typography>
         <Box height="300px">
-          <PieChart />
+          {chartError ? (
+            <Alert severity="error">Failed to load chart data</Alert>
+          ) : (
+            <PieChart onError={handleChartError} />
+          )}
         </Box>
       </Box>
 
-      {/* Explicitly set bottom margin to prevent any additional content */}
       <Box sx={{ mb: 5 }} />
     </Box>
   );

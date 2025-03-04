@@ -47,7 +47,7 @@ const config = {
     enableNotifications:
       process.env.REACT_APP_ENABLE_NOTIFICATIONS === "true" || true,
     debugMode: process.env.NODE_ENV === "development",
-    useMockServices: process.env.REACT_APP_USE_MOCK === "true" || false,
+    useMockServices: false,
   },
 
   /**

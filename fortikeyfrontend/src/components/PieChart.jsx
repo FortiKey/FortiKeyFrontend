@@ -1,9 +1,9 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Pie } from "react-chartjs-2";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, Title } from "chart.js";
-import { mockDataTeam } from "../data/mockdata";
-import { Box } from "@mui/material";
+import { Box, CircularProgress, Typography } from "@mui/material";
 import { tokens } from "../theme";
+import apiService from "../services/apiservice";
 
 // Register Chart.js components needed for pie chart
 ChartJS.register(ArcElement, Tooltip, Legend, Title);
@@ -12,28 +12,59 @@ ChartJS.register(ArcElement, Tooltip, Legend, Title);
  * PieChart Component
  *
  * Displays a pie chart visualization of user authorization status and API usage.
- * Uses mock data to calculate percentages for each category.
+ * Uses API data to calculate percentages for each category.
  *
  * @returns {JSX.Element} A pie chart visualization
  */
 const PieChart = () => {
   const colors = tokens();
+  const [chartData, setChartData] = useState({
+    authorizedCount: 0,
+    unauthorizedCount: 0,
+    apiUsage: 0,
+  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Calculate totals from mock data
-  const authorizedCount = mockDataTeam.filter((user) => user.authorized).length;
-  const unauthorizedCount = mockDataTeam.filter(
-    (user) => !user.authorized
-  ).length;
-  const totalApiUsage = mockDataTeam.reduce(
-    (sum, user) => sum + user.apiKeyUsage,
-    0
-  );
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const data = await apiService.getApiUsage();
 
-  // Calculate percentages for the chart
-  const total = authorizedCount + unauthorizedCount + totalApiUsage;
-  const authorizedPercentage = Math.round((authorizedCount / total) * 100);
-  const unauthorizedPercentage = Math.round((unauthorizedCount / total) * 100);
-  const apiUsagePercentage = Math.round((totalApiUsage / total) * 100);
+        // Validate data has expected properties
+        if (!data || typeof data !== "object") {
+          throw new Error("Invalid data format received from API");
+        }
+
+        setChartData({
+          authorizedCount: data.authorizedCount || 0,
+          unauthorizedCount: data.unauthorizedCount || 0,
+          apiUsage: data.apiUsage || 0,
+        });
+      } catch (error) {
+        console.error("Failed to fetch chart data:", error);
+        setError("Unable to load chart data. Please try again later.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  // Calculate percentages for the chart using API data
+  const total =
+    chartData.authorizedCount +
+    chartData.unauthorizedCount +
+    chartData.apiUsage;
+  const authorizedPercentage =
+    total > 0 ? Math.round((chartData.authorizedCount / total) * 100) : 0;
+  const unauthorizedPercentage =
+    total > 0 ? Math.round((chartData.unauthorizedCount / total) * 100) : 0;
+  const apiUsagePercentage =
+    total > 0 ? Math.round((chartData.apiUsage / total) * 100) : 0;
 
   // Chart data configuration
   const data = {
@@ -81,6 +112,34 @@ const PieChart = () => {
       },
     },
   };
+
+  if (loading) {
+    return (
+      <Box
+        height="300px"
+        width="300px"
+        display="flex"
+        alignItems="center"
+        justifyContent="center"
+      >
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Box
+        height="300px"
+        width="300px"
+        display="flex"
+        alignItems="center"
+        justifyContent="center"
+      >
+        <Typography color="error">{error}</Typography>
+      </Box>
+    );
+  }
 
   return (
     <Box height="300px" width="300px">
