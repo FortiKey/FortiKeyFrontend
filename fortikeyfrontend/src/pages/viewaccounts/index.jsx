@@ -40,6 +40,8 @@ const ViewAccounts = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deletingUser, setDeletingUser] = useState(false);
+  const [isFortiKeyUser, setIsFortiKeyUser] = useState(false);
+  const [currentUserCompany, setCurrentUserCompany] = useState("");
 
   // Pagination state
   const [paginationModel, setPaginationModel] = useState({
@@ -51,6 +53,7 @@ const ViewAccounts = () => {
   /**
    * Fetch users from the backend API
    * Uses pagination parameters for server-side pagination
+   * Filters users by company if not a FortiKey user
    */
   const fetchUsers = async () => {
     try {
@@ -60,8 +63,20 @@ const ViewAccounts = () => {
       const { page, pageSize } = paginationModel;
       const response = await authService.getUsers(page, pageSize);
 
-      setRows(response.data);
-      setRowCount(response.total);
+      // If not FortiKey user, filter the response to only include users from same company
+      if (!isFortiKeyUser) {
+        const filteredData = response.data.filter((user) => {
+          const userCompany = user?.organization || user?.company || "";
+          return userCompany === currentUserCompany;
+        });
+        setRows(filteredData);
+        // Adjust total count for pagination
+        setRowCount(filteredData.length);
+      } else {
+        // FortiKey users can see all users
+        setRows(response.data);
+        setRowCount(response.total);
+      }
     } catch (error) {
       console.error("Failed to fetch users:", error);
       setError("Unable to load user accounts. Please try again.");
@@ -71,10 +86,39 @@ const ViewAccounts = () => {
     }
   };
 
-  // Fetch users when component mounts or pagination changes
+  // Fetch users when component mounts, pagination changes, or company status changes
   useEffect(() => {
-    fetchUsers();
-  }, [paginationModel.page, paginationModel.pageSize]);
+    // Only fetch once we have the user's company information
+    if (currentUserCompany || currentUserCompany === "") {
+      fetchUsers();
+    }
+  }, [
+    paginationModel.page,
+    paginationModel.pageSize,
+    isFortiKeyUser,
+    currentUserCompany,
+  ]);
+
+  // Add this new useEffect after the existing state declarations but before fetchUsers
+  useEffect(() => {
+    // Check if the user is from FortiKey
+    const checkUserOrganization = async () => {
+      try {
+        const user = await authService.getCurrentUser();
+
+        // More robust check with fallbacks for different property names
+        const userCompany = user?.organization || user?.company || "";
+        setIsFortiKeyUser(userCompany === "FortiKey");
+        setCurrentUserCompany(userCompany);
+      } catch (error) {
+        console.error("Error checking user organization:", error);
+        setIsFortiKeyUser(false);
+        setCurrentUserCompany("");
+      }
+    };
+
+    checkUserOrganization();
+  }, []);
 
   /**
    * Handle name column click
@@ -147,6 +191,13 @@ const ViewAccounts = () => {
       field: "externalUserId",
       headerName: "External User ID",
       flex: 1,
+    },
+    {
+      field: "company",
+      headerName: "Company",
+      flex: 1,
+      valueGetter: (params) =>
+        params.row.organization || params.row.company || "Unknown",
     },
     {
       field: "validated",
