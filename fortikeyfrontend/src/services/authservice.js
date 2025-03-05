@@ -32,7 +32,17 @@ const authService = {
    */
   register: async (userData) => {
     try {
-      const response = await axios.post(`${API_URL}/auth/register`, userData);
+      // Transform company field to businessName for backend compatibility
+      const transformedData = {
+        ...userData,
+        businessName: userData.company, // Map company to businessName
+      };
+      delete transformedData.company; // Remove the original company field
+
+      const response = await axios.post(
+        `${API_URL}/v1/business/register`,
+        transformedData
+      );
       return response.data;
     } catch (error) {
       throw error.response?.data || error;
@@ -53,12 +63,22 @@ const authService = {
    */
   login: async (credentials) => {
     try {
-      const response = await axios.post(`${API_URL}/auth/login`, credentials);
+      const response = await axios.post(
+        `${API_URL}/v1/business/login`,
+        credentials
+      );
       if (response.data.token) {
         localStorage.setItem(config.auth.tokenStorageKey, response.data.token);
+
+        // Store user data including userId from response
+        const userData = response.data.user || {
+          id: response.data.userId,
+          email: credentials.email,
+        };
+
         localStorage.setItem(
           config.auth.userStorageKey,
-          JSON.stringify(response.data.user)
+          JSON.stringify(userData)
         );
       }
       return response.data;
@@ -93,11 +113,30 @@ const authService = {
       const token = localStorage.getItem(config.auth.tokenStorageKey);
       if (!token) return null;
 
-      const response = await axios.get(`${API_URL}/auth/profile`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      // Get user ID from stored user data
+      const userStr = localStorage.getItem(config.auth.userStorageKey);
+      if (!userStr) return null;
+
+      const user = JSON.parse(userStr);
+      const userId = user.id || user._id;
+
+      if (!userId) return null;
+
+      const response = await axios.get(
+        `${API_URL}/v1/business/profile/${userId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      // Transform businessName back to company for frontend consistency
+      if (response.data && response.data.businessName) {
+        response.data.company = response.data.businessName;
+        delete response.data.businessName;
+      }
+
       return response.data;
     } catch (error) {
       if (error.response?.status === 401) {
@@ -147,10 +186,23 @@ const authService = {
   changePassword: async (passwordData) => {
     try {
       const token = localStorage.getItem(config.auth.tokenStorageKey);
+      if (!token) throw new Error("Authentication required");
 
-      const response = await axios.post(
-        `${API_URL}/auth/change-password`,
-        passwordData,
+      // Get user ID from stored user data
+      const userStr = localStorage.getItem(config.auth.userStorageKey);
+      if (!userStr) throw new Error("User data not found");
+
+      const user = JSON.parse(userStr);
+      const userId = user.id || user._id;
+
+      if (!userId) throw new Error("User ID not found");
+
+      const response = await axios.patch(
+        `${API_URL}/v1/business/profile/${userId}`,
+        {
+          password: passwordData.newPassword,
+          currentPassword: passwordData.currentPassword,
+        },
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -176,9 +228,12 @@ const authService = {
    */
   requestPasswordReset: async (email) => {
     try {
-      const response = await axios.post(`${API_URL}/auth/forgot-password`, {
-        email,
-      });
+      const response = await axios.post(
+        `${API_URL}/v1/business/forgot-password`,
+        {
+          email,
+        }
+      );
       return response.data;
     } catch (error) {
       throw error.response?.data || error;

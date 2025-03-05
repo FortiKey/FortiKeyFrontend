@@ -39,14 +39,17 @@ const ManageAPIKeys = () => {
   }, []);
 
   /**
-   * Fetches the current API key from the backend
+   * Fetches the current API key from localStorage
+   * Since the backend doesn't provide a GET endpoint for API keys,
+   * we use localStorage to persist the key
    */
   const fetchApiKey = async () => {
     try {
       setLoading(true);
       setError("");
-      const key = await apiService.getCurrentKey();
-      setApiKey(key);
+      // Get the API key from localStorage
+      const storedKey = localStorage.getItem("apiKey");
+      setApiKey(storedKey || "");
     } catch (error) {
       console.error("Failed to fetch API key:", error);
       setError("Failed to load your API key. Please try again.");
@@ -108,7 +111,17 @@ const ManageAPIKeys = () => {
     try {
       setGenerating(true);
       setError("");
-      const newKey = await apiService.generateNewKey();
+
+      // Use the updated method name from our service
+      const response = await apiService.generateApiKey();
+
+      // Extract the key from the response based on backend format
+      // Adjust this based on the actual response structure
+      const newKey = response.key || response.apiKey || response.token || "";
+
+      // Store the key in localStorage for persistence
+      localStorage.setItem("apiKey", newKey);
+
       setApiKey(newKey);
       setConfirmDialogOpen(false);
       showSuccessToast("New API key generated successfully!");
