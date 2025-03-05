@@ -61,21 +61,26 @@ const authService = {
         `${API_URL}/v1/business/login`,
         credentials
       );
-      if (response.data.token) {
-        localStorage.setItem(config.auth.tokenStorageKey, response.data.token);
 
-        // Store user data including userId from response
-        const userData = response.data.user || {
+      // Store token
+      localStorage.setItem(config.auth.tokenStorageKey, response.data.token);
+
+      // Get full profile data
+      const profileResponse = await axios.get(
+        `${API_URL}/v1/business/profile/${response.data.userId}`,
+        { headers: { Authorization: `Bearer ${response.data.token}` } }
+      );
+
+      // Store complete user data
+      localStorage.setItem(
+        config.auth.userStorageKey,
+        JSON.stringify({
           id: response.data.userId,
-          email: credentials.email,
-        };
+          ...profileResponse.data,
+        })
+      );
 
-        localStorage.setItem(
-          config.auth.userStorageKey,
-          JSON.stringify(userData)
-        );
-      }
-      return response.data;
+      return profileResponse.data;
     } catch (error) {
       throw error.response?.data || error;
     }

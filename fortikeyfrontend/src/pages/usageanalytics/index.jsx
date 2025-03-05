@@ -38,7 +38,7 @@ const UsageAnalytics = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [timeRange, setTimeRange] = useState("7d"); // Default to 7 days
-  const [chartType, setChartType] = useState("business");
+  const [chartType, setChartType] = useState("company");
 
   // Fetch analytics data when component mounts or time range changes
   useEffect(() => {
@@ -139,7 +139,7 @@ const UsageAnalytics = () => {
               onChange={(e) => setChartType(e.target.value)}
               sx={{ color: colors.text.primary }}
             >
-              <MenuItem value="business">Business Analytics</MenuItem>
+              <MenuItem value="company">Company Analytics</MenuItem>
               <MenuItem value="devices">Device Types</MenuItem>
               <MenuItem value="auth">Authentication Methods</MenuItem>
               <MenuItem value="failures">Failure Reasons</MenuItem>

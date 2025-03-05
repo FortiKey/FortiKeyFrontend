@@ -168,12 +168,12 @@ const apiService = {
   },
 
   /**
-   * Get business analytics
+   * Get company analytics
    *
    * @param {Object} filters - Optional filter parameters
-   * @returns {Promise<Object>} Business analytics data
+   * @returns {Promise<Object>} Company analytics data
    */
-  getBusinessStats: async (filters = {}) => {
+  getCompanyStats: async (filters = {}) => {
     try {
       const http = getAuthenticatedAxios();
       const response = await http.get(`${API_URL}/v1/analytics/business`, {

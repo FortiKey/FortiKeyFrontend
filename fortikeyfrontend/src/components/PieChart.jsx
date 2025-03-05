@@ -15,11 +15,11 @@ ChartJS.register(ArcElement, Tooltip, Legend, Title);
  *
  * @param {Object} props - Component props
  * @param {string} [props.timeRange] - Optional time range filter (1d, 7d, 30d, 90d)
- * @param {string} [props.chartType] - Optional chart type ('business', 'devices', 'auth', 'failures')
+ * @param {string} [props.chartType] - Optional chart type ('company', 'devices', 'auth', 'failures')
  * @param {Function} [props.onError] - Optional error callback
  * @returns {JSX.Element} A pie chart visualization
  */
-const PieChart = ({ timeRange = null, chartType = "business", onError }) => {
+const PieChart = ({ timeRange = null, chartType = "company", onError }) => {
   const colors = tokens();
   const [chartData, setChartData] = useState({});
   const [loading, setLoading] = useState(true);
@@ -67,10 +67,10 @@ const PieChart = ({ timeRange = null, chartType = "business", onError }) => {
             });
             break;
           }
-          case "business":
+          case "company":
           default: {
-            // Original business stats (default)
-            const data = await apiService.getBusinessStats(params);
+            // Company stats (default)
+            const data = await apiService.getCompanyStats(params);
             setChartData({
               authorizedCount:
                 data.authorizedCount ||
@@ -202,7 +202,7 @@ const PieChart = ({ timeRange = null, chartType = "business", onError }) => {
           ],
         };
       }
-      case "business":
+      case "company":
       default: {
         // Calculate total and percentages
         const total =
@@ -259,9 +259,9 @@ const PieChart = ({ timeRange = null, chartType = "business", onError }) => {
         return "Authentication Methods";
       case "failures":
         return "Failed Authentication Reasons";
-      case "business":
+      case "company":
       default:
-        return "Business Analytics";
+        return "Company Analytics";
     }
   };
 
