@@ -38,6 +38,7 @@ const UsageAnalytics = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [timeRange, setTimeRange] = useState("7d"); // Default to 7 days
+  const [chartType, setChartType] = useState("business");
 
   // Fetch analytics data when component mounts or time range changes
   useEffect(() => {
@@ -52,8 +53,29 @@ const UsageAnalytics = () => {
       setLoading(true);
       setError(null);
 
-      const data = await apiService.getUsageAnalytics(timeRange);
-      setAnalyticsData(data);
+      // Get TOTP stats and failure data for summary statistics
+      const [totpData, failureData] = await Promise.all([
+        apiService.getTOTPStats({ period: timeRange }),
+        apiService.getFailureAnalytics({ period: timeRange }),
+      ]);
+
+      // Format for the summary stats section
+      setAnalyticsData({
+        summaryStats: [
+          {
+            label: "Total Authentications",
+            value: totpData.summary?.totalAuthentications || 0,
+          },
+          {
+            label: "Success Rate",
+            value: `${totpData.summary?.successRate || 0}%`,
+          },
+          {
+            label: "Failed Attempts",
+            value: failureData.totalFailures || 0,
+          },
+        ],
+      });
     } catch (error) {
       console.error("Failed to fetch analytics data:", error);
       setError("Unable to load analytics data. Please try again.");
@@ -109,6 +131,21 @@ const UsageAnalytics = () => {
             </Select>
           </FormControl>
 
+          <FormControl size="small" sx={{ minWidth: 150 }}>
+            <InputLabel>Chart Type</InputLabel>
+            <Select
+              value={chartType}
+              label="Chart Type"
+              onChange={(e) => setChartType(e.target.value)}
+              sx={{ color: colors.text.primary }}
+            >
+              <MenuItem value="business">Business Analytics</MenuItem>
+              <MenuItem value="devices">Device Types</MenuItem>
+              <MenuItem value="auth">Authentication Methods</MenuItem>
+              <MenuItem value="failures">Failure Reasons</MenuItem>
+            </Select>
+          </FormControl>
+
           <IconButton
             onClick={handleRefresh}
             disabled={loading}
@@ -144,7 +181,14 @@ const UsageAnalytics = () => {
           <Grid container spacing={3}>
             <Grid item xs={12} md={6}>
               <Box sx={{ height: "350px" }}>
-                <PieChart data={analyticsData.chartData} />
+                <PieChart
+                  timeRange={timeRange}
+                  chartType={chartType}
+                  onError={() => {
+                    setError("Failed to load chart data");
+                    showErrorToast("Failed to load chart data");
+                  }}
+                />
               </Box>
             </Grid>
             <Grid item xs={12} md={6}>
