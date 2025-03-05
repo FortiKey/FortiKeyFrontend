@@ -116,8 +116,7 @@ const ManageAPIKeys = () => {
       const response = await apiService.generateApiKey();
 
       // Extract the key from the response based on backend format
-      // Adjust this based on the actual response structure
-      const newKey = response.key || response.apiKey || response.token || "";
+      const newKey = response.apiKey || "";
 
       // Store the key in localStorage for persistence
       localStorage.setItem("apiKey", newKey);

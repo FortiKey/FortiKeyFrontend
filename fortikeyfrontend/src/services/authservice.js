@@ -32,16 +32,10 @@ const authService = {
    */
   register: async (userData) => {
     try {
-      // Transform company field to businessName for backend compatibility
-      const transformedData = {
-        ...userData,
-        businessName: userData.company, // Map company to businessName
-      };
-      delete transformedData.company; // Remove the original company field
-
+      // No need to transform data as backend now accepts company directly
       const response = await axios.post(
         `${API_URL}/v1/business/register`,
-        transformedData
+        userData
       );
       return response.data;
     } catch (error) {
@@ -131,8 +125,12 @@ const authService = {
         }
       );
 
-      // Transform businessName back to company for frontend consistency
-      if (response.data && response.data.businessName) {
+      // Handle both field names for backward compatibility during transition
+      if (
+        response.data &&
+        response.data.businessName &&
+        !response.data.company
+      ) {
         response.data.company = response.data.businessName;
         delete response.data.businessName;
       }
