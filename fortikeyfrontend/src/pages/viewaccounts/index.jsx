@@ -99,25 +99,27 @@ const ViewAccounts = () => {
     currentUserCompany,
   ]);
 
-  // Add this new useEffect after the existing state declarations but before fetchUsers
+  // Replace the useEffect that checks user organization
   useEffect(() => {
-    // Check if the user is from FortiKey
-    const checkUserOrganization = async () => {
+    // Check if the user has admin role
+    const checkUserRole = async () => {
       try {
         const user = await authService.getCurrentUser();
 
-        // More robust check with fallbacks for different property names
+        // Check for admin role instead of company name
+        setIsFortiKeyUser(user?.role === "admin");
+
+        // Still keep company name for filtering non-admin views
         const userCompany = user?.organization || user?.company || "";
-        setIsFortiKeyUser(userCompany === "FortiKey");
         setCurrentUserCompany(userCompany);
       } catch (error) {
-        console.error("Error checking user organization:", error);
+        console.error("Error checking user role:", error);
         setIsFortiKeyUser(false);
         setCurrentUserCompany("");
       }
     };
 
-    checkUserOrganization();
+    checkUserRole();
   }, []);
 
   /**

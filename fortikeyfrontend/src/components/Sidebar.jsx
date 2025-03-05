@@ -92,26 +92,27 @@ const Sidebar = () => {
   }, []);
 
   useEffect(() => {
-    // Check if the user is from FortiKey
-    const checkUserOrganization = async () => {
+    // Check if the user has admin role
+    const checkUserRole = async () => {
       try {
         setLoading(true);
         const user = await authService.getCurrentUser();
 
-        // Safely access user organization with fallbacks
-        const userOrg = user?.organization || user?.company || "";
+        // Check for admin role
+        setIsFortiKeyUser(user?.role === "admin");
 
-        setIsFortiKeyUser(userOrg === "FortiKey");
+        // Still keep company name for display
+        const userOrg = user?.organization || user?.company || "";
         setCompanyName(userOrg || "Company Name");
       } catch (error) {
-        console.error("Error checking user organization:", error);
+        console.error("Error checking user role:", error);
         setIsFortiKeyUser(false);
       } finally {
         setLoading(false);
       }
     };
 
-    checkUserOrganization();
+    checkUserRole();
   }, []);
 
   const toggleSidebar = () => {

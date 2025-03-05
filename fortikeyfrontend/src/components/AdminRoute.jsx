@@ -14,8 +14,7 @@ import authService from "../services/authservice";
 const AdminRoute = ({ children }) => {
   const adminCheck = async () => {
     const user = await authService.getCurrentUser();
-    const userCompany = user?.organization || user?.company || "";
-    return userCompany === "FortiKey";
+    return user?.role === "admin";
   };
 
   return (

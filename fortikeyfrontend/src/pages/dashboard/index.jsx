@@ -47,35 +47,21 @@ const Dashboard = () => {
   const [chartError, setChartError] = useState(false);
 
   useEffect(() => {
-    // Check if the user is from FortiKey
-    const checkUserOrganization = async () => {
+    const checkUserRole = async () => {
       try {
         setLoading(true);
-        setError(null);
-
         const user = await authService.getCurrentUser();
-
-        // More robust check with fallbacks for different property names
-        const organization = user?.organization || user?.company || "";
-        setIsFortiKeyUser(organization === "FortiKey");
+        setIsFortiKeyUser(user?.role === "admin");
       } catch (error) {
-        console.error("Error checking user organization:", error);
+        console.error("Error checking user role:", error);
         setIsFortiKeyUser(false);
-        setError(
-          "Unable to load user information. Some features may be limited."
-        );
-
-        // Only show toast for non-network errors (to avoid double notifications)
-        if (error.response) {
-          showErrorToast("Failed to load user data");
-        }
       } finally {
         setLoading(false);
       }
     };
 
-    checkUserOrganization();
-  }, [showErrorToast]);
+    checkUserRole();
+  }, []);
 
   // Handle chart error
   const handleChartError = () => {
