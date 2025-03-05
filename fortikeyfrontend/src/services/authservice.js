@@ -384,6 +384,53 @@ const authService = {
       throw error.response?.data || error;
     }
   },
+
+  /**
+   * Update user profile information
+   *
+   * Updates the authenticated user's profile data such as name and email.
+   * Requires authentication.
+   *
+   * @param {Object} profileData - Profile data to update
+   * @param {string} profileData.firstName - User's first name
+   * @param {string} profileData.lastName - User's last name
+   * @param {string} profileData.email - User's email address
+   * @returns {Promise<Object>} Updated user data
+   * @throws {Error} If profile update fails
+   */
+  updateProfile: async (profileData) => {
+    try {
+      const token = localStorage.getItem(config.auth.tokenStorageKey);
+      if (!token) throw new Error("Authentication required");
+
+      // Get user ID from stored user data
+      const userStr = localStorage.getItem(config.auth.userStorageKey);
+      if (!userStr) throw new Error("User data not found");
+
+      const user = JSON.parse(userStr);
+      const userId = user.id || user._id;
+
+      if (!userId) throw new Error("User ID not found");
+
+      const response = await axios.patch(
+        `${API_URL}/v1/business/profile/${userId}`,
+        {
+          firstName: profileData.firstName,
+          lastName: profileData.lastName,
+          email: profileData.email,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error;
+    }
+  },
 };
 
 export default authService;
