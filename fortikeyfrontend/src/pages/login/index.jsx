@@ -132,7 +132,7 @@ const Login = () => {
       showSuccessToast("Login successful!");
       navigate("/dashboard");
     } catch (error) {
-      handleApiError(error, "Invalid email or password. Please try again.");
+      setError(error.message || "Invalid email or password. Please try again.");
     } finally {
       setLoading(false);
     }

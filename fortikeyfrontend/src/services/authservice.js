@@ -32,9 +32,8 @@ const authService = {
    */
   register: async (userData) => {
     try {
-      // No need to transform data as backend now accepts company directly
       const response = await axios.post(
-        `${API_URL}/v1/business/register`,
+        `${API_URL}/business/register`,
         userData
       );
       return response.data;
@@ -58,7 +57,7 @@ const authService = {
   login: async (credentials) => {
     try {
       const response = await axios.post(
-        `${API_URL}/v1/business/login`,
+        `${API_URL}/business/login`,
         credentials
       );
 
@@ -67,7 +66,7 @@ const authService = {
 
       // Get full profile data
       const profileResponse = await axios.get(
-        `${API_URL}/v1/business/profile/${response.data.userId}`,
+        `${API_URL}/business/profile/${response.data.userId}`,
         { headers: { Authorization: `Bearer ${response.data.token}` } }
       );
 
@@ -82,6 +81,9 @@ const authService = {
 
       return profileResponse.data;
     } catch (error) {
+      if (error.response?.status === 429) {
+        throw new Error("Too many failed attempts, please try again later.");
+      }
       throw error.response?.data || error;
     }
   },
@@ -122,7 +124,7 @@ const authService = {
       if (!userId) return null;
 
       const response = await axios.get(
-        `${API_URL}/v1/business/profile/${userId}`,
+        `${API_URL}/business/profile/${userId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -201,7 +203,7 @@ const authService = {
       if (!userId) throw new Error("User ID not found");
 
       const response = await axios.patch(
-        `${API_URL}/v1/business/profile/${userId}`,
+        `${API_URL}/business/profile/${userId}`,
         {
           password: passwordData.newPassword,
           currentPassword: passwordData.currentPassword,
@@ -232,7 +234,7 @@ const authService = {
   requestPasswordReset: async (email) => {
     try {
       const response = await axios.post(
-        `${API_URL}/v1/business/forgot-password`,
+        `${API_URL}/business/forgot-password`,
         {
           email,
         }
@@ -416,7 +418,7 @@ const authService = {
       if (!userId) throw new Error("User ID not found");
 
       const response = await axios.patch(
-        `${API_URL}/v1/business/profile/${userId}`,
+        `${API_URL}/business/profile/${userId}`,
         {
           firstName: profileData.firstName,
           lastName: profileData.lastName,

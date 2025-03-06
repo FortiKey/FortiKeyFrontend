@@ -27,7 +27,7 @@ const apiService = {
   generateApiKey: async () => {
     try {
       const http = getAuthenticatedAxios();
-      const response = await http.post(`${API_URL}/v1/business/apikey`);
+      const response = await http.post(`${API_URL}/business/apikey`);
       return response.data;
     } catch (error) {
       throw error.response?.data || error;
@@ -41,7 +41,7 @@ const apiService = {
   deleteApiKey: async () => {
     try {
       const http = getAuthenticatedAxios();
-      const response = await http.delete(`${API_URL}/v1/business/apikey`);
+      const response = await http.delete(`${API_URL}/business/apikey`);
       return response.data;
     } catch (error) {
       throw error.response?.data || error;
@@ -57,7 +57,7 @@ const apiService = {
   createTOTPSecret: async (data) => {
     try {
       const http = getAuthenticatedAxios();
-      const response = await http.post(`${API_URL}/v1/totp-secrets`, data);
+      const response = await http.post(`${API_URL}/totp-secrets`, data);
       return response.data;
     } catch (error) {
       throw error.response?.data || error;
@@ -72,7 +72,7 @@ const apiService = {
   getAllTOTPSecrets: async () => {
     try {
       const http = getAuthenticatedAxios();
-      const response = await http.get(`${API_URL}/v1/totp-secrets`);
+      const response = await http.get(`${API_URL}/totp-secrets`);
       return response.data;
     } catch (error) {
       throw error.response?.data || error;
@@ -89,7 +89,7 @@ const apiService = {
     try {
       const http = getAuthenticatedAxios();
       const response = await http.get(
-        `${API_URL}/v1/totp-secrets/user/${externalUserId}`
+        `${API_URL}/totp-secrets/user/${externalUserId}`
       );
       return response.data;
     } catch (error) {
@@ -106,7 +106,7 @@ const apiService = {
   getTOTPSecretById: async (id) => {
     try {
       const http = getAuthenticatedAxios();
-      const response = await http.get(`${API_URL}/v1/totp-secrets/${id}`);
+      const response = await http.get(`${API_URL}/totp-secrets/${id}`);
       return response.data;
     } catch (error) {
       throw error.response?.data || error;
@@ -124,7 +124,7 @@ const apiService = {
     try {
       const http = getAuthenticatedAxios();
       const response = await http.patch(
-        `${API_URL}/v1/totp-secrets/${id}`,
+        `${API_URL}/totp-secrets/${id}`,
         data
       );
       return response.data;
@@ -142,7 +142,7 @@ const apiService = {
   deleteTOTPSecret: async (id) => {
     try {
       const http = getAuthenticatedAxios();
-      const response = await http.delete(`${API_URL}/v1/totp-secrets/${id}`);
+      const response = await http.delete(`${API_URL}/totp-secrets/${id}`);
       return response.data;
     } catch (error) {
       throw error.response?.data || error;
@@ -158,7 +158,7 @@ const apiService = {
   validateTOTP: async (data) => {
     try {
       const response = await axios.post(
-        `${API_URL}/v1/totp-secrets/validate`,
+        `${API_URL}/totp-secrets/validate`,
         data
       );
       return response.data;
@@ -176,7 +176,7 @@ const apiService = {
   getCompanyStats: async (filters = {}) => {
     try {
       const http = getAuthenticatedAxios();
-      const response = await http.get(`${API_URL}/v1/analytics/business`, {
+      const response = await http.get(`${API_URL}/analytics/business`, {
         params: filters,
       });
       return response.data;
@@ -194,7 +194,7 @@ const apiService = {
   getTOTPStats: async (filters = {}) => {
     try {
       const http = getAuthenticatedAxios();
-      const response = await http.get(`${API_URL}/v1/analytics/totp`, {
+      const response = await http.get(`${API_URL}/analytics/totp`, {
         params: filters,
       });
       return response.data;
@@ -212,7 +212,7 @@ const apiService = {
   getFailureAnalytics: async (filters = {}) => {
     try {
       const http = getAuthenticatedAxios();
-      const response = await http.get(`${API_URL}/v1/analytics/failures`, {
+      const response = await http.get(`${API_URL}/analytics/failures`, {
         params: filters,
       });
       return response.data;
@@ -232,7 +232,7 @@ const apiService = {
     try {
       const http = getAuthenticatedAxios();
       const response = await http.get(
-        `${API_URL}/v1/analytics/users/${externalUserId}/totp`,
+        `${API_URL}/analytics/users/${externalUserId}/totp`,
         {
           params: filters,
         }
@@ -252,7 +252,7 @@ const apiService = {
   getSuspiciousActivity: async (filters = {}) => {
     try {
       const http = getAuthenticatedAxios();
-      const response = await http.get(`${API_URL}/v1/analytics/suspicious`, {
+      const response = await http.get(`${API_URL}/analytics/suspicious`, {
         params: filters,
       });
       return response.data;
@@ -270,7 +270,7 @@ const apiService = {
   getDeviceBreakdown: async (filters = {}) => {
     try {
       const http = getAuthenticatedAxios();
-      const response = await http.get(`${API_URL}/v1/analytics/devices`, {
+      const response = await http.get(`${API_URL}/analytics/devices`, {
         params: filters,
       });
       return response.data;
@@ -288,7 +288,7 @@ const apiService = {
   getBackupCodeUsage: async (filters = {}) => {
     try {
       const http = getAuthenticatedAxios();
-      const response = await http.get(`${API_URL}/v1/analytics/backup-codes`, {
+      const response = await http.get(`${API_URL}/analytics/backup-codes`, {
         params: filters,
       });
       return response.data;
@@ -307,7 +307,7 @@ const apiService = {
     try {
       const http = getAuthenticatedAxios();
       const response = await http.get(
-        `${API_URL}/v1/analytics/time-comparison`,
+        `${API_URL}/analytics/time-comparison`,
         {
           params: filters,
         }
