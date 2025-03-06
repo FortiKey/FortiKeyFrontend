@@ -1,10 +1,8 @@
 import axios from "axios";
-import config from "../config"; // Add this import
+import config from "../config";
 
 // API base URL from environment variables and config
-const API_URL =
-  config.apiUrl || process.env.REACT_APP_API_URL || "http://localhost:5000/api";
-const USE_MOCK = config.features.useMockServices;
+const API_URL = config.apiUrl;
 
 /**
  * Authentication Service
@@ -33,14 +31,11 @@ const authService = {
    * @throws {Error} If registration fails (email already exists, invalid data, etc.)
    */
   register: async (userData) => {
-    if (USE_MOCK) {
-      console.log("Mock register:", userData);
-      await new Promise((resolve) => setTimeout(resolve, 800)); // Simulate network delay
-      return { success: true };
-    }
-
     try {
-      const response = await axios.post(`${API_URL}/users/register`, userData);
+      const response = await axios.post(
+        `${API_URL}/business/register`,
+        userData
+      );
       return response.data;
     } catch (error) {
       throw error.response?.data || error;
@@ -60,32 +55,35 @@ const authService = {
    * @throws {Error} If authentication fails (invalid credentials, account locked, etc.)
    */
   login: async (credentials) => {
-    if (USE_MOCK) {
-      console.log("Mock login:", credentials);
-      await new Promise((resolve) => setTimeout(resolve, 800));
-
-      const mockUser = {
-        id: "mock-123",
-        email: credentials.email,
-        firstName: "Demo",
-        lastName: "User",
-      };
-
-      // Store mock data in localStorage for other methods to use
-      localStorage.setItem("token", "mock-jwt-token");
-      localStorage.setItem("user", JSON.stringify(mockUser));
-
-      return { user: mockUser, token: "mock-jwt-token" };
-    }
-
     try {
-      const response = await axios.post(`${API_URL}/users/login`, credentials);
-      if (response.data.token) {
-        localStorage.setItem("token", response.data.token);
-        localStorage.setItem("user", JSON.stringify(response.data.user));
-      }
-      return response.data;
+      const response = await axios.post(
+        `${API_URL}/business/login`,
+        credentials
+      );
+
+      // Store token
+      localStorage.setItem(config.auth.tokenStorageKey, response.data.token);
+
+      // Get full profile data
+      const profileResponse = await axios.get(
+        `${API_URL}/business/profile/${response.data.userId}`,
+        { headers: { Authorization: `Bearer ${response.data.token}` } }
+      );
+
+      // Store complete user data
+      localStorage.setItem(
+        config.auth.userStorageKey,
+        JSON.stringify({
+          id: response.data.userId,
+          ...profileResponse.data,
+        })
+      );
+
+      return profileResponse.data;
     } catch (error) {
+      if (error.response?.status === 429) {
+        throw new Error("Too many failed attempts, please try again later.");
+      }
       throw error.response?.data || error;
     }
   },
@@ -97,8 +95,9 @@ const authService = {
    * Does not make an API call as token invalidation happens server-side.
    */
   logout: () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
+    localStorage.removeItem(config.auth.tokenStorageKey);
+    localStorage.removeItem(config.auth.userStorageKey);
+    localStorage.removeItem(config.auth.refreshTokenStorageKey);
   },
 
   /**
@@ -111,26 +110,42 @@ const authService = {
    * @throws {Error} If the API request fails for reasons other than authentication
    */
   getCurrentUser: async () => {
-    if (USE_MOCK) {
-      const userStr = localStorage.getItem("user");
-      if (!userStr) return null;
-      return JSON.parse(userStr);
-    }
-
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem(config.auth.tokenStorageKey);
       if (!token) return null;
 
-      const response = await axios.get(`${API_URL}/users/me`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      // Get user ID from stored user data
+      const userStr = localStorage.getItem(config.auth.userStorageKey);
+      if (!userStr) return null;
+
+      const user = JSON.parse(userStr);
+      const userId = user.id || user._id;
+
+      if (!userId) return null;
+
+      const response = await axios.get(
+        `${API_URL}/business/profile/${userId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      // Handle both field names for backward compatibility during transition
+      if (
+        response.data &&
+        response.data.businessName &&
+        !response.data.company
+      ) {
+        response.data.company = response.data.businessName;
+        delete response.data.businessName;
+      }
+
       return response.data;
     } catch (error) {
       if (error.response?.status === 401) {
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
+        authService.logout();
       }
       return null;
     }
@@ -146,7 +161,7 @@ const authService = {
    * @returns {boolean} True if user is authenticated (has a token)
    */
   isAuthenticated: () => {
-    return !!localStorage.getItem("token");
+    return !!localStorage.getItem(config.auth.tokenStorageKey);
   },
 
   /**
@@ -158,85 +173,70 @@ const authService = {
    * @returns {string|null} JWT token or null if not authenticated
    */
   getToken: () => {
-    return localStorage.getItem("token");
+    return localStorage.getItem(config.auth.tokenStorageKey);
   },
 
   /**
-   * Update user profile information
-   *
-   * Updates the authenticated user's profile with new information.
-   * Requires authentication and updates the stored user data on success.
-   *
-   * @param {Object} userData - Updated user data
-   * @param {string} [userData.firstName] - User's first name
-   * @param {string} [userData.lastName] - User's last name
-   * @param {string} [userData.email] - User's email address
-   * @param {string} [userData.company] - User's company or organization
-   * @returns {Promise<Object>} Updated user object
-   * @throws {Error} If update fails or user is not authenticated
-   */
-  updateProfile: async (userData) => {
-    if (USE_MOCK) {
-      console.log("Mock update profile:", userData);
-      await new Promise((resolve) => setTimeout(resolve, 800));
-
-      // Update mock user data in localStorage
-      const userStr = localStorage.getItem("user");
-      if (userStr) {
-        const user = JSON.parse(userStr);
-        const updatedUser = { ...user, ...userData };
-        localStorage.setItem("user", JSON.stringify(updatedUser));
-        return updatedUser;
-      }
-      return userData;
-    }
-
-    try {
-      const token = localStorage.getItem("token");
-
-      const response = await axios.put(`${API_URL}/users/profile`, userData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      // Update stored user data
-      localStorage.setItem("user", JSON.stringify(response.data));
-
-      return response.data;
-    } catch (error) {
-      throw error.response?.data || error;
-    }
-  },
-
-  /**
-   * Change user password
-   *
-   * Updates the authenticated user's password.
-   * Requires authentication and verification of current password.
-   *
-   * @param {Object} passwordData - Password change data
-   * @param {string} passwordData.currentPassword - Current password
-   * @param {string} passwordData.newPassword - New password
-   * @returns {Promise<Object>} Success message
-   * @throws {Error} If password change fails (wrong current password, invalid new password, etc.)
-   */
+ * Change user password
+ *
+ * Updates the authenticated user's password.
+ * Requires authentication and verification of current password.
+ *
+ * @param {Object} passwordData - Password change data
+ * @param {string} passwordData.currentPassword - Current password
+ * @param {string} passwordData.newPassword - New password
+ * @returns {Promise<Object>} Success message
+ * @throws {Error} If password change fails (wrong current password, invalid new password, etc.)
+ */
   changePassword: async (passwordData) => {
     try {
-      const token = localStorage.getItem("token");
+      // Validate input data
+      if (!passwordData.currentPassword || !passwordData.newPassword) {
+        throw new Error("Both current password and new password are required");
+      }
 
-      const response = await axios.post(
-        `${API_URL}/users/change-password`,
-        passwordData,
+      const token = localStorage.getItem(config.auth.tokenStorageKey);
+      if (!token) {
+        throw new Error("Authentication required");
+      }
+
+      // Get user ID from stored user data
+      const userStr = localStorage.getItem(config.auth.userStorageKey);
+      if (!userStr) {
+        throw new Error("User data not found");
+      }
+
+      const user = JSON.parse(userStr);
+      const userId = user.id || user._id;
+
+      if (!userId) {
+        throw new Error("User ID not found");
+      }
+
+      // Create the request payload with explicitly named fields
+      const payload = {
+        currentPassword: passwordData.currentPassword,
+        newPassword: passwordData.newPassword
+      };
+
+      const response = await axios.patch(
+        `${API_URL}/business/profile/${userId}/password`,
+        payload,
         {
           headers: {
             Authorization: `Bearer ${token}`,
-          },
+            'Content-Type': 'application/json'
+          }
         }
       );
 
       return response.data;
     } catch (error) {
+      // Provide more detailed error information
+      if (error.response) {
+        console.error("Server response:", error.response.status, error.response.data);
+      }
+
       throw error.response?.data || error;
     }
   },
@@ -252,19 +252,205 @@ const authService = {
    * @throws {Error} If the request fails (email not found, server error, etc.)
    */
   requestPasswordReset: async (email) => {
-    if (USE_MOCK) {
-      console.log("Mock password reset for:", email);
-      await new Promise((resolve) => setTimeout(resolve, 800));
-      return {
-        success: true,
-        message: "If the email exists, a reset link has been sent.",
-      };
-    }
-
     try {
-      const response = await axios.post(`${API_URL}/users/reset-password`, {
-        email,
+      const response = await axios.post(
+        `${API_URL}/business/forgot-password`,
+        {
+          email,
+        }
+      );
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error;
+    }
+  },
+
+  /**
+   * Get a list of users with pagination (admin function)
+   *
+   * @param {number} page - Page number (0-based)
+   * @param {number} pageSize - Number of records per page
+   * @returns {Promise<Object>} Paginated user data
+   * @throws {Error} If unauthorized or server error occurs
+   */
+  getUsers: async (page, pageSize) => {
+    try {
+      const token = localStorage.getItem(config.auth.tokenStorageKey);
+      if (!token) throw new Error("Authentication required");
+
+      const response = await axios.get(`${API_URL}/auth/users`, {
+        params: { page, pageSize },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error;
+    }
+  },
+
+  /**
+   * Delete a user account (admin function)
+   *
+   * @param {string} userId - ID of the user to delete
+   * @returns {Promise<Object>} Success message
+   * @throws {Error} If unauthorized or server error occurs
+   */
+  deleteUser: async (userId) => {
+    try {
+      const token = localStorage.getItem(config.auth.tokenStorageKey);
+      if (!token) throw new Error("Authentication required");
+
+      const response = await axios.delete(`${API_URL}/auth/users/${userId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error;
+    }
+  },
+
+  /**
+   * Get all companies (admin function)
+   *
+   * @returns {Promise<Array>} List of companies with staff counts
+   * @throws {Error} If unauthorized or server error occurs
+   */
+  getCompanies: async () => {
+    try {
+      const token = localStorage.getItem(config.auth.tokenStorageKey);
+      if (!token) throw new Error("Authentication required");
+
+      const response = await axios.get(`${API_URL}/admin/companies`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error;
+    }
+  },
+
+  /**
+   * Get staff for a specific company (admin function)
+   *
+   * @param {string} company - Company name
+   * @returns {Promise<Array>} List of staff for the company
+   * @throws {Error} If unauthorized or server error occurs
+   */
+  getStaffByCompany: async (company) => {
+    try {
+      const token = localStorage.getItem(config.auth.tokenStorageKey);
+      if (!token) throw new Error("Authentication required");
+
+      const response = await axios.get(
+        `${API_URL}/admin/companies/${company}/staff`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error;
+    }
+  },
+
+  /**
+   * Delete a staff member (admin function)
+   *
+   * @param {string} staffId - ID of staff to delete
+   * @returns {Promise<Object>} Success message
+   * @throws {Error} If unauthorized or server error occurs
+   */
+  deleteStaff: async (staffId) => {
+    try {
+      const token = localStorage.getItem(config.auth.tokenStorageKey);
+      if (!token) throw new Error("Authentication required");
+
+      const response = await axios.delete(`${API_URL}/admin/staff/${staffId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error;
+    }
+  },
+
+  /**
+   * Delete a company and all associated staff (admin function)
+   *
+   * @param {string} company - Company name
+   * @returns {Promise<Object>} Success message
+   * @throws {Error} If unauthorized or server error occurs
+   */
+  deleteCompany: async (company) => {
+    try {
+      const token = localStorage.getItem(config.auth.tokenStorageKey);
+      if (!token) throw new Error("Authentication required");
+
+      const response = await axios.delete(
+        `${API_URL}/admin/companies/${company}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error;
+    }
+  },
+
+  /**
+   * Update user profile information
+   *
+   * Updates the authenticated user's profile data such as name and email.
+   * Requires authentication.
+   *
+   * @param {Object} profileData - Profile data to update
+   * @param {string} profileData.firstName - User's first name
+   * @param {string} profileData.lastName - User's last name
+   * @param {string} profileData.email - User's email address
+   * @returns {Promise<Object>} Updated user data
+   * @throws {Error} If profile update fails
+   */
+  updateProfile: async (profileData) => {
+    try {
+      const token = localStorage.getItem(config.auth.tokenStorageKey);
+      if (!token) throw new Error("Authentication required");
+
+      // Get user ID from stored user data
+      const userStr = localStorage.getItem(config.auth.userStorageKey);
+      if (!userStr) throw new Error("User data not found");
+
+      const user = JSON.parse(userStr);
+      const userId = user.id || user._id;
+
+      if (!userId) throw new Error("User ID not found");
+
+      const response = await axios.patch(
+        `${API_URL}/business/profile/${userId}`,
+        {
+          firstName: profileData.firstName,
+          lastName: profileData.lastName,
+          email: profileData.email,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
       return response.data;
     } catch (error) {
       throw error.response?.data || error;

@@ -1,4 +1,16 @@
-import { Box, Button, Grid, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  Grid,
+  Typography,
+  CircularProgress,
+  Alert,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  TextField,
+  Divider,
+} from "@mui/material";
 import Header from "../../components/Header";
 import { tokens } from "../../theme";
 import PieChart from "../../components/PieChart";
@@ -11,6 +23,7 @@ import AdminPanelSettingsOutlinedIcon from "@mui/icons-material/AdminPanelSettin
 import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import authService from "../../services/authservice";
 import { useToast } from "../../context";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
 /**
  * Dashboard Component
@@ -31,23 +44,108 @@ import { useToast } from "../../context";
 const Dashboard = () => {
   const colors = tokens();
   const navigate = useNavigate();
-  const { showInfoToast } = useToast();
+  const { showInfoToast, showErrorToast, showSuccessToast } = useToast();
+
+  // State management
   const [isFortiKeyUser, setIsFortiKeyUser] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [chartError, setChartError] = useState(false);
+
+  // New state variables for profile form
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [updating, setUpdating] = useState(false);
 
   useEffect(() => {
-    // Check if the user is from FortiKey
-    const checkUserOrganization = async () => {
+    const checkUserRole = async () => {
       try {
+        setLoading(true);
         const user = await authService.getCurrentUser();
-        setIsFortiKeyUser(user && user.organization === "FortiKey");
+        setIsFortiKeyUser(user?.role === "admin");
+
+        // Set initial profile form values
+        setFirstName(user?.firstName || "");
+        setLastName(user?.lastName || "");
+        setEmail(user?.email || "");
       } catch (error) {
-        console.error("Error checking user organization:", error);
+        console.error("Error checking user role:", error);
         setIsFortiKeyUser(false);
+      } finally {
+        setLoading(false);
       }
     };
 
-    checkUserOrganization();
+    checkUserRole();
   }, []);
+
+  // Handle chart error
+  const handleChartError = () => {
+    setChartError(true);
+    showErrorToast("Failed to load chart data");
+  };
+
+  // New handler for profile update
+  const handleUpdateProfile = async (e) => {
+    e.preventDefault();
+    setUpdating(true);
+
+    try {
+      await authService.updateProfile({
+        firstName,
+        lastName,
+        email,
+      });
+
+      // Update local storage with new user data
+      const userData = localStorage.getItem("user");
+      if (userData) {
+        const user = JSON.parse(userData);
+        user.firstName = firstName;
+        user.lastName = lastName;
+        user.email = email;
+        localStorage.setItem("user", JSON.stringify(user));
+      }
+
+      showSuccessToast("Profile updated successfully");
+    } catch (error) {
+      showErrorToast(error.message || "Failed to update profile");
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  // New handler for password update
+  const handleUpdatePassword = async (e) => {
+    e.preventDefault();
+
+    if (newPassword !== confirmPassword) {
+      showErrorToast("Passwords don't match");
+      return;
+    }
+
+    setUpdating(true);
+
+    try {
+      await authService.changePassword({
+        currentPassword,
+        newPassword,
+      });
+
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+      showSuccessToast("Password changed successfully");
+    } catch (error) {
+      showErrorToast(error.message || "Failed to change password");
+    } finally {
+      setUpdating(false);
+    }
+  };
 
   // Define navigation buttons
   const baseButtons = [
@@ -90,6 +188,20 @@ const Dashboard = () => {
       ]
     : baseButtons;
 
+  // Show loading state
+  if (loading) {
+    return (
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        height="80vh"
+      >
+        <CircularProgress size={60} color="secondary" />
+      </Box>
+    );
+  }
+
   return (
     <Box
       sx={{
@@ -97,6 +209,13 @@ const Dashboard = () => {
         bgcolor: colors.primary.main,
       }}
     >
+      {/* Display error if present */}
+      {error && (
+        <Alert severity="warning" sx={{ mb: 3 }}>
+          {error}
+        </Alert>
+      )}
+
       {/* Header section with title and subtitle */}
       <Box
         sx={{
@@ -156,18 +275,162 @@ const Dashboard = () => {
           p: 3,
           borderRadius: "4px",
           boxShadow: "0px 2px 10px rgba(0, 0, 0, 0.1)",
-          mb: 5, // Add bottom margin to ensure we don't have space for buttons
+          mb: 5,
         }}
       >
         <Typography variant="h5" sx={{ mb: 2, color: colors.text.secondary }}>
           Key Status Overview
         </Typography>
         <Box height="300px">
-          <PieChart />
+          {chartError ? (
+            <Alert severity="error">Failed to load chart data</Alert>
+          ) : (
+            <PieChart onError={handleChartError} />
+          )}
         </Box>
       </Box>
 
-      {/* Explicitly set bottom margin to prevent any additional content */}
+      {/* Profile Accordion - NEW COMPONENT */}
+      <Accordion
+        sx={{
+          backgroundColor: colors.otherColor.main,
+          mb: 5,
+          "&.MuiAccordion-root": {
+            borderRadius: "4px",
+            boxShadow: "0px 2px 10px rgba(0, 0, 0, 0.1)",
+          },
+        }}
+      >
+        <AccordionSummary
+          expandIcon={<ExpandMoreIcon />}
+          sx={{
+            borderRadius: "4px",
+            "&.Mui-expanded": {
+              borderBottomLeftRadius: 0,
+              borderBottomRightRadius: 0,
+            },
+          }}
+        >
+          <Typography variant="h5" sx={{ color: colors.text.secondary }}>
+            My Profile
+          </Typography>
+        </AccordionSummary>
+
+        <AccordionDetails>
+          <Grid container spacing={3}>
+            {/* Left column - Personal Information */}
+            <Grid item xs={12} md={6}>
+              <Typography variant="h6" sx={{ color: colors.text.secondary }}>
+                Personal Information
+              </Typography>
+              <Divider sx={{ mb: 2 }} />
+
+              <form onSubmit={handleUpdateProfile}>
+                <TextField
+                  fullWidth
+                  label="First Name"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  margin="normal"
+                  required
+                  sx={{ mb: 2 }}
+                />
+
+                <TextField
+                  fullWidth
+                  label="Last Name"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  margin="normal"
+                  required
+                  sx={{ mb: 2 }}
+                />
+
+                <TextField
+                  fullWidth
+                  label="Email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  margin="normal"
+                  required
+                  sx={{ mb: 2 }}
+                />
+
+                <Button
+                  type="submit"
+                  variant="contained"
+                  color="secondary"
+                  disabled={updating}
+                >
+                  {updating ? "Updating..." : "Update Profile"}
+                </Button>
+              </form>
+            </Grid>
+
+            {/* Right column - Password Change */}
+            <Grid item xs={12} md={6}>
+              <Typography variant="h6" sx={{ color: colors.text.secondary }}>
+                Change Password
+              </Typography>
+              <Divider sx={{ mb: 2 }} />
+
+              <form onSubmit={handleUpdatePassword}>
+                <TextField
+                  fullWidth
+                  label="Current Password"
+                  type="password"
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  margin="normal"
+                  required
+                  sx={{ mb: 2 }}
+                />
+
+                <TextField
+                  fullWidth
+                  label="New Password"
+                  type="password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  margin="normal"
+                  required
+                  sx={{ mb: 2 }}
+                />
+
+                <TextField
+                  fullWidth
+                  label="Confirm New Password"
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  margin="normal"
+                  required
+                  sx={{ mb: 2 }}
+                  error={
+                    newPassword !== confirmPassword && confirmPassword !== ""
+                  }
+                  helperText={
+                    newPassword !== confirmPassword && confirmPassword !== ""
+                      ? "Passwords don't match"
+                      : ""
+                  }
+                />
+
+                <Button
+                  type="submit"
+                  variant="contained"
+                  color="secondary"
+                  disabled={updating}
+                >
+                  {updating ? "Updating..." : "Change Password"}
+                </Button>
+              </form>
+            </Grid>
+          </Grid>
+        </AccordionDetails>
+      </Accordion>
+
       <Box sx={{ mb: 5 }} />
     </Box>
   );

@@ -26,16 +26,17 @@ const ApiDocumentation = () => {
   const theme = useTheme();
   const colors = tokens();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  const { showSuccessToast } = useToast();
+  const { showSuccessToast, showErrorToast } = useToast();
 
   /**
    * Handle documentation download
-   * Shows a success toast notification when download starts
+   * Shows a toast notification when download starts
    *
    * @param {number} part - The documentation part number being downloaded
    */
   const handleDownload = (part) => {
     showSuccessToast(`Documentation Part ${part} download started`);
+    // No tracking call needed
   };
 
   return (
@@ -73,7 +74,7 @@ const ApiDocumentation = () => {
             startIcon={<OpenInNewIcon />}
             component="a"
             href="/assets/apidocument1.pdf"
-            download="apidocument1.pdf"
+            download="FortiKey_API_Part1.pdf"
             type="application/pdf"
             fullWidth={isMobile}
             onClick={() => handleDownload(1)}
@@ -119,7 +120,7 @@ const ApiDocumentation = () => {
             startIcon={<OpenInNewIcon />}
             component="a"
             href="/assets/apidocument2.pdf"
-            download="apidocument2.pdf"
+            download="FortiKey_API_Part2.pdf"
             type="application/pdf"
             fullWidth={isMobile}
             onClick={() => handleDownload(2)}

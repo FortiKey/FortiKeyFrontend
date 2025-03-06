@@ -1,4 +1,10 @@
-import { Box, IconButton, Menu, MenuItem } from "@mui/material";
+import {
+  Box,
+  IconButton,
+  Menu,
+  MenuItem,
+  CircularProgress,
+} from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
@@ -23,17 +29,33 @@ const Topbar = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
   const [userName, setUserName] = useState("User");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   // Fetch current user data on component mount
   useEffect(() => {
     const fetchUserData = async () => {
       try {
+        setLoading(true);
         const user = await authService.getCurrentUser();
+
         if (user) {
-          setUserName(`${user.firstName} ${user.lastName}`);
+          // More robust property access with fallbacks
+          const firstName = user.firstName || user.first_name || "";
+          const lastName = user.lastName || user.last_name || "";
+
+          if (firstName || lastName) {
+            setUserName(`${firstName} ${lastName}`.trim());
+          } else if (user.displayName || user.username || user.email) {
+            // Alternative user identifiers if name isn't available
+            setUserName(user.displayName || user.username || user.email);
+          }
         }
       } catch (error) {
         console.error("Error fetching user data:", error);
+        setError("Unable to load user data");
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -70,7 +92,7 @@ const Topbar = () => {
         backgroundColor: colors.primary.main,
       }}
     >
-      {/* User profile button */}
+      {/* User profile button with loading state */}
       <IconButton
         color="secondary"
         onClick={handleClick}
@@ -78,7 +100,11 @@ const Topbar = () => {
         aria-haspopup="true"
         aria-expanded={open ? "true" : undefined}
       >
-        <PersonOutlinedIcon />
+        {loading ? (
+          <CircularProgress color="secondary" size={20} />
+        ) : (
+          <PersonOutlinedIcon />
+        )}
       </IconButton>
 
       {/* Profile dropdown menu */}

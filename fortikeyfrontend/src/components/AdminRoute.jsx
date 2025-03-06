@@ -14,7 +14,7 @@ import authService from "../services/authservice";
 const AdminRoute = ({ children }) => {
   const adminCheck = async () => {
     const user = await authService.getCurrentUser();
-    return user && user.role === "admin";
+    return user?.role === "admin";
   };
 
   return (

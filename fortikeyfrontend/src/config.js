@@ -11,7 +11,7 @@ const config = {
    * API base URL
    * Uses environment variable in production or falls back to localhost for development
    */
-  apiUrl: process.env.REACT_APP_API_URL || "http://localhost:5000/api",
+  apiUrl: process.env.REACT_APP_API_URL || "http://localhost:3001/api/v1",
 
   /**
    * Application name
@@ -47,7 +47,7 @@ const config = {
     enableNotifications:
       process.env.REACT_APP_ENABLE_NOTIFICATIONS === "true" || true,
     debugMode: process.env.NODE_ENV === "development",
-    useMockServices: process.env.REACT_APP_USE_MOCK === "true" || false,
+    useMockServices: false,
   },
 
   /**

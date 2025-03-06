@@ -18,7 +18,6 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import AdminRoute from "./components/AdminRoute";
 import { Box } from "@mui/material";
 import { ToastProvider } from "./context";
-import DemoModeIndicator from "./components/DemoModeIndicator";
 
 /**
  * Main Application Component
@@ -34,7 +33,6 @@ function App() {
     <ThemeProvider theme={theme}>
       <CssBaseline /> {/* Normalizes CSS across browsers */}
       <ToastProvider>
-        <DemoModeIndicator /> {/* Provides toast notification functionality */}
         <Routes>
           {/* Public Routes - Accessible without authentication */}
           <Route path="/" element={<Landing />} />

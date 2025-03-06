@@ -1,85 +1,322 @@
+import axios from "axios";
 import config from "../config";
 
-const USE_MOCK = config.features.useMockServices;
 const API_URL = config.apiUrl;
 
-/**
- * API service placeholder
- * Note: This is a temporary implementation until the backend is ready.
- * Tests can mock these functions as needed.
- */
-
-/**
- * Get API keys for the authenticated user
- * @returns {Promise<Array>} List of API keys
- */
-export const getApiKeys = async () => {
-  if (USE_MOCK) {
-    console.log("Mock getApiKeys");
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    return [
-      {
-        id: "mock-1",
-        key: "fk_live_3x7abcdef1234567890",
-        created: new Date().toISOString(),
-        status: "active",
-      },
-      {
-        id: "mock-2",
-        key: "fk_test_4x8ghijkl0987654321",
-        created: new Date().toISOString(),
-        status: "active",
-      },
-    ];
-  }
-
-  // This would fetch from the backend when implemented
-  return [];
+// Helper function for authenticated requests
+const getAuthenticatedAxios = () => {
+  const token = localStorage.getItem(config.auth.tokenStorageKey);
+  return axios.create({
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
 };
 
 /**
- * Create a new API key
- * @param {string} name - Name for the new key
- * @returns {Promise<Object>} The created key
+ * API Service
+ *
+ * Handles API key management, TOTP operations, and analytics functionality.
+ * Provides methods for creating, retrieving, and managing API keys and TOTP secrets.
  */
-export const createApiKey = async (name) => {
-  if (USE_MOCK) {
-    console.log("Mock createApiKey:", name);
-    await new Promise((resolve) => setTimeout(resolve, 800));
-    return {
-      id: `mock-${Date.now()}`,
-      name,
-      key: `fk_live_${Math.random().toString(36).substring(2, 15)}`,
-      created: new Date().toISOString(),
-      status: "active",
-    };
-  }
-
-  // This would create a key on the backend when implemented
-  return {};
-};
-
-/**
- * Delete an API key
- * @param {string} id - ID of the key to delete
- * @returns {Promise<Object>} Response with success message
- */
-export const deleteApiKey = async (id) => {
-  if (USE_MOCK) {
-    console.log("Mock deleteApiKey:", id);
-    await new Promise((resolve) => setTimeout(resolve, 600));
-    return { message: "API key deleted" };
-  }
-
-  // This would delete the key on the backend when implemented
-  return {};
-};
-
-// Default export for compatibility with tests
 const apiService = {
-  getApiKeys,
-  createApiKey,
-  deleteApiKey,
+  /**
+   * Generate a new API key for the authenticated user
+   * @returns {Promise<Object>} Generated API key data
+   */
+  generateApiKey: async () => {
+    try {
+      const http = getAuthenticatedAxios();
+      const response = await http.post(`${API_URL}/business/apikey`);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error;
+    }
+  },
+
+  /**
+   * Delete the API key for the authenticated user
+   * @returns {Promise<Object>} Success message
+   */
+  deleteApiKey: async () => {
+    try {
+      const http = getAuthenticatedAxios();
+      const response = await http.delete(`${API_URL}/business/apikey`);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error;
+    }
+  },
+
+  /**
+   * Create a new TOTP secret
+   *
+   * @param {Object} data - TOTP secret data
+   * @returns {Promise<Object>} Created TOTP secret
+   */
+  createTOTPSecret: async (data) => {
+    try {
+      const http = getAuthenticatedAxios();
+      const response = await http.post(`${API_URL}/totp-secrets`, data);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error;
+    }
+  },
+
+  /**
+   * Get all TOTP secrets for the authenticated user
+   *
+   * @returns {Promise<Array>} List of TOTP secrets
+   */
+  getAllTOTPSecrets: async () => {
+    try {
+      const http = getAuthenticatedAxios();
+      const response = await http.get(`${API_URL}/totp-secrets`);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error;
+    }
+  },
+
+  /**
+   * Get a TOTP secret by external user ID
+   *
+   * @param {string} externalUserId - External user ID
+   * @returns {Promise<Object>} TOTP secret data
+   */
+  getTOTPSecretByExternalUserId: async (externalUserId) => {
+    try {
+      const http = getAuthenticatedAxios();
+      const response = await http.get(
+        `${API_URL}/totp-secrets/user/${externalUserId}`
+      );
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error;
+    }
+  },
+
+  /**
+   * Get a TOTP secret by its ID
+   *
+   * @param {string} id - TOTP secret ID
+   * @returns {Promise<Object>} TOTP secret data
+   */
+  getTOTPSecretById: async (id) => {
+    try {
+      const http = getAuthenticatedAxios();
+      const response = await http.get(`${API_URL}/totp-secrets/${id}`);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error;
+    }
+  },
+
+  /**
+   * Update a TOTP secret
+   *
+   * @param {string} id - TOTP secret ID
+   * @param {Object} data - Updated TOTP secret data
+   * @returns {Promise<Object>} Updated TOTP secret
+   */
+  updateTOTPSecret: async (id, data) => {
+    try {
+      const http = getAuthenticatedAxios();
+      const response = await http.patch(
+        `${API_URL}/totp-secrets/${id}`,
+        data
+      );
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error;
+    }
+  },
+
+  /**
+   * Delete a TOTP secret
+   *
+   * @param {string} id - TOTP secret ID
+   * @returns {Promise<Object>} Success message
+   */
+  deleteTOTPSecret: async (id) => {
+    try {
+      const http = getAuthenticatedAxios();
+      const response = await http.delete(`${API_URL}/totp-secrets/${id}`);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error;
+    }
+  },
+
+  /**
+   * Validate a TOTP token
+   *
+   * @param {Object} data - TOTP validation data
+   * @returns {Promise<Object>} Validation result
+   */
+  validateTOTP: async (data) => {
+    try {
+      const response = await axios.post(
+        `${API_URL}/totp-secrets/validate`,
+        data
+      );
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error;
+    }
+  },
+
+  /**
+   * Get company analytics
+   *
+   * @param {Object} filters - Optional filter parameters
+   * @returns {Promise<Object>} Company analytics data
+   */
+  getCompanyStats: async (filters = {}) => {
+    try {
+      const http = getAuthenticatedAxios();
+      const response = await http.get(`${API_URL}/analytics/business`, {
+        params: filters,
+      });
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error;
+    }
+  },
+
+  /**
+   * Get TOTP analytics
+   *
+   * @param {Object} filters - Optional filter parameters
+   * @returns {Promise<Object>} TOTP analytics data
+   */
+  getTOTPStats: async (filters = {}) => {
+    try {
+      const http = getAuthenticatedAxios();
+      const response = await http.get(`${API_URL}/analytics/totp`, {
+        params: filters,
+      });
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error;
+    }
+  },
+
+  /**
+   * Get failure analytics
+   *
+   * @param {Object} filters - Optional filter parameters
+   * @returns {Promise<Object>} Failure analytics data
+   */
+  getFailureAnalytics: async (filters = {}) => {
+    try {
+      const http = getAuthenticatedAxios();
+      const response = await http.get(`${API_URL}/analytics/failures`, {
+        params: filters,
+      });
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error;
+    }
+  },
+
+  /**
+   * Get TOTP stats for a specific user
+   *
+   * @param {string} externalUserId - External user ID
+   * @param {Object} filters - Optional filter parameters
+   * @returns {Promise<Object>} User TOTP analytics data
+   */
+  getUserTOTPStats: async (externalUserId, filters = {}) => {
+    try {
+      const http = getAuthenticatedAxios();
+      const response = await http.get(
+        `${API_URL}/analytics/users/${externalUserId}/totp`,
+        {
+          params: filters,
+        }
+      );
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error;
+    }
+  },
+
+  /**
+   * Get suspicious activity analytics
+   *
+   * @param {Object} filters - Optional filter parameters
+   * @returns {Promise<Object>} Suspicious activity data
+   */
+  getSuspiciousActivity: async (filters = {}) => {
+    try {
+      const http = getAuthenticatedAxios();
+      const response = await http.get(`${API_URL}/analytics/suspicious`, {
+        params: filters,
+      });
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error;
+    }
+  },
+
+  /**
+   * Get device breakdown analytics
+   *
+   * @param {Object} filters - Optional filter parameters
+   * @returns {Promise<Object>} Device breakdown data
+   */
+  getDeviceBreakdown: async (filters = {}) => {
+    try {
+      const http = getAuthenticatedAxios();
+      const response = await http.get(`${API_URL}/analytics/devices`, {
+        params: filters,
+      });
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error;
+    }
+  },
+
+  /**
+   * Get backup code usage analytics
+   *
+   * @param {Object} filters - Optional filter parameters
+   * @returns {Promise<Object>} Backup code usage data
+   */
+  getBackupCodeUsage: async (filters = {}) => {
+    try {
+      const http = getAuthenticatedAxios();
+      const response = await http.get(`${API_URL}/analytics/backup-codes`, {
+        params: filters,
+      });
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error;
+    }
+  },
+
+  /**
+   * Get time comparison analytics
+   *
+   * @param {Object} filters - Optional filter parameters
+   * @returns {Promise<Object>} Time comparison data
+   */
+  getTimeComparisons: async (filters = {}) => {
+    try {
+      const http = getAuthenticatedAxios();
+      const response = await http.get(
+        `${API_URL}/analytics/time-comparison`,
+        {
+          params: filters,
+        }
+      );
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error;
+    }
+  },
 };
 
 export default apiService;

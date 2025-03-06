@@ -1,7 +1,13 @@
 import { useState, useEffect } from "react";
 import { ProSidebar, Menu, MenuItem } from "react-pro-sidebar";
 import "react-pro-sidebar/dist/css/styles.css";
-import { Box, useTheme, Typography, IconButton } from "@mui/material";
+import {
+  Box,
+  useTheme,
+  Typography,
+  IconButton,
+  CircularProgress,
+} from "@mui/material";
 import { tokens } from "../theme";
 import { Link, useNavigate } from "react-router-dom";
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
@@ -69,6 +75,7 @@ const Sidebar = () => {
   const [sidebarState, setSidebarState] = useState("hidden");
   const [isFortiKeyUser, setIsFortiKeyUser] = useState(false);
   const [companyName, setCompanyName] = useState("Company Name");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const handleResize = () => {
@@ -85,21 +92,27 @@ const Sidebar = () => {
   }, []);
 
   useEffect(() => {
-    // Check if the user is from FortiKey
-    const checkUserOrganization = async () => {
+    // Check if the user has admin role
+    const checkUserRole = async () => {
       try {
+        setLoading(true);
         const user = await authService.getCurrentUser();
-        setIsFortiKeyUser(user && user.organization === "FortiKey");
-        setCompanyName(
-          user && user.organization ? user.organization : "Company Name"
-        );
+
+        // Check for admin role
+        setIsFortiKeyUser(user?.role === "admin");
+
+        // Still keep company name for display
+        const userOrg = user?.organization || user?.company || "";
+        setCompanyName(userOrg || "Company Name");
       } catch (error) {
-        console.error("Error checking user organization:", error);
+        console.error("Error checking user role:", error);
         setIsFortiKeyUser(false);
+      } finally {
+        setLoading(false);
       }
     };
 
-    checkUserOrganization();
+    checkUserRole();
   }, []);
 
   const toggleSidebar = () => {
@@ -160,6 +173,31 @@ const Sidebar = () => {
       to: "/admindashboard",
       icon: <SupervisorAccountOutlinedIcon />,
     });
+  }
+
+  // Render loading state
+  if (loading) {
+    return (
+      <Box
+        sx={{
+          position: "fixed",
+          height: "100vh",
+          width: "80px",
+          backgroundColor: colors.primary.main,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          borderRight: `1px solid ${colors.neutral.main}`,
+          zIndex: 1000,
+          transform:
+            sidebarState === "hidden" ? "translateX(-100%)" : "translateX(0)",
+          transition: "transform 0.3s ease-in-out",
+        }}
+      >
+        <CircularProgress color="secondary" size={40} />
+      </Box>
+    );
   }
 
   return (
