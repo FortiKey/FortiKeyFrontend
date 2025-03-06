@@ -49,7 +49,6 @@ const Dashboard = () => {
   // State management
   const [isFortiKeyUser, setIsFortiKeyUser] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [chartError, setChartError] = useState(false);
 
   // New state variables for profile form
@@ -106,13 +105,14 @@ const Dashboard = () => {
       } catch (error) {
         console.error("Error checking user role:", error);
         setIsFortiKeyUser(false);
+        showErrorToast("Failed to load user data");
       } finally {
         setLoading(false);
       }
     };
 
     checkUserRole();
-  }, []);
+  }, [showErrorToast]);
 
   // Handle chart error
   const handleChartError = () => {
@@ -240,13 +240,6 @@ const Dashboard = () => {
         bgcolor: colors.primary.main,
       }}
     >
-      {/* Display error if present */}
-      {error && (
-        <Alert severity="warning" sx={{ mb: 3 }}>
-          {error}
-        </Alert>
-      )}
-
       {/* Header section with title and subtitle */}
       <Box
         sx={{

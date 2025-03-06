@@ -26,7 +26,7 @@ const ApiDocumentation = () => {
   const theme = useTheme();
   const colors = tokens();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  const { showSuccessToast, showErrorToast } = useToast();
+  const { showSuccessToast } = useToast();
 
   /**
    * Handle documentation download
