@@ -87,7 +87,7 @@ const Topbar = () => {
     <Box
       display="flex"
       justifyContent="flex-end"
-      p={{ xs: 2, sm: 3 }}
+      p={{ xs: 2 }}
       sx={{
         backgroundColor: colors.primary.main,
       }}
