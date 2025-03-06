@@ -323,7 +323,7 @@ const Sidebar = () => {
       <IconButton
         sx={{
           position: "fixed",
-          top: "50px", // Keep vertical position inside purple area
+          top: "17px",
           left: "15px", // Adjusted left to align with home button below
           zIndex: 1001,
           color: colors.secondary.main,

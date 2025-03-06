@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   Box,
   CircularProgress,
@@ -40,15 +40,8 @@ const UsageAnalytics = () => {
   const [timeRange, setTimeRange] = useState("7d"); // Default to 7 days
   const [chartType, setChartType] = useState("company");
 
-  // Fetch analytics data when component mounts or time range changes
-  useEffect(() => {
-    fetchAnalyticsData();
-  }, [timeRange]);
-
-  /**
-   * Fetches analytics data from the backend API
-   */
-  const fetchAnalyticsData = async () => {
+  // Define the function using useCallback outside useEffect
+  const fetchAnalyticsData = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -83,7 +76,12 @@ const UsageAnalytics = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [timeRange, showErrorToast]);
+
+  // Use the function in useEffect
+  useEffect(() => {
+    fetchAnalyticsData();
+  }, [fetchAnalyticsData]);
 
   /**
    * Handles time range change

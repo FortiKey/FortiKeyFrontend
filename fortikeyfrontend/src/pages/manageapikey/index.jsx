@@ -34,30 +34,30 @@ const ManageAPIKeys = () => {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    // Fetch the current API key on component mount
-    fetchApiKey();
-  }, []);
+    /**
+     * Fetches the current API key from localStorage
+     * Since the backend doesn't provide a GET endpoint for API keys,
+     * we use localStorage to persist the key
+     */
+    const fetchApiKey = async () => {
+      try {
+        setLoading(true);
+        setError("");
+        // Get the API key from localStorage
+        const storedKey = localStorage.getItem("apiKey");
+        setApiKey(storedKey || "");
+      } catch (error) {
+        console.error("Failed to fetch API key:", error);
+        setError("Failed to load your API key. Please try again.");
+        showErrorToast("Failed to load your API key");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  /**
-   * Fetches the current API key from localStorage
-   * Since the backend doesn't provide a GET endpoint for API keys,
-   * we use localStorage to persist the key
-   */
-  const fetchApiKey = async () => {
-    try {
-      setLoading(true);
-      setError("");
-      // Get the API key from localStorage
-      const storedKey = localStorage.getItem("apiKey");
-      setApiKey(storedKey || "");
-    } catch (error) {
-      console.error("Failed to fetch API key:", error);
-      setError("Failed to load your API key. Please try again.");
-      showErrorToast("Failed to load your API key");
-    } finally {
-      setLoading(false);
-    }
-  };
+    // Call the function
+    fetchApiKey();
+  }, [showErrorToast]);
 
   // Extract common button styling
   const apiKeyButtonStyle = {
