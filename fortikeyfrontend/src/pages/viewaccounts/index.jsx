@@ -12,7 +12,7 @@ import { DataGrid } from "@mui/x-data-grid";
 import Header from "../../components/Header";
 import { tokens } from "../../theme";
 import { ThemeProvider } from "@mui/material/styles";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import authService from "../../services/authservice";
 import { useToast } from "../../context";
 
@@ -55,7 +55,7 @@ const ViewAccounts = () => {
    * Uses pagination parameters for server-side pagination
    * Filters users by company if not a FortiKey user
    */
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -84,7 +84,7 @@ const ViewAccounts = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [paginationModel, isFortiKeyUser, currentUserCompany, showErrorToast]);
 
   // Fetch users when component mounts, pagination changes, or company status changes
   useEffect(() => {
@@ -92,12 +92,7 @@ const ViewAccounts = () => {
     if (currentUserCompany || currentUserCompany === "") {
       fetchUsers();
     }
-  }, [
-    paginationModel.page,
-    paginationModel.pageSize,
-    isFortiKeyUser,
-    currentUserCompany,
-  ]);
+  }, [fetchUsers, currentUserCompany]);
 
   // Replace the useEffect that checks user organization
   useEffect(() => {
