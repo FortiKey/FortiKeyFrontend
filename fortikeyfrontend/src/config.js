@@ -11,7 +11,7 @@ const config = {
    * API base URL
    * Uses environment variable in production or falls back to localhost for development
    */
-  apiUrl: process.env.REACT_APP_API_URL || "http://localhost:5000/api/v1",
+  apiUrl: process.env.REACT_APP_API_URL || "http://localhost:3001/api/v1",
 
   /**
    * Application name

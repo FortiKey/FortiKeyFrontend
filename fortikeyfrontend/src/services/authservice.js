@@ -177,46 +177,66 @@ const authService = {
   },
 
   /**
-   * Change user password
-   *
-   * Updates the authenticated user's password.
-   * Requires authentication and verification of current password.
-   *
-   * @param {Object} passwordData - Password change data
-   * @param {string} passwordData.currentPassword - Current password
-   * @param {string} passwordData.newPassword - New password
-   * @returns {Promise<Object>} Success message
-   * @throws {Error} If password change fails (wrong current password, invalid new password, etc.)
-   */
+ * Change user password
+ *
+ * Updates the authenticated user's password.
+ * Requires authentication and verification of current password.
+ *
+ * @param {Object} passwordData - Password change data
+ * @param {string} passwordData.currentPassword - Current password
+ * @param {string} passwordData.newPassword - New password
+ * @returns {Promise<Object>} Success message
+ * @throws {Error} If password change fails (wrong current password, invalid new password, etc.)
+ */
   changePassword: async (passwordData) => {
     try {
+      // Validate input data
+      if (!passwordData.currentPassword || !passwordData.newPassword) {
+        throw new Error("Both current password and new password are required");
+      }
+
       const token = localStorage.getItem(config.auth.tokenStorageKey);
-      if (!token) throw new Error("Authentication required");
+      if (!token) {
+        throw new Error("Authentication required");
+      }
 
       // Get user ID from stored user data
       const userStr = localStorage.getItem(config.auth.userStorageKey);
-      if (!userStr) throw new Error("User data not found");
+      if (!userStr) {
+        throw new Error("User data not found");
+      }
 
       const user = JSON.parse(userStr);
       const userId = user.id || user._id;
 
-      if (!userId) throw new Error("User ID not found");
+      if (!userId) {
+        throw new Error("User ID not found");
+      }
+
+      // Create the request payload with explicitly named fields
+      const payload = {
+        currentPassword: passwordData.currentPassword,
+        newPassword: passwordData.newPassword
+      };
 
       const response = await axios.patch(
-        `${API_URL}/business/profile/${userId}`,
-        {
-          password: passwordData.newPassword,
-          currentPassword: passwordData.currentPassword,
-        },
+        `${API_URL}/business/profile/${userId}/password`,
+        payload,
         {
           headers: {
             Authorization: `Bearer ${token}`,
-          },
+            'Content-Type': 'application/json'
+          }
         }
       );
 
       return response.data;
     } catch (error) {
+      // Provide more detailed error information
+      if (error.response) {
+        console.error("Server response:", error.response.status, error.response.data);
+      }
+
       throw error.response?.data || error;
     }
   },
