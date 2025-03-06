@@ -61,6 +61,37 @@ const Dashboard = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [updating, setUpdating] = useState(false);
 
+  // Add this formStyles object - copied exactly from createuser
+  const formStyles = {
+    textField: {
+      "& .MuiOutlinedInput-root": {
+        "& fieldset": {
+          borderColor: colors.text.secondary,
+          borderWidth: "1px",
+        },
+        "&:hover fieldset": {
+          borderColor: colors.secondary.main,
+        },
+        "&.Mui-focused fieldset": {
+          borderColor: colors.secondary.main,
+        },
+      },
+      "& .MuiInputLabel-root": {
+        "&.Mui-focused": {
+          color: colors.secondary.main,
+        },
+        bgcolor: colors.otherColor.main,
+        paddingLeft: "5px",
+        paddingRight: "5px",
+      },
+      "& .MuiInputLabel-shrink": {
+        bgcolor: colors.otherColor.main,
+        paddingLeft: "5px",
+        paddingRight: "5px",
+      },
+    },
+  };
+
   useEffect(() => {
     const checkUserRole = async () => {
       try {
@@ -333,7 +364,8 @@ const Dashboard = () => {
                   onChange={(e) => setFirstName(e.target.value)}
                   margin="normal"
                   required
-                  sx={{ mb: 2 }}
+                  variant="outlined"
+                  sx={{ ...formStyles.textField, mb: 2 }}
                 />
 
                 <TextField
@@ -343,7 +375,8 @@ const Dashboard = () => {
                   onChange={(e) => setLastName(e.target.value)}
                   margin="normal"
                   required
-                  sx={{ mb: 2 }}
+                  variant="outlined"
+                  sx={{ ...formStyles.textField, mb: 2 }}
                 />
 
                 <TextField
@@ -354,7 +387,8 @@ const Dashboard = () => {
                   onChange={(e) => setEmail(e.target.value)}
                   margin="normal"
                   required
-                  sx={{ mb: 2 }}
+                  variant="outlined"
+                  sx={{ ...formStyles.textField, mb: 2 }}
                 />
 
                 <Button
@@ -384,7 +418,8 @@ const Dashboard = () => {
                   onChange={(e) => setCurrentPassword(e.target.value)}
                   margin="normal"
                   required
-                  sx={{ mb: 2 }}
+                  variant="outlined"
+                  sx={{ ...formStyles.textField, mb: 2 }}
                 />
 
                 <TextField
@@ -395,7 +430,8 @@ const Dashboard = () => {
                   onChange={(e) => setNewPassword(e.target.value)}
                   margin="normal"
                   required
-                  sx={{ mb: 2 }}
+                  variant="outlined"
+                  sx={{ ...formStyles.textField, mb: 2 }}
                 />
 
                 <TextField
@@ -406,7 +442,8 @@ const Dashboard = () => {
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   margin="normal"
                   required
-                  sx={{ mb: 2 }}
+                  variant="outlined"
+                  sx={{ ...formStyles.textField, mb: 2 }}
                   error={
                     newPassword !== confirmPassword && confirmPassword !== ""
                   }
