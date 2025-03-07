@@ -11,6 +11,7 @@ import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import HelpOutlineOutlinedIcon from "@mui/icons-material/HelpOutlineOutlined";
 import { tokens } from "../theme";
 import authService from "../services/authservice";
+import { useToast } from "../context";
 
 /**
  * Top navigation bar component
@@ -30,7 +31,7 @@ const Topbar = () => {
   const open = Boolean(anchorEl);
   const [userName, setUserName] = useState("User");
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const { showErrorToast } = useToast();
 
   // Fetch current user data on component mount
   useEffect(() => {
@@ -53,14 +54,14 @@ const Topbar = () => {
         }
       } catch (error) {
         console.error("Error fetching user data:", error);
-        setError("Unable to load user data");
+        showErrorToast("Unable to load user data");
       } finally {
         setLoading(false);
       }
     };
 
     fetchUserData();
-  }, []);
+  }, [showErrorToast]);
 
   // Handle profile menu open
   const handleClick = (event) => {
@@ -87,7 +88,7 @@ const Topbar = () => {
     <Box
       display="flex"
       justifyContent="flex-end"
-      p={{ xs: 2, sm: 3 }}
+      p={{ xs: 2 }}
       sx={{
         backgroundColor: colors.primary.main,
       }}
