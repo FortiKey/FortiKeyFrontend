@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import {
   Box,
   CircularProgress,
@@ -10,6 +10,9 @@ import {
   Grid,
   Typography,
   IconButton,
+  Paper,
+  Divider,
+  Tooltip,
 } from "@mui/material";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import PieChart from "../../components/PieChart";
@@ -17,84 +20,322 @@ import Header from "../../components/Header";
 import apiService from "../../services/apiservice";
 import { useToast } from "../../context";
 import { tokens } from "../../theme";
+// Import enhanced utility functions
+import {
+  processTOTPStats,
+  processFailureAnalytics,
+  processDeviceBreakdown,
+  formatValue
+} from "../../utils/analyticsUtils";
 
-/**
- * Usage Analytics Page Component
- *
- * Displays analytics and visualization of API usage data.
- * Features:
- * - Data fetching from backend API
- * - Pie chart showing the distribution of API usage categories
- * - Time period filtering
- * - Loading states and error handling
- * - Data refresh capability
- */
 const UsageAnalytics = () => {
   const colors = tokens();
-  const { showErrorToast } = useToast();
+  const { showErrorToast, showSuccessToast } = useToast();
 
   // State management
   const [analyticsData, setAnalyticsData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [timeRange, setTimeRange] = useState("7d"); // Default to 7 days
+  const [timeRange, setTimeRange] = useState("30"); // Default to 30 days
   const [chartType, setChartType] = useState("company");
+  const [refreshing, setRefreshing] = useState(false);
+  const [lastRefreshTime, setLastRefreshTime] = useState(null);
 
-  // Define the function using useCallback outside useEffect
-  const fetchAnalyticsData = useCallback(async () => {
+  // State for chart data - passed to PieChart
+  const [chartData, setChartData] = useState({});
+
+  // Use ref to prevent duplicate API calls on mount
+  const initialLoadComplete = useRef(false);
+
+  // Keep track of previous data for consistency across refreshes
+  const prevDataRef = useRef({});
+
+  // Convert timeRange for API calls
+  const getTimeRangeValue = () => {
+    return parseInt(timeRange, 10);
+  };
+
+  // Enhanced fetch data function with explicit period parameter
+  const fetchDataWithPeriod = async (explicitPeriod, force = false) => {
     try {
       setLoading(true);
+      if (force) setRefreshing(true);
       setError(null);
 
-      // Get TOTP stats and failure data for summary statistics
-      const [totpData, failureData] = await Promise.all([
-        apiService.getTOTPStats({ period: timeRange }),
-        apiService.getFailureAnalytics({ period: timeRange }),
+      // Use the explicit period rather than the state value
+      const periodToUse = explicitPeriod || getTimeRangeValue();
+
+      // Load summary data with explicit period
+      const [totpResponse, failureResponse, deviceResponse] = await Promise.all([
+        apiService.getTOTPStats({ period: periodToUse }, force)
+          .catch(err => {
+            return { summary: {} };
+          }),
+        apiService.getFailureAnalytics({ period: periodToUse }, force)
+          .catch(err => {
+            return {};
+          }),
+        apiService.getDeviceBreakdown({ period: periodToUse }, force)
+          .catch(err => {
+            return {};
+          })
       ]);
 
-      // Format for the summary stats section
+      // Process the data
+      const totpData = processTOTPStats(totpResponse);
+      const failureData = processFailureAnalytics(failureResponse);
+      const deviceData = processDeviceBreakdown(deviceResponse);
+
+      // Set the analytics data
       setAnalyticsData({
         summaryStats: [
           {
             label: "Total Authentications",
-            value: totpData.summary?.totalAuthentications || 0,
+            value: formatValue(totpData.summary.totalValidations),
           },
           {
             label: "Success Rate",
-            value: `${totpData.summary?.successRate || 0}%`,
+            value: formatValue(totpData.summary.validationSuccessRate, 'percentage'),
           },
           {
             label: "Failed Attempts",
-            value: failureData.totalFailures || 0,
+            value: formatValue(failureData.totalFailures),
           },
+          {
+            label: "Backup Codes Used",
+            value: formatValue(totpData.summary.totalBackupCodesUsed),
+          }
         ],
+        deviceTypes: deviceData.deviceTypes || {},
+        browsers: deviceData.browsers || {},
+        totpStats: totpData.dailyStats || [],
+        // Store raw data for comparison
+        rawData: {
+          totp: totpResponse,
+          failures: failureResponse,
+          devices: deviceResponse
+        }
       });
+
+      // Load chart data based on currently selected type
+      await loadChartDataWithPeriod(chartType, periodToUse, force);
+
+      // Record last refresh time
+      setLastRefreshTime(new Date());
+
+      if (force) {
+        showSuccessToast("Analytics data refreshed successfully");
+      }
     } catch (error) {
-      console.error("Failed to fetch analytics data:", error);
-      setError("Unable to load analytics data. Please try again.");
+      setError("Unable to load analytics data. " +
+        (error.message || "Please try again later."));
       showErrorToast("Failed to load analytics data");
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
-  }, [timeRange, showErrorToast]);
-
-  // Use the function in useEffect
-  useEffect(() => {
-    fetchAnalyticsData();
-  }, [fetchAnalyticsData]);
-
-  /**
-   * Handles time range change
-   */
-  const handleTimeRangeChange = (event) => {
-    setTimeRange(event.target.value);
   };
 
-  /**
-   * Manually refreshes the analytics data
-   */
+  // Enhanced load chart data function with explicit period parameter
+  const loadChartDataWithPeriod = async (type, explicitPeriod, force = false) => {
+    try {
+      setRefreshing(true);
+      let data = {};
+
+      // Use the explicit period rather than the state value
+      const periodToUse = explicitPeriod || getTimeRangeValue();
+
+      switch (type) {
+        case "devices": {
+          try {
+            const response = await apiService.getDeviceBreakdown({ period: periodToUse }, force);
+            const processedData = processDeviceBreakdown(response);
+            data = processedData.deviceTypes || {};
+          } catch (error) {
+            // Fallback to previous data if available
+            if (prevDataRef.current.devices) {
+              data = prevDataRef.current.devices;
+            }
+          }
+          break;
+        }
+        case "auth": {
+          try {
+            const [totpResponse, backupResponse] = await Promise.all([
+              apiService.getTOTPStats({ period: periodToUse }, force),
+              apiService.getBackupCodeUsage({ period: periodToUse }, force),
+            ]);
+            
+            const processedTOTP = processTOTPStats(totpResponse);
+            
+            // Try different properties to find the backup count
+            let backupCount = 0;
+            if (backupResponse.backupCount) {
+              backupCount = backupResponse.backupCount;
+            } else if (backupResponse.summary && backupResponse.summary.backupCodeUses) {
+              backupCount = backupResponse.summary.backupCodeUses;
+            } else if (backupResponse.summary && backupResponse.summary.backupCount) {
+              backupCount = backupResponse.summary.backupCount;
+            } else if (processedTOTP.summary && processedTOTP.summary.totalBackupCodesUsed) {
+              // If it's not in the backup response, get it from the TOTP summary
+              backupCount = processedTOTP.summary.totalBackupCodesUsed;
+            }
+            
+            const validations = processedTOTP.summary.totalValidations || 0;
+            
+            // Make sure standard TOTP doesn't go negative if backupCount > validations
+            const standardTOTP = Math.max(0, validations - backupCount);
+            
+            data = {
+              standardTOTP: standardTOTP,
+              backupCodes: backupCount
+            };
+          } catch (error) {
+            // error handling
+          }
+          break;
+        }
+        case "failures": {
+          try {
+            const response = await apiService.getFailureAnalytics({ period: periodToUse }, force);
+            const processedData = processFailureAnalytics(response);
+            
+            // Convert failures array to counts by type
+            const failureCounts = {};
+            
+            // Check the structure of failuresByType directly from the response
+            if (response.failuresByType && Array.isArray(response.failuresByType)) {
+              response.failuresByType.forEach(item => {
+                // Extract the key from _id.eventType and the count value
+                if (item._id && item._id.eventType) {
+                  const eventType = item._id.eventType;
+                  
+                  // Check if count is a number or an object
+                  let countValue = 0;
+                  if (typeof item.count === 'number') {
+                    countValue = item.count;
+                  } else if (item.count && typeof item.count === 'object') {
+                    // If count is an object, it might have a value property
+                    countValue = item.count.value || Object.values(item.count)[0] || 0;
+                  }
+                  
+                  failureCounts[eventType] = countValue;
+                }
+              });
+            } else {
+              failureCounts['Unknown'] = processedData.totalFailures || 0;
+            }
+            
+            // If we still have no data, try using the failures array from processedData
+            if (Object.keys(failureCounts).length === 0 && Array.isArray(processedData.failures)) {
+              processedData.failures.forEach((failure, index) => {
+                let key = 'Unknown';
+                if (failure._id && failure._id.eventType) {
+                  key = failure._id.eventType;
+                }
+                
+                let value = 0;
+                if (typeof failure.count === 'number') {
+                  value = failure.count;
+                } else if (failure.count && typeof failure.count === 'object') {
+                  value = failure.count.value || Object.values(failure.count)[0] || 0;
+                }
+                
+                failureCounts[key] = value;
+              });
+            }
+            
+            data = failureCounts;
+          } catch (error) {
+            if (prevDataRef.current.failures) {
+              data = prevDataRef.current.failures;
+            } else {
+              // Default data if no fallback available
+              data = { 'No Data': 1 };
+            }
+          }
+          break;
+        }
+        case "company":
+        default: {
+          try {
+            const response = await apiService.getCompanyStats({ period: periodToUse }, force);
+
+            data = {
+              successfulEvents: response.summary?.successfulEvents || 0,
+              failedEvents: response.summary?.failedEvents || 0,
+              backupCodesUsed: response.summary?.totalBackupCodesUsed || 0
+            };
+          } catch (error) {
+            if (prevDataRef.current.company) {
+              data = prevDataRef.current.company;
+            }
+          }
+        }
+      }
+
+      // Store data for fallback
+      prevDataRef.current[type] = data;
+
+      // Update chart data
+      setChartData(data);
+    } catch (error) {
+      // Error handling
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
+  // Regular fetchData function that uses the current state
+  const fetchData = useCallback(async (force = false) => {
+    await fetchDataWithPeriod(getTimeRangeValue(), force);
+  }, [timeRange, chartType, showErrorToast, showSuccessToast]);
+
+  // Regular loadChartData function that uses the current state
+  const loadChartData = useCallback(async (type, force = false) => {
+    await loadChartDataWithPeriod(type, getTimeRangeValue(), force);
+  }, [timeRange]);
+
+  // Initial data fetch - only on first render
+  useEffect(() => {
+    // Only load data once on mount
+    if (!initialLoadComplete.current) {
+      fetchData();
+      initialLoadComplete.current = true;
+    }
+  }, [fetchData]);
+
+  // Modified time range change handler
+  const handleTimeRangeChange = (event) => {
+    const newTimeRange = event.target.value;
+
+    // Update state
+    setTimeRange(newTimeRange);
+
+    // Use the new value directly instead of relying on the state
+    const newPeriod = parseInt(newTimeRange, 10);
+
+    // Use the explicit period functions
+    fetchDataWithPeriod(newPeriod, true);
+  };
+
+  // Handle chart type change
+  const handleChartTypeChange = (event) => {
+    const newType = event.target.value;
+    setChartType(newType);
+    loadChartData(newType);
+  };
+
+  // Manual refresh handler
   const handleRefresh = () => {
-    fetchAnalyticsData();
+    fetchData(true);
+  };
+
+  // Format the last refresh time
+  const formatLastRefreshTime = () => {
+    if (!lastRefreshTime) return 'Never';
+
+    return lastRefreshTime.toLocaleTimeString();
   };
 
   return (
@@ -121,11 +362,11 @@ const UsageAnalytics = () => {
               value={timeRange}
               label="Time Range"
               onChange={handleTimeRangeChange}
+              disabled={loading || refreshing}
             >
-              <MenuItem value="1d">Last 24 Hours</MenuItem>
-              <MenuItem value="7d">Last 7 Days</MenuItem>
-              <MenuItem value="30d">Last 30 Days</MenuItem>
-              <MenuItem value="90d">Last 90 Days</MenuItem>
+              <MenuItem value="1">Last 24 Hours</MenuItem>
+              <MenuItem value="7">Last 7 Days</MenuItem>
+              <MenuItem value="30">Last 30 Days</MenuItem>
             </Select>
           </FormControl>
 
@@ -134,8 +375,9 @@ const UsageAnalytics = () => {
             <Select
               value={chartType}
               label="Chart Type"
-              onChange={(e) => setChartType(e.target.value)}
+              onChange={handleChartTypeChange}
               sx={{ color: colors.text.primary }}
+              disabled={loading || refreshing}
             >
               <MenuItem value="company">Company Analytics</MenuItem>
               <MenuItem value="devices">Device Types</MenuItem>
@@ -144,13 +386,15 @@ const UsageAnalytics = () => {
             </Select>
           </FormControl>
 
-          <IconButton
-            onClick={handleRefresh}
-            disabled={loading}
-            sx={{ color: colors.secondary.main }}
-          >
-            <RefreshIcon />
-          </IconButton>
+          <Tooltip title="Refresh Data">
+            <IconButton
+              onClick={handleRefresh}
+              disabled={loading || refreshing}
+              sx={{ color: colors.secondary.main }}
+            >
+              <RefreshIcon />
+            </IconButton>
+          </Tooltip>
         </Box>
       </Box>
 
@@ -160,6 +404,19 @@ const UsageAnalytics = () => {
           {error}
         </Alert>
       )}
+
+      {/* Last refresh time indicator */}
+      <Typography
+        variant="caption"
+        sx={{
+          display: 'block',
+          textAlign: 'right',
+          mb: 1,
+          color: colors.text.secondary
+        }}
+      >
+        Last updated: {formatLastRefreshTime()}
+      </Typography>
 
       {/* Analytics visualization container */}
       <Box
@@ -173,17 +430,21 @@ const UsageAnalytics = () => {
           p: 3,
         }}
       >
-        {loading ? (
+        {loading && !analyticsData ? (
           <CircularProgress size={60} />
         ) : analyticsData ? (
           <Grid container spacing={3}>
             <Grid item xs={12} md={6}>
-              <Box sx={{ height: "350px" }}>
+              <Box sx={{ height: "350px", display: "flex", justifyContent: "center" }}>
+                {/* Pass data to PieChart instead of having it fetch data */}
                 <PieChart
-                  timeRange={timeRange}
                   chartType={chartType}
-                  onError={() => {
-                    setError("Failed to load chart data");
+                  chartData={chartData}
+                  loading={refreshing}
+                  error={error}
+                  onError={(err) => {
+                    setError("Failed to load chart data. " +
+                      (err.message || "Please try again later."));
                     showErrorToast("Failed to load chart data");
                   }}
                 />
@@ -199,7 +460,7 @@ const UsageAnalytics = () => {
                 }}
               >
                 {analyticsData.summaryStats.map((stat, index) => (
-                  <Box
+                  <Paper
                     key={index}
                     sx={{
                       p: 2,
@@ -218,10 +479,74 @@ const UsageAnalytics = () => {
                     >
                       {stat.value}
                     </Typography>
-                  </Box>
+                  </Paper>
                 ))}
               </Box>
             </Grid>
+
+            {/* Device Usage Breakdown */}
+            {analyticsData.deviceTypes && Object.keys(analyticsData.deviceTypes).length > 0 && (
+              <Grid item xs={12}>
+                <Divider sx={{ my: 2 }} />
+                <Typography variant="h4" color={colors.text.primary} sx={{ mb: 2 }}>
+                  Device Usage Breakdown
+                </Typography>
+
+                <Grid container spacing={2}>
+                  {Object.entries(analyticsData.deviceTypes)
+                    .filter(([_, count]) => count > 0) // Only show non-zero entries
+                    .sort(([keyA, countA], [keyB, countB]) => countB - countA) // Sort by count descending
+                    .map(([deviceType, count]) => (
+                      <Grid item xs={12} sm={4} key={deviceType}>
+                        <Paper sx={{ p: 2, backgroundColor: colors.primary.main }}>
+                          <Typography variant="h6" color={colors.text.secondary}>
+                            {deviceType}
+                          </Typography>
+                          <Typography variant="h4" color={colors.secondary.main}>
+                            {formatValue(count)}
+                          </Typography>
+                          {/* Add percentage */}
+                          <Typography variant="body2" color={colors.text.secondary}>
+                            {calculatePercentage(count, Object.values(analyticsData.deviceTypes).reduce((a, b) => a + b, 0))}
+                          </Typography>
+                        </Paper>
+                      </Grid>
+                    ))}
+                </Grid>
+              </Grid>
+            )}
+
+            {/* Browser Usage Breakdown */}
+            {analyticsData.browsers && Object.keys(analyticsData.browsers).length > 0 && (
+              <Grid item xs={12}>
+                <Divider sx={{ my: 2 }} />
+                <Typography variant="h4" color={colors.text.primary} sx={{ mb: 2 }}>
+                  Browser Usage
+                </Typography>
+
+                <Grid container spacing={2}>
+                  {Object.entries(analyticsData.browsers)
+                    .filter(([_, count]) => count > 0) // Only show non-zero entries
+                    .sort(([_1, countA], [_2, countB]) => countB - countA)// Sort by count descending
+                    .map(([browser, count]) => (
+                      <Grid item xs={12} sm={4} key={browser}>
+                        <Paper sx={{ p: 2, backgroundColor: colors.primary.main }}>
+                          <Typography variant="h6" color={colors.text.secondary}>
+                            {browser}
+                          </Typography>
+                          <Typography variant="h4" color={colors.secondary.main}>
+                            {formatValue(count)}
+                          </Typography>
+                          {/* Add percentage */}
+                          <Typography variant="body2" color={colors.text.secondary}>
+                            {calculatePercentage(count, Object.values(analyticsData.browsers).reduce((a, b) => a + b, 0))}
+                          </Typography>
+                        </Paper>
+                      </Grid>
+                    ))}
+                </Grid>
+              </Grid>
+            )}
           </Grid>
         ) : (
           <Typography variant="h5" color={colors.text.secondary}>
@@ -231,6 +556,12 @@ const UsageAnalytics = () => {
       </Box>
     </Box>
   );
+};
+
+// Helper function to calculate percentage
+const calculatePercentage = (value, total) => {
+  if (!total) return '0%';
+  return `${Math.round((value / total) * 100)}%`;
 };
 
 export default UsageAnalytics;
