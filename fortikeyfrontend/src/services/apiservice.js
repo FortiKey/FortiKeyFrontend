@@ -1,5 +1,6 @@
 import axios from "axios";
 import config from "../config";
+import { cachedApiCall, createCacheKey } from "../utils/analyticsDataCaching";
 
 const API_URL = config.apiUrl;
 
@@ -173,15 +174,30 @@ const apiService = {
    * @param {Object} filters - Optional filter parameters
    * @returns {Promise<Object>} Company analytics data
    */
-  getCompanyStats: async (filters = {}) => {
+  getCompanyStats: async (filters = {}, forceRefresh = false) => {
+    const cacheKey = createCacheKey('analytics/business', filters);
+
     try {
-      const http = getAuthenticatedAxios();
-      const response = await http.get(`${API_URL}/analytics/business`, {
-        params: filters,
-      });
-      return response.data;
+      return await cachedApiCall(cacheKey, async () => {
+        const http = getAuthenticatedAxios();
+
+        // Ensure the period is passed correctly
+        const params = { ...filters };
+        if (params.period && typeof params.period === 'number') {
+          params.period = params.period.toString();
+        }
+
+        const response = await http.get(`${API_URL}/analytics/business`, {
+          params,
+        });
+
+        return response.data;
+      }, forceRefresh);
     } catch (error) {
-      throw error.response?.data || error;
+      console.error('Error fetching company stats:', error);
+      // Throw more informative error
+      const errorMessage = error.response?.data?.message || error.message || 'Failed to fetch company statistics';
+      throw new Error(errorMessage);
     }
   },
 
@@ -191,15 +207,30 @@ const apiService = {
    * @param {Object} filters - Optional filter parameters
    * @returns {Promise<Object>} TOTP analytics data
    */
-  getTOTPStats: async (filters = {}) => {
+  getTOTPStats: async (filters = {}, forceRefresh = false) => {
+    const cacheKey = createCacheKey('analytics/totp', filters);
+
     try {
-      const http = getAuthenticatedAxios();
-      const response = await http.get(`${API_URL}/analytics/totp`, {
-        params: filters,
-      });
-      return response.data;
+      return await cachedApiCall(cacheKey, async () => {
+        const http = getAuthenticatedAxios();
+
+        // Ensure the period is passed correctly
+        const params = { ...filters };
+        if (params.period && typeof params.period === 'number') {
+          params.period = params.period.toString();
+        }
+
+        const response = await http.get(`${API_URL}/analytics/totp`, {
+          params,
+        });
+
+        return response.data;
+      }, forceRefresh);
     } catch (error) {
-      throw error.response?.data || error;
+      console.error('Error fetching TOTP stats:', error);
+      // Throw more informative error
+      const errorMessage = error.response?.data?.message || error.message || 'Failed to fetch TOTP statistics';
+      throw new Error(errorMessage);
     }
   },
 
@@ -209,15 +240,30 @@ const apiService = {
    * @param {Object} filters - Optional filter parameters
    * @returns {Promise<Object>} Failure analytics data
    */
-  getFailureAnalytics: async (filters = {}) => {
+  getFailureAnalytics: async (filters = {}, forceRefresh = false) => {
+    const cacheKey = createCacheKey('analytics/failures', filters);
+
     try {
-      const http = getAuthenticatedAxios();
-      const response = await http.get(`${API_URL}/analytics/failures`, {
-        params: filters,
-      });
-      return response.data;
+      return await cachedApiCall(cacheKey, async () => {
+        const http = getAuthenticatedAxios();
+
+        // Ensure the period is passed correctly
+        const params = { ...filters };
+        if (params.period && typeof params.period === 'number') {
+          params.period = params.period.toString();
+        }
+
+        const response = await http.get(`${API_URL}/analytics/failures`, {
+          params,
+        });
+
+        return response.data;
+      }, forceRefresh);
     } catch (error) {
-      throw error.response?.data || error;
+      console.error('Error fetching failure analytics:', error);
+      // Throw more informative error
+      const errorMessage = error.response?.data?.message || error.message || 'Failed to fetch failure analytics';
+      throw new Error(errorMessage);
     }
   },
 
@@ -267,15 +313,30 @@ const apiService = {
    * @param {Object} filters - Optional filter parameters
    * @returns {Promise<Object>} Device breakdown data
    */
-  getDeviceBreakdown: async (filters = {}) => {
+  getDeviceBreakdown: async (filters = {}, forceRefresh = false) => {
+    const cacheKey = createCacheKey('analytics/devices', filters);
+
     try {
-      const http = getAuthenticatedAxios();
-      const response = await http.get(`${API_URL}/analytics/devices`, {
-        params: filters,
-      });
-      return response.data;
+      return await cachedApiCall(cacheKey, async () => {
+        const http = getAuthenticatedAxios();
+
+        // Ensure the period is passed correctly
+        const params = { ...filters };
+        if (params.period && typeof params.period === 'number') {
+          params.period = params.period.toString();
+        }
+
+        const response = await http.get(`${API_URL}/analytics/devices`, {
+          params,
+        });
+
+        return response.data;
+      }, forceRefresh);
     } catch (error) {
-      throw error.response?.data || error;
+      console.error('Error fetching device breakdown:', error);
+      // Throw more informative error
+      const errorMessage = error.response?.data?.message || error.message || 'Failed to fetch device analytics';
+      throw new Error(errorMessage);
     }
   },
 
@@ -304,16 +365,31 @@ const apiService = {
    * @returns {Promise<Object>} Time comparison data
    */
   getTimeComparisons: async (filters = {}) => {
+    const formatDateFilter = (date) => {
+      if (date instanceof Date) {
+        return date.toISOString().split('T')[0]; // Format as YYYY-MM-DD
+      }
+      return date;
+    };
+
+    // Format the date filters
+    const formattedFilters = {
+      ...filters,
+      startDate: formatDateFilter(filters.startDate),
+      endDate: formatDateFilter(filters.endDate),
+    };
+
     try {
       const http = getAuthenticatedAxios();
       const response = await http.get(
         `${API_URL}/analytics/time-comparison`,
         {
-          params: filters,
+          params: formattedFilters,
         }
       );
       return response.data;
     } catch (error) {
+      console.error("Error fetching time comparisons:", error.response?.data || error);
       throw error.response?.data || error;
     }
   },
