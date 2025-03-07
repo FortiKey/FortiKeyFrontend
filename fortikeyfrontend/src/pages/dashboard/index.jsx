@@ -24,6 +24,7 @@ import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import authService from "../../services/authservice";
 import { useToast } from "../../context";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import apiService from "../../services/apiservice";
 
 /**
  * Dashboard Component
@@ -45,6 +46,9 @@ const Dashboard = () => {
   const colors = tokens();
   const navigate = useNavigate();
   const { showInfoToast, showErrorToast, showSuccessToast } = useToast();
+  const [chartData, setChartData] = useState({});
+  const [chartType, setChartType] = useState("company");
+  const [chartLoading, setChartLoading] = useState(true);
 
   // State management
   const [isFortiKeyUser, setIsFortiKeyUser] = useState(false);
@@ -112,6 +116,36 @@ const Dashboard = () => {
     };
 
     checkUserRole();
+  }, [showErrorToast]);
+
+  useEffect(() => {
+    // Fetch data for the pie chart
+    const fetchChartData = async () => {
+      try {
+        setChartLoading(true);
+        setChartError(false);
+
+        // Fetch company stats for the dashboard overview
+        const response = await apiService.getCompanyStats({ period: 30 });
+
+        // Format data for the pie chart
+        const formattedData = {
+          successfulEvents: response.summary?.successfulEvents || 0,
+          failedEvents: response.summary?.failedEvents || 0,
+          backupCodesUsed: response.summary?.totalBackupCodesUsed || 0
+        };
+
+        setChartData(formattedData);
+      } catch (error) {
+        console.error("Failed to load chart data:", error);
+        setChartError(true);
+        showErrorToast("Failed to load overview data");
+      } finally {
+        setChartLoading(false);
+      }
+    };
+
+    fetchChartData();
   }, [showErrorToast]);
 
   // Handle chart error
@@ -209,14 +243,14 @@ const Dashboard = () => {
   // Add admin button only for FortiKey users
   const navButtons = isFortiKeyUser
     ? [
-        ...baseButtons,
-        {
-          title: "Admin Dashboard",
-          path: "/admindashboard",
-          icon: <AdminPanelSettingsOutlinedIcon sx={{ fontSize: 40 }} />,
-          color: colors.neutral.main,
-        },
-      ]
+      ...baseButtons,
+      {
+        title: "Admin Dashboard",
+        path: "/admindashboard",
+        icon: <AdminPanelSettingsOutlinedIcon sx={{ fontSize: 40 }} />,
+        color: colors.neutral.main,
+      },
+    ]
     : baseButtons;
 
   // Show loading state
@@ -309,7 +343,13 @@ const Dashboard = () => {
           {chartError ? (
             <Alert severity="error">Failed to load chart data</Alert>
           ) : (
-            <PieChart onError={handleChartError} />
+            <PieChart
+              chartType={chartType}
+              chartData={chartData}
+              loading={chartLoading}
+              error={chartError}
+              onError={handleChartError}
+            />
           )}
         </Box>
       </Box>
