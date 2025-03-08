@@ -66,20 +66,27 @@ const UsageAnalytics = () => {
       const periodToUse = explicitPeriod || getTimeRangeValue();
 
       // Load summary data with explicit period
-      const [totpResponse, failureResponse, deviceResponse] = await Promise.all([
-        apiService.getTOTPStats({ period: periodToUse }, force)
-          .catch(err => {
-            return { summary: {} };
-          }),
-        apiService.getFailureAnalytics({ period: periodToUse }, force)
-          .catch(err => {
-            return {};
-          }),
-        apiService.getDeviceBreakdown({ period: periodToUse }, force)
-          .catch(err => {
-            return {};
-          })
-      ]);
+      let totpResponse = { summary: {} };
+      let failureResponse = {};
+      let deviceResponse = {};
+
+      try {
+        totpResponse = await apiService.getTOTPStats({ period: periodToUse }, force);
+      } catch (err) {
+        // Handle error
+      }
+
+      try {
+        failureResponse = await apiService.getFailureAnalytics({ period: periodToUse }, force);
+      } catch (err) {
+        // Handle error
+      }
+
+      try {
+        deviceResponse = await apiService.getDeviceBreakdown({ period: periodToUse }, force);
+      } catch (err) {
+        // Handle error
+      }
 
       // Process the data
       const totpData = processTOTPStats(totpResponse);
@@ -136,6 +143,24 @@ const UsageAnalytics = () => {
     }
   };
 
+  const getDefaultChartData = (type) => {
+    switch (type) {
+      case "devices":
+        return { "Desktop": 0, "Mobile": 0, "Tablet": 0 };
+      case "auth":
+        return { "standardTOTP": 0, "backupCodes": 0 };
+      case "failures":
+        return { "authFailure": 0 };
+      case "company":
+      default:
+        return {
+          successfulEvents: 0,
+          failedEvents: 0,
+          backupCodesUsed: 0
+        };
+    }
+  };
+
   // Enhanced load chart data function with explicit period parameter
   const loadChartDataWithPeriod = async (type, explicitPeriod, force = false) => {
     try {
@@ -165,9 +190,9 @@ const UsageAnalytics = () => {
               apiService.getTOTPStats({ period: periodToUse }, force),
               apiService.getBackupCodeUsage({ period: periodToUse }, force),
             ]);
-            
+
             const processedTOTP = processTOTPStats(totpResponse);
-            
+
             // Try different properties to find the backup count
             let backupCount = 0;
             if (backupResponse.backupCount) {
@@ -180,12 +205,12 @@ const UsageAnalytics = () => {
               // If it's not in the backup response, get it from the TOTP summary
               backupCount = processedTOTP.summary.totalBackupCodesUsed;
             }
-            
+
             const validations = processedTOTP.summary.totalValidations || 0;
-            
+
             // Make sure standard TOTP doesn't go negative if backupCount > validations
             const standardTOTP = Math.max(0, validations - backupCount);
-            
+
             data = {
               standardTOTP: standardTOTP,
               backupCodes: backupCount
@@ -199,17 +224,17 @@ const UsageAnalytics = () => {
           try {
             const response = await apiService.getFailureAnalytics({ period: periodToUse }, force);
             const processedData = processFailureAnalytics(response);
-            
+
             // Convert failures array to counts by type
             const failureCounts = {};
-            
+
             // Check the structure of failuresByType directly from the response
             if (response.failuresByType && Array.isArray(response.failuresByType)) {
               response.failuresByType.forEach(item => {
                 // Extract the key from _id.eventType and the count value
                 if (item._id && item._id.eventType) {
                   const eventType = item._id.eventType;
-                  
+
                   // Check if count is a number or an object
                   let countValue = 0;
                   if (typeof item.count === 'number') {
@@ -218,14 +243,14 @@ const UsageAnalytics = () => {
                     // If count is an object, it might have a value property
                     countValue = item.count.value || Object.values(item.count)[0] || 0;
                   }
-                  
+
                   failureCounts[eventType] = countValue;
                 }
               });
             } else {
               failureCounts['Unknown'] = processedData.totalFailures || 0;
             }
-            
+
             // If we still have no data, try using the failures array from processedData
             if (Object.keys(failureCounts).length === 0 && Array.isArray(processedData.failures)) {
               processedData.failures.forEach((failure, index) => {
@@ -233,18 +258,18 @@ const UsageAnalytics = () => {
                 if (failure._id && failure._id.eventType) {
                   key = failure._id.eventType;
                 }
-                
+
                 let value = 0;
                 if (typeof failure.count === 'number') {
                   value = failure.count;
                 } else if (failure.count && typeof failure.count === 'object') {
                   value = failure.count.value || Object.values(failure.count)[0] || 0;
                 }
-                
+
                 failureCounts[key] = value;
               });
             }
-            
+
             data = failureCounts;
           } catch (error) {
             if (prevDataRef.current.failures) {
