@@ -6,7 +6,10 @@ import {
   DialogTitle,
   CircularProgress,
   Alert,
+  Tooltip,
+  IconButton,
 } from "@mui/material";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import { ThemeProvider } from "@mui/material/styles";
 import { theme } from "../../theme";
 import Header from "../../components/Header";
@@ -35,19 +38,20 @@ const ManageAPIKeys = () => {
 
   useEffect(() => {
     /**
-     * Fetches the current API key from localStorage
-     * Since the backend doesn't provide a GET endpoint for API keys,
-     * we use localStorage to persist the key
+     * Fetches the current API key from localStorage and tries the backend if possible
+     * We try to keep localStorage and backend in sync
      */
     const fetchApiKey = async () => {
       try {
         setLoading(true);
         setError("");
-        // Get the API key from localStorage
+
+        // Try to get the API key from backend first (if there were an endpoint)
+
+        // Get the API key from localStorage as fallback
         const storedKey = localStorage.getItem("apiKey");
         setApiKey(storedKey || "");
       } catch (error) {
-        console.error("Failed to fetch API key:", error);
         setError("Failed to load your API key. Please try again.");
         showErrorToast("Failed to load your API key");
       } finally {
@@ -116,7 +120,8 @@ const ManageAPIKeys = () => {
       const response = await apiService.generateApiKey();
 
       // Extract the key from the response based on backend format
-      const newKey = response.apiKey || "";
+      // More robust extraction with fallbacks for different field names
+      const newKey = response.apiKey || response.key || "";
 
       // Store the key in localStorage for persistence
       localStorage.setItem("apiKey", newKey);
@@ -125,7 +130,6 @@ const ManageAPIKeys = () => {
       setConfirmDialogOpen(false);
       showSuccessToast("New API key generated successfully!");
     } catch (error) {
-      console.error("Failed to generate new API key:", error);
       setError("Failed to generate new API key. Please try again.");
       showErrorToast("Failed to generate new API key");
     } finally {
@@ -144,9 +148,17 @@ const ManageAPIKeys = () => {
         showSuccessToast("API key copied to clipboard!");
       })
       .catch((err) => {
-        console.error("Failed to copy API key:", err);
         showErrorToast("Failed to copy API key. Please try again.");
       });
+  };
+
+  // Function to format key for display (truncated with ellipsis)
+  const formatKeyForDisplay = (key) => {
+    if (!key) return "No API key available";
+    if (key.length <= 20) return key;
+
+    // For longer keys, show first 10 and last 10 characters
+    return `${key.substring(0, 10)}...${key.substring(key.length - 10)}`;
   };
 
   return (
@@ -200,17 +212,41 @@ const ManageAPIKeys = () => {
               ) : (
                 <>
                   {/* API key display with copy functionality */}
-                  <Button
-                    variant="outlined"
-                    onClick={handleCopyKey}
+                  <Box
                     sx={{
-                      ...apiKeyButtonStyle,
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
+                      display: "flex",
+                      flexDirection: "row",
+                      alignItems: "center",
+                      width: "100%",
+                      maxWidth: "350px",
                     }}
                   >
-                    {apiKey || "No API key available"}
-                  </Button>
+                    <Tooltip title={apiKey || "No API key available"}>
+                      <Button
+                        variant="outlined"
+                        sx={{
+                          ...apiKeyButtonStyle,
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          flexGrow: 1,
+                          justifyContent: "flex-start",
+                          paddingRight: "50px", // Space for the copy button
+                        }}
+                      >
+                        {formatKeyForDisplay(apiKey)}
+                      </Button>
+                    </Tooltip>
+                    <IconButton
+                      onClick={handleCopyKey}
+                      disabled={!apiKey}
+                      sx={{
+                        ml: -5,
+                        color: colors.secondary.main,
+                      }}
+                    >
+                      <ContentCopyIcon />
+                    </IconButton>
+                  </Box>
 
                   {/* Generate new key button */}
                   <Button

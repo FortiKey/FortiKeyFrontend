@@ -102,12 +102,39 @@ export const cachedApiCall = async (key, apiCall, forceRefresh = false) => {
         }
     }
 
-    // Check cache first if not forcing refresh
-    if (!forceRefresh) {
-        const cachedData = getFromCache(key);
-        if (cachedData) {
-            return cachedData;
+    // Force bypass cache when requested
+    if (forceRefresh) {
+        try {
+            // Add timing info for performance monitoring
+            const startTime = Date.now();
+
+            // Store the promise in in-flight requests
+            inFlightRequests[key] = apiCall();
+
+            // Await the result
+            const result = await inFlightRequests[key];
+
+            // Calculate request time
+            const requestTime = Date.now() - startTime;
+
+            // Cache the successful response
+            storeInCache(key, result);
+
+            // Clean up in-flight request
+            delete inFlightRequests[key];
+
+            return result;
+        } catch (error) {
+            // Clean up in-flight request on error
+            delete inFlightRequests[key];
+            throw error;
         }
+    }
+
+    // Check cache first if not forcing refresh
+    const cachedData = getFromCache(key);
+    if (cachedData) {
+        return cachedData;
     }
 
     // Create a new promise for this request
