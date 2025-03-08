@@ -152,8 +152,8 @@ describe("Dashboard Component", () => {
       },
     });
 
-    // Simple render check
-    render(<Dashboard />);
+    // Simple render check - using renderWithProviders instead of render
+    renderWithProviders(<Dashboard />);
 
     // Wait for just the title to appear with a more generous timeout
     const title = await screen.findByText("Dashboard", {}, { timeout: 6000 });
