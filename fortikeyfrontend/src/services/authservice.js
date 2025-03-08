@@ -273,22 +273,50 @@ const authService = {
    * @returns {Promise<Object>} Paginated user data
    * @throws {Error} If unauthorized or server error occurs
    */
-  getUsers: async (page, pageSize) => {
-    try {
-      const token = localStorage.getItem(config.auth.tokenStorageKey);
-      if (!token) throw new Error("Authentication required");
 
-      const response = await axios.get(`${API_URL}/auth/users`, {
-        params: { page, pageSize },
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      return response.data;
-    } catch (error) {
-      throw error.response?.data || error;
-    }
-  },
+  /**
+ * Get a list of users with 2FA (TOTP) with pagination
+ *
+ * @param {number} page - Page number (0-based)
+ * @param {number} pageSize - Number of records per page
+ * @returns {Promise<Object>} Paginated user data
+ * @throws {Error} If unauthorized or server error occurs
+ */
+getUsers: async (page, pageSize) => {
+  try {
+    const token = localStorage.getItem(config.auth.tokenStorageKey);
+    if (!token) throw new Error("Authentication required");
+
+    // Use the TOTP secrets endpoint to get all users with 2FA
+    const response = await axios.get(`${API_URL}/totp-secrets`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    
+    // Get total count before pagination
+    const totalCount = response.data.length;
+    
+    // Apply manual pagination (if the API doesn't support it)
+    const startIndex = page * pageSize;
+    const endIndex = startIndex + pageSize;
+    const paginatedData = response.data.slice(startIndex, endIndex);
+    
+    // Minimal transformation - just ensure id is present for DataGrid
+    const transformedData = paginatedData.map(totpSecret => ({
+      ...totpSecret,                        // Keep all original fields
+      id: totpSecret._id || String(Math.random())  // Ensure id exists for DataGrid
+    }));
+    
+    return {
+      data: transformedData,
+      total: totalCount,
+    };
+  } catch (error) {
+    console.error("Failed to fetch TOTP users:", error);
+    throw new Error(error.response?.data?.message || "Route not found");
+  }
+},
 
   /**
    * Delete a user account (admin function)
@@ -297,12 +325,20 @@ const authService = {
    * @returns {Promise<Object>} Success message
    * @throws {Error} If unauthorized or server error occurs
    */
+  /**
+ * Delete a TOTP user
+ *
+ * @param {string} userId - ID of the TOTP secret to delete
+ * @returns {Promise<Object>} Success message
+ * @throws {Error} If unauthorized or server error occurs
+ */
   deleteUser: async (userId) => {
     try {
       const token = localStorage.getItem(config.auth.tokenStorageKey);
       if (!token) throw new Error("Authentication required");
 
-      const response = await axios.delete(`${API_URL}/auth/users/${userId}`, {
+      // Use the TOTP secret delete endpoint
+      const response = await axios.delete(`${API_URL}/totp-secrets/${userId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
