@@ -3,7 +3,7 @@ import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import ViewAccounts from "../../pages/viewaccounts";
 
-// Skip using renderWithThemeAndToast for now to simplify debugging
+// Mock the toast context with the correct function name
 jest.mock("../../context", () => ({
   useAuth: () => ({
     user: { id: "admin123", role: "admin" },
@@ -13,10 +13,12 @@ jest.mock("../../context", () => ({
   }),
   useToast: () => ({
     showToast: jest.fn(),
+    showErrorToast: jest.fn(),
+    showSuccessToast: jest.fn(),
   }),
 }));
 
-// Mock the auth service based on how it's imported in the component
+// Mock the auth service
 jest.mock("../../services/authservice", () => ({
   __esModule: true,
   default: {
@@ -42,15 +44,14 @@ jest.mock("../../services/authservice", () => ({
 }));
 
 describe("ViewAccounts Component", () => {
-  test("renders the view accounts page", async () => {
-    // Use simple render instead of the utility function
+  test("renders the view accounts page", () => {
     render(
       <MemoryRouter>
         <ViewAccounts />
       </MemoryRouter>
     );
 
-    // Just look for a basic text element
+    // Just check for a basic element that should be there
     expect(screen.getByText(/View Accounts/i)).toBeInTheDocument();
   });
 });
