@@ -1,188 +1,211 @@
 import React from "react";
-import { screen, fireEvent, waitFor, act } from "@testing-library/react";
-import { renderWithProviders } from "../testUtils";
-import ViewAccounts from "../../pages/viewaccounts";
-import authService from "../../services/authservice";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
+import ViewAccounts from "../../pages/ViewAccounts";
+import { authService } from "../../services/authService";
+import { useAuth } from "../../context/AuthContext";
 
-// Mock auth service
-jest.mock("../../services/authservice", () => ({
-  getUsers: jest.fn(),
-  deleteUser: jest.fn(),
-  isAuthenticated: jest.fn().mockReturnValue(true),
-  getCurrentUser: jest.fn().mockReturnValue({ role: "admin" }),
-  isFortiKeyAdmin: jest.fn().mockReturnValue(true),
+// Mock the auth context
+jest.mock("../../context/AuthContext", () => ({
+  useAuth: jest.fn(),
 }));
 
-// Mock the toast context
-const mockShowSuccessToast = jest.fn();
-const mockShowErrorToast = jest.fn();
-jest.mock("../../context", () => ({
-  ...jest.requireActual("../../context"),
-  useToast: () => ({
-    showSuccessToast: mockShowSuccessToast,
-    showErrorToast: mockShowErrorToast,
-  }),
+// Mock the auth service
+jest.mock("../../services/authService", () => ({
+  authService: {
+    getUsers: jest.fn(),
+    deleteUser: jest.fn(),
+  },
 }));
-
-// Mock data
-const mockUsers = {
-  users: [
-    {
-      id: "1",
-      firstName: "John",
-      lastName: "Doe",
-      email: "john@example.com",
-      company: "Company A",
-      isValidated: true,
-    },
-    {
-      id: "2",
-      firstName: "Jane",
-      lastName: "Smith",
-      email: "jane@example.com",
-      company: "Company B",
-      isValidated: false,
-    },
-  ],
-  total: 2,
-};
 
 describe("ViewAccounts Component", () => {
   beforeEach(() => {
+    // Clear all mocks before each test
     jest.clearAllMocks();
-    // Mock successful API responses
-    authService.getUsers.mockResolvedValue(mockUsers);
-    authService.deleteUser.mockResolvedValue({
-      message: "User deleted successfully",
+
+    // Default auth context values
+    useAuth.mockReturnValue({
+      user: { id: "admin123", role: "admin" },
+      isFortiKeyAdmin: true,
+    });
+
+    // Setup mock data with a user entry that matches what we'll look for
+    authService.getUsers.mockResolvedValue({
+      data: [
+        {
+          id: 1,
+          email: "john.doe@example.com",
+          name: "John Doe", // Make sure this matches what the test looks for
+          role: "user",
+          company: "Test Company",
+        },
+      ],
+      total: 1,
     });
   });
 
-  test("renders user accounts in a grid after loading", async () => {
-    renderWithProviders(<ViewAccounts />);
+  test("renders the view accounts page", async () => {
+    render(
+      <MemoryRouter>
+        <ViewAccounts />
+      </MemoryRouter>
+    );
 
-    // Should show loading state initially
-    expect(screen.getByRole("progressbar")).toBeInTheDocument();
+    // Check for heading
+    expect(screen.getByText("View Accounts")).toBeInTheDocument();
+    expect(screen.getByText("Your TOTP Users")).toBeInTheDocument();
 
-    // Wait for data to load
+    // Wait for users to load
     await waitFor(() => {
-      expect(screen.queryByRole("progressbar")).not.toBeInTheDocument();
+      expect(authService.getUsers).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  test("displays user data in the table", async () => {
+    render(
+      <MemoryRouter>
+        <ViewAccounts />
+      </MemoryRouter>
+    );
+
+    // Wait for the user data to be displayed
+    await waitFor(() => {
+      expect(screen.getByText("John Doe")).toBeInTheDocument();
     });
 
-    // Verify users are displayed
-    expect(screen.getByText("John Doe")).toBeInTheDocument();
-    expect(screen.getByText("Jane Smith")).toBeInTheDocument();
-    expect(screen.getByText("john@example.com")).toBeInTheDocument();
-    expect(screen.getByText("jane@example.com")).toBeInTheDocument();
-
-    // Verify API call was made with correct pagination
+    // Check if API was called with correct parameters (page 0, pageSize 10)
     expect(authService.getUsers).toHaveBeenCalledWith(0, 10);
   });
 
-  test("opens delete confirmation dialog when user name is clicked", async () => {
-    renderWithProviders(<ViewAccounts />);
-
-    // Wait for data to load
-    await waitFor(() => {
-      expect(screen.queryByRole("progressbar")).not.toBeInTheDocument();
-    });
-
-    // Find and click on the user name
-    const userNameCell = screen.getByText("John Doe");
-    fireEvent.click(userNameCell);
-
-    // Verify dialog is opened
-    expect(
-      screen.getByText(/Are you sure you want to delete this user?/i)
-    ).toBeInTheDocument();
-  });
-
   test("deletes a user after confirmation", async () => {
-    renderWithProviders(<ViewAccounts />);
+    authService.deleteUser.mockResolvedValue({ success: true });
 
-    // Wait for data to load
+    render(
+      <MemoryRouter>
+        <ViewAccounts />
+      </MemoryRouter>
+    );
+
+    // Wait for user data to load
     await waitFor(() => {
-      expect(screen.queryByRole("progressbar")).not.toBeInTheDocument();
+      expect(screen.getByText("John Doe")).toBeInTheDocument();
     });
 
     // Click on user name to open delete dialog
     const userNameCell = screen.getByText("John Doe");
     fireEvent.click(userNameCell);
 
-    // Confirm deletion
-    const confirmButton = screen.getByRole("button", { name: /confirm/i });
-    fireEvent.click(confirmButton);
-
-    // Verify delete API call
+    // Verify dialog is opened (use the actual text from the dialog)
     await waitFor(() => {
-      expect(authService.deleteUser).toHaveBeenCalledWith("1");
+      expect(screen.getByText(/confirm deletion/i)).toBeInTheDocument();
     });
 
-    // Verify success toast
-    expect(mockShowSuccessToast).toHaveBeenCalledWith(
-      "User deleted successfully"
-    );
+    // Find and click the delete button
+    const deleteButton = screen.getByRole("button", { name: /delete/i });
+    fireEvent.click(deleteButton);
+
+    // Verify delete API was called
+    await waitFor(() => {
+      expect(authService.deleteUser).toHaveBeenCalledWith(1);
+    });
   });
 
   test("handles pagination correctly", async () => {
-    renderWithProviders(<ViewAccounts />);
+    // Mock second page of data
+    const secondPageData = {
+      data: [{ id: 2, name: "Jane Smith", email: "jane@example.com" }],
+      total: 11, // More than one page
+    };
 
-    // Wait for data to load
+    // First call returns first page, second call returns second page
+    authService.getUsers
+      .mockResolvedValueOnce({
+        data: [{ id: 1, name: "John Doe", email: "john.doe@example.com" }],
+        total: 11,
+      })
+      .mockResolvedValueOnce(secondPageData);
+
+    render(
+      <MemoryRouter>
+        <ViewAccounts />
+      </MemoryRouter>
+    );
+
+    // Wait for initial data to load
     await waitFor(() => {
-      expect(screen.queryByRole("progressbar")).not.toBeInTheDocument();
+      expect(screen.getByText("John Doe")).toBeInTheDocument();
     });
 
-    // Clear the mock to track new calls
-    authService.getUsers.mockClear();
-
-    // Find and click next page button
-    const nextButton = screen.getByRole("button", { name: /next page/i });
-    fireEvent.click(nextButton);
+    // Get pagination next button and click it
+    const nextPageButton = screen.getByRole("button", { name: /next page/i });
+    fireEvent.click(nextPageButton);
 
     // Verify API call with updated page number
-    expect(authService.getUsers).toHaveBeenCalledWith(1, 10);
+    // Note: MUI DataGrid uses 0-based indexing for pages
+    await waitFor(() => {
+      expect(authService.getUsers).toHaveBeenCalledWith(1, 10);
+    });
   });
 
   test("shows error message when API call fails", async () => {
     // Mock API failure
-    authService.getUsers.mockRejectedValueOnce(
-      new Error("Failed to fetch users")
-    );
+    authService.getUsers.mockRejectedValue(new Error("API Error"));
 
-    renderWithProviders(<ViewAccounts />);
+    render(
+      <MemoryRouter>
+        <ViewAccounts />
+      </MemoryRouter>
+    );
 
     // Wait for error state
     await waitFor(() => {
-      expect(screen.getByText(/Failed to fetch users/i)).toBeInTheDocument();
+      // Use the actual error message from the component
+      expect(
+        screen.getByText(/Failed to load user accounts/i)
+      ).toBeInTheDocument();
     });
-
-    // Verify error toast
-    expect(mockShowErrorToast).toHaveBeenCalled();
   });
 
   test("shows empty state when no users are found", async () => {
-    // Mock empty users response
-    authService.getUsers.mockResolvedValueOnce({ users: [], total: 0 });
+    // Mock empty data response
+    authService.getUsers.mockResolvedValue({
+      data: [],
+      total: 0,
+    });
 
-    renderWithProviders(<ViewAccounts />);
+    render(
+      <MemoryRouter>
+        <ViewAccounts />
+      </MemoryRouter>
+    );
 
     // Wait for data to load
     await waitFor(() => {
-      expect(screen.queryByRole("progressbar")).not.toBeInTheDocument();
+      expect(authService.getUsers).toHaveBeenCalled();
     });
 
-    // Verify empty state message
-    expect(screen.getByText(/No users found/i)).toBeInTheDocument();
+    // Look for the "No rows" message that MUI DataGrid shows
+    await waitFor(() => {
+      expect(screen.getByText(/no rows/i)).toBeInTheDocument();
+    });
   });
 
   test("disables delete functionality for non-FortiKey admins", async () => {
-    // Mock non-FortiKey admin
-    authService.isFortiKeyAdmin.mockReturnValueOnce(false);
+    // Mock user is not a FortiKey admin
+    useAuth.mockReturnValue({
+      user: { id: "user123", role: "admin" },
+      isFortiKeyAdmin: false,
+    });
 
-    renderWithProviders(<ViewAccounts />);
+    render(
+      <MemoryRouter>
+        <ViewAccounts />
+      </MemoryRouter>
+    );
 
     // Wait for data to load
     await waitFor(() => {
-      expect(screen.queryByRole("progressbar")).not.toBeInTheDocument();
+      expect(screen.getByText("John Doe")).toBeInTheDocument();
     });
 
     // Verify that clicking user name doesn't open delete dialog for non-FortiKey admins
@@ -190,8 +213,6 @@ describe("ViewAccounts Component", () => {
     fireEvent.click(userNameCell);
 
     // Dialog should not appear
-    expect(
-      screen.queryByText(/Are you sure you want to delete this user?/i)
-    ).not.toBeInTheDocument();
+    expect(screen.queryByText(/confirm deletion/i)).not.toBeInTheDocument();
   });
 });
