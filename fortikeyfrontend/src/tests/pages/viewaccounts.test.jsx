@@ -1,22 +1,36 @@
 import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
-import ViewAccounts from "../../pages/ViewAccounts";
-import { authService } from "../../services/authService";
+import ViewAccounts from "../../pages/viewaccounts";
+import { authService } from "../../services/authservice";
 import { useAuth } from "../../context/AuthContext";
+import { renderWithProviders } from "../testUtils";
 
-// Mock the auth context
-jest.mock("../../context/AuthContext", () => ({
-  useAuth: jest.fn(),
-}));
+// Mock the context module instead of trying to mock AuthContext directly
+jest.mock("../../context", () => {
+  return {
+    ...jest.requireActual("../../context"),
+    useAuth: () => ({
+      user: { id: "test-user", role: "admin" },
+      isAuthenticated: true,
+      logout: jest.fn(),
+    }),
+  };
+});
 
-// Mock the auth service
-jest.mock("../../services/authService", () => ({
+jest.mock("../../services/authservice", () => ({
   authService: {
-    getUsers: jest.fn(),
-    deleteUser: jest.fn(),
+    getAccounts: jest.fn().mockResolvedValue([
+      { id: 1, name: "Test Account 1", status: "active" },
+      { id: 2, name: "Test Account 2", status: "inactive" },
+    ]),
+    deleteAccount: jest.fn().mockResolvedValue({ success: true }),
   },
 }));
+
+function renderWithRouter(ui) {
+  return render(<MemoryRouter>{ui}</MemoryRouter>);
+}
 
 describe("ViewAccounts Component", () => {
   beforeEach(() => {
@@ -45,11 +59,7 @@ describe("ViewAccounts Component", () => {
   });
 
   test("renders the view accounts page", async () => {
-    render(
-      <MemoryRouter>
-        <ViewAccounts />
-      </MemoryRouter>
-    );
+    renderWithRouter(<ViewAccounts />);
 
     // Check for heading
     expect(screen.getByText("View Accounts")).toBeInTheDocument();
@@ -62,11 +72,7 @@ describe("ViewAccounts Component", () => {
   });
 
   test("displays user data in the table", async () => {
-    render(
-      <MemoryRouter>
-        <ViewAccounts />
-      </MemoryRouter>
-    );
+    renderWithRouter(<ViewAccounts />);
 
     // Wait for the user data to be displayed
     await waitFor(() => {
@@ -80,11 +86,7 @@ describe("ViewAccounts Component", () => {
   test("deletes a user after confirmation", async () => {
     authService.deleteUser.mockResolvedValue({ success: true });
 
-    render(
-      <MemoryRouter>
-        <ViewAccounts />
-      </MemoryRouter>
-    );
+    renderWithRouter(<ViewAccounts />);
 
     // Wait for user data to load
     await waitFor(() => {
@@ -125,11 +127,7 @@ describe("ViewAccounts Component", () => {
       })
       .mockResolvedValueOnce(secondPageData);
 
-    render(
-      <MemoryRouter>
-        <ViewAccounts />
-      </MemoryRouter>
-    );
+    renderWithRouter(<ViewAccounts />);
 
     // Wait for initial data to load
     await waitFor(() => {
@@ -151,11 +149,7 @@ describe("ViewAccounts Component", () => {
     // Mock API failure
     authService.getUsers.mockRejectedValue(new Error("API Error"));
 
-    render(
-      <MemoryRouter>
-        <ViewAccounts />
-      </MemoryRouter>
-    );
+    renderWithRouter(<ViewAccounts />);
 
     // Wait for error state
     await waitFor(() => {
@@ -173,11 +167,7 @@ describe("ViewAccounts Component", () => {
       total: 0,
     });
 
-    render(
-      <MemoryRouter>
-        <ViewAccounts />
-      </MemoryRouter>
-    );
+    renderWithRouter(<ViewAccounts />);
 
     // Wait for data to load
     await waitFor(() => {
@@ -197,11 +187,7 @@ describe("ViewAccounts Component", () => {
       isFortiKeyAdmin: false,
     });
 
-    render(
-      <MemoryRouter>
-        <ViewAccounts />
-      </MemoryRouter>
-    );
+    renderWithRouter(<ViewAccounts />);
 
     // Wait for data to load
     await waitFor(() => {
