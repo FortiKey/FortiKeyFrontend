@@ -1,18 +1,34 @@
 import React from "react";
-import { render } from "@testing-library/react";
-import { textFieldStyle, buttonStyle } from "../../components/formstyles";
-import { ThemeProvider, createTheme } from "@mui/material/styles";
+import {
+  createTextFieldStyles,
+  createContainerStyles,
+} from "../../components/FormStyles";
 
-const theme = createTheme();
+describe("FormStyles", () => {
+  test("createTextFieldStyles returns valid style object", () => {
+    const textFieldStyles = createTextFieldStyles();
+    expect(textFieldStyles).toBeDefined();
+    expect(typeof textFieldStyles).toBe("object");
 
-describe("Form Styles", () => {
-  test("styles are defined correctly", () => {
-    // Test that our styles are objects with expected properties
-    expect(textFieldStyle).toBeDefined();
-    expect(buttonStyle).toBeDefined();
+    // Check that it has nested properties in a better way
+    expect(Object.keys(textFieldStyles)).toContain("& .MuiInputLabel-root");
+    expect(Object.keys(textFieldStyles)).toContain("& .MuiInputLabel-shrink");
+  });
 
-    // Check specific properties if you know what they should be
-    // For example:
-    expect(textFieldStyle).toHaveProperty("marginBottom");
+  test("createContainerStyles returns valid style object", () => {
+    const containerStyles = createContainerStyles();
+    expect(containerStyles).toBeDefined();
+    expect(typeof containerStyles).toBe("object");
+    expect(containerStyles.maxWidth).toBe("400px");
+  });
+
+  test("styles can be customized with parameters", () => {
+    // Test custom parameter for createTextFieldStyles
+    const customTextFieldStyles = createTextFieldStyles("#FF0000");
+    expect(customTextFieldStyles).toBeDefined();
+
+    // Test custom parameter for createContainerStyles
+    const customContainerStyles = createContainerStyles("800px");
+    expect(customContainerStyles).toHaveProperty("maxWidth", "800px");
   });
 });
