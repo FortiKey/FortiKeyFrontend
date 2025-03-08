@@ -25,6 +25,7 @@ import authService from "../../services/authservice";
 import { useToast } from "../../context";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import apiService from "../../services/apiservice";
+import { createTextFieldStyles } from "../../components/FormStyles";
 
 /**
  * Dashboard Component
@@ -66,33 +67,7 @@ const Dashboard = () => {
 
   // Add this formStyles object - copied exactly from createuser
   const formStyles = {
-    textField: {
-      "& .MuiOutlinedInput-root": {
-        "& fieldset": {
-          borderColor: colors.text.secondary,
-          borderWidth: "1px",
-        },
-        "&:hover fieldset": {
-          borderColor: colors.secondary.main,
-        },
-        "&.Mui-focused fieldset": {
-          borderColor: colors.secondary.main,
-        },
-      },
-      "& .MuiInputLabel-root": {
-        "&.Mui-focused": {
-          color: colors.secondary.main,
-        },
-        bgcolor: colors.otherColor.main,
-        paddingLeft: "5px",
-        paddingRight: "5px",
-      },
-      "& .MuiInputLabel-shrink": {
-        bgcolor: colors.otherColor.main,
-        paddingLeft: "5px",
-        paddingRight: "5px",
-      },
-    },
+    textField: createTextFieldStyles(colors.otherColor.main),
   };
 
   useEffect(() => {
@@ -132,7 +107,7 @@ const Dashboard = () => {
         const formattedData = {
           successfulEvents: response.summary?.successfulEvents || 0,
           failedEvents: response.summary?.failedEvents || 0,
-          backupCodesUsed: response.summary?.totalBackupCodesUsed || 0
+          backupCodesUsed: response.summary?.totalBackupCodesUsed || 0,
         };
 
         setChartData(formattedData);
@@ -243,14 +218,14 @@ const Dashboard = () => {
   // Add admin button only for FortiKey users
   const navButtons = isFortiKeyUser
     ? [
-      ...baseButtons,
-      {
-        title: "Admin Dashboard",
-        path: "/admindashboard",
-        icon: <AdminPanelSettingsOutlinedIcon sx={{ fontSize: 40 }} />,
-        color: colors.neutral.main,
-      },
-    ]
+        ...baseButtons,
+        {
+          title: "Admin Dashboard",
+          path: "/admindashboard",
+          icon: <AdminPanelSettingsOutlinedIcon sx={{ fontSize: 40 }} />,
+          color: colors.neutral.main,
+        },
+      ]
     : baseButtons;
 
   // Show loading state

@@ -15,6 +15,11 @@ import { tokens } from "../../theme";
 import authService from "../../services/authservice";
 import { useToast } from "../../context";
 import { validateEmail, validatePassword } from "../../utils/validation";
+import {
+  createTextFieldStyles,
+  createContainerStyles,
+  coloredButtonStyles,
+} from "../../components/FormStyles";
 
 /**
  * Create User (Registration) Page Component
@@ -34,52 +39,9 @@ const CreateUser = () => {
 
   // Common form styling constants
   const formStyles = {
-    textField: {
-      "& .MuiOutlinedInput-root": {
-        "& fieldset": {
-          borderColor: colors.text.secondary,
-          borderWidth: "1px",
-        },
-        "&:hover fieldset": {
-          borderColor: colors.secondary.main,
-        },
-        "&.Mui-focused fieldset": {
-          borderColor: colors.secondary.main,
-        },
-      },
-      "& .MuiInputLabel-root": {
-        "&.Mui-focused": {
-          color: colors.secondary.main,
-        },
-        bgcolor: colors.primary.main,
-        paddingLeft: "5px",
-        paddingRight: "5px",
-      },
-      "& .MuiInputLabel-shrink": {
-        bgcolor: colors.primary.main,
-        paddingLeft: "5px",
-        paddingRight: "5px",
-      },
-    },
-    button: {
-      backgroundColor: colors.secondary.main,
-      color: colors.primary.main,
-      padding: "12px",
-      fontSize: "16px",
-      fontWeight: "bold",
-      marginTop: "10px",
-      "&:hover": {
-        backgroundColor: "#0069d9",
-      },
-    },
-    container: {
-      width: "100%",
-      maxWidth: "500px",
-      bgcolor: colors.primary.main,
-      borderRadius: "12px",
-      padding: "40px",
-      boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-    },
+    textField: createTextFieldStyles(),
+    button: coloredButtonStyles,
+    container: createContainerStyles("500px"),
   };
 
   // Form state management

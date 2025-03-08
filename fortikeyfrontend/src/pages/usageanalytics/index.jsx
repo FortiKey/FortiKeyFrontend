@@ -27,6 +27,11 @@ import {
   processDeviceBreakdown,
   formatValue,
 } from "../../utils/analyticsUtils";
+import {
+  createTextFieldStyles,
+  simpleButtonStyles,
+  selectStyles,
+} from "../../components/FormStyles";
 
 const UsageAnalytics = () => {
   const colors = tokens();
@@ -52,56 +57,9 @@ const UsageAnalytics = () => {
 
   // Add consistent form styling constants (similar to login page)
   const formStyles = {
-    textField: {
-      "& .MuiOutlinedInput-root": {
-        "& fieldset": {
-          borderColor: colors.text.secondary,
-          borderWidth: "1px",
-        },
-        "&:hover fieldset": {
-          borderColor: colors.secondary.main,
-        },
-        "&.Mui-focused fieldset": {
-          borderColor: colors.secondary.main,
-        },
-      },
-      "& .MuiInputLabel-root": {
-        "&.Mui-focused": {
-          color: colors.secondary.main,
-        },
-        bgcolor: colors.primary.main,
-        paddingLeft: "5px",
-        paddingRight: "5px",
-      },
-      "& .MuiInputLabel-shrink": {
-        bgcolor: colors.primary.main,
-        paddingLeft: "5px",
-        paddingRight: "5px",
-      },
-    },
-    button: {
-      fontSize: "16px",
-      padding: "12px 24px",
-      "&:hover": {
-        opacity: 0.9,
-      },
-    },
-    select: {
-      minWidth: 120,
-      flexGrow: { xs: 1, sm: 0 },
-      "& .MuiOutlinedInput-root": {
-        "& fieldset": {
-          borderColor: colors.text.secondary,
-          borderWidth: "1px",
-        },
-        "&:hover fieldset": {
-          borderColor: colors.secondary.main,
-        },
-        "&.Mui-focused fieldset": {
-          borderColor: colors.secondary.main,
-        },
-      },
-    },
+    textField: createTextFieldStyles(),
+    button: simpleButtonStyles,
+    select: selectStyles,
   };
 
   // Convert timeRange for API calls

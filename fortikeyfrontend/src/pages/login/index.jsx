@@ -12,6 +12,11 @@ import Navbar from "../../components/Navbar";
 import { tokens } from "../../theme";
 import authService from "../../services/authservice";
 import { useToast } from "../../context";
+import {
+  createTextFieldStyles,
+  createContainerStyles,
+  simpleButtonStyles,
+} from "../../components/FormStyles";
 
 /**
  * Login Page Component
@@ -28,50 +33,11 @@ const Login = () => {
   const colors = tokens();
   const { showSuccessToast, showErrorToast } = useToast();
 
-  // Common form styling constants
+  // Replace this formStyles object definition
   const formStyles = {
-    textField: {
-      "& .MuiOutlinedInput-root": {
-        "& fieldset": {
-          borderColor: colors.text.secondary,
-          borderWidth: "1px",
-        },
-        "&:hover fieldset": {
-          borderColor: colors.secondary.main,
-        },
-        "&.Mui-focused fieldset": {
-          borderColor: colors.secondary.main,
-        },
-      },
-      "& .MuiInputLabel-root": {
-        "&.Mui-focused": {
-          color: colors.secondary.main,
-        },
-        bgcolor: colors.primary.main,
-        paddingLeft: "5px",
-        paddingRight: "5px",
-      },
-      "& .MuiInputLabel-shrink": {
-        bgcolor: colors.primary.main,
-        paddingLeft: "5px",
-        paddingRight: "5px",
-      },
-    },
-    button: {
-      fontSize: "16px",
-      padding: "12px 24px",
-      "&:hover": {
-        opacity: 0.9,
-      },
-    },
-    container: {
-      width: "100%",
-      maxWidth: "400px",
-      bgcolor: colors.primary.main,
-      borderRadius: "12px",
-      padding: "40px",
-      boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-    },
+    textField: createTextFieldStyles(),
+    button: simpleButtonStyles,
+    container: createContainerStyles(),
   };
 
   // Form state management
