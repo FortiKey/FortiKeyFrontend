@@ -52,25 +52,25 @@ describe("CreateUser Component", () => {
     renderWithProviders(<CreateUser />);
 
     // Fill out the form with valid data
-    fireEvent.change(screen.getByLabelText(/First Name/i), {
+    fireEvent.change(document.querySelector('input[name="firstName"]'), {
       target: { value: "John" },
     });
-    fireEvent.change(screen.getByLabelText(/Last Name/i), {
+    fireEvent.change(document.querySelector('input[name="lastName"]'), {
       target: { value: "Doe" },
     });
-    fireEvent.change(screen.getByLabelText(/Email/i), {
+    fireEvent.change(document.querySelector('input[name="email"]'), {
       target: { value: "john@example.com" },
     });
 
     // Get all password fields and use the first one (the password field)
-    const passwordFields = screen.getAllByLabelText(/Password/i);
+    const passwordFields = document.querySelectorAll('input[name="password"]');
     fireEvent.change(passwordFields[0], {
       target: { value: "Password123!" },
     });
-    fireEvent.change(screen.getByLabelText(/Confirm Password/i), {
+    fireEvent.change(document.querySelector('input[name="confirmPassword"]'), {
       target: { value: "Password123!" },
     });
-    fireEvent.change(screen.getByLabelText(/Company/i), {
+    fireEvent.change(document.querySelector('input[name="company"]'), {
       target: { value: "Test Company" },
     });
 
@@ -96,28 +96,28 @@ describe("CreateUser Component", () => {
     renderWithProviders(<CreateUser />);
 
     // Fill out the form with mismatched passwords
-    fireEvent.change(screen.getByLabelText(/First Name/i), {
+    fireEvent.change(document.querySelector('input[name="firstName"]'), {
       target: { value: "John" },
     });
-    fireEvent.change(screen.getByLabelText(/Last Name/i), {
+    fireEvent.change(document.querySelector('input[name="lastName"]'), {
       target: { value: "Doe" },
     });
-    fireEvent.change(screen.getByLabelText(/Email/i), {
+    fireEvent.change(document.querySelector('input[name="email"]'), {
       target: { value: "john@example.com" },
     });
 
     // Get all password fields and use the first one (the password field)
-    const passwordFields = screen.getAllByLabelText(/Password/i);
+    const passwordFields = document.querySelectorAll('input[name="password"]');
     fireEvent.change(passwordFields[0], {
       target: { value: "Password123!" },
     });
 
     // Use specific label for confirm password
-    fireEvent.change(screen.getByLabelText(/Confirm Password/i), {
+    fireEvent.change(document.querySelector('input[name="confirmPassword"]'), {
       target: { value: "DifferentPassword123!" },
     });
 
-    fireEvent.change(screen.getByLabelText(/Company/i), {
+    fireEvent.change(document.querySelector('input[name="company"]'), {
       target: { value: "Test Company" },
     });
 
