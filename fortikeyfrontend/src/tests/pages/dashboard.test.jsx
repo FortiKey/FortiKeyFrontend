@@ -80,12 +80,48 @@ describe("Dashboard Component", () => {
     expect(screen.getByText(/Dashboard/i)).toBeInTheDocument();
   });
 
-  test.skip("navigates to Manage API Keys page when button is clicked", async () => {
-    // This test requires loading to complete
+  test("navigates to Manage API Keys page when button is clicked", async () => {
+    // Render the component
+    renderWithProviders(<Dashboard />);
+
+    // Wait for loading to finish
+    await waitFor(
+      () => {
+        expect(screen.queryByRole("progressbar")).not.toBeInTheDocument();
+      },
+      { timeout: 3000 }
+    );
+
+    // Find and click the button
+    const manageKeysButton = screen.getByRole("button", {
+      name: /manage api keys/i,
+    });
+    fireEvent.click(manageKeysButton);
+
+    // Check that navigation occurred
+    expect(mockNavigate).toHaveBeenCalledWith("/manage-api-keys");
   });
 
-  test.skip("navigates to API Documentation page when button is clicked", async () => {
-    // This test requires loading to complete
+  test("navigates to API Documentation page when button is clicked", async () => {
+    // Render the component
+    renderWithProviders(<Dashboard />);
+
+    // Wait for loading to finish
+    await waitFor(
+      () => {
+        expect(screen.queryByRole("progressbar")).not.toBeInTheDocument();
+      },
+      { timeout: 3000 }
+    );
+
+    // Find and click the button
+    const apiDocsButton = screen.getByRole("button", {
+      name: /api documentation/i,
+    });
+    fireEvent.click(apiDocsButton);
+
+    // Check that navigation occurred
+    expect(mockNavigate).toHaveBeenCalledWith("/api-documentation");
   });
 
   // This test is not needed because authentication is handled by the ProtectedRoute component
@@ -103,9 +139,44 @@ describe("Dashboard Component", () => {
   //   });
   // });
 
-  // For the dashboard tests, we need to skip them until we fix the loading state issue
-  test.skip("renders dashboard with title after loading", async () => {
-    // The dashboard component has issues with state updates in useEffect
-    // We'll revisit this test once the core component issues are fixed
+  test("renders dashboard with title after loading", async () => {
+    // Fix the mock API responses with proper structure
+    apiService.getCompanyStats.mockResolvedValue({
+      data: {
+        summary: {
+          totalKeys: 5,
+          activeKeys: 3,
+        },
+      },
+    });
+
+    apiService.fetchSummary.mockResolvedValue({
+      data: {
+        totalRequests: 1000,
+        totalSuccess: 900,
+        totalFailures: 100,
+      },
+    });
+
+    apiService.fetchUsage.mockResolvedValue({
+      data: [{ date: "2023-01-01", count: 100 }],
+    });
+
+    // Render with proper async handling
+    await act(async () => {
+      renderWithProviders(<Dashboard />);
+    });
+
+    // Wait for loading to finish
+    await waitFor(
+      () => {
+        expect(screen.queryByRole("progressbar")).not.toBeInTheDocument();
+      },
+      { timeout: 3000 }
+    );
+
+    // Verify dashboard content
+    expect(screen.getByText(/Dashboard/i)).toBeInTheDocument();
+    expect(screen.getByTestId("mock-pie-chart")).toBeInTheDocument();
   });
 });
