@@ -41,7 +41,6 @@ const ViewAccounts = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deletingUser, setDeletingUser] = useState(false);
   const [isFortiKeyUser, setIsFortiKeyUser] = useState(false);
-  const [currentUserCompany, setCurrentUserCompany] = useState("");
 
   // Pagination state
   const [paginationModel, setPaginationModel] = useState({
@@ -53,7 +52,7 @@ const ViewAccounts = () => {
   /**
    * Fetch users from the backend API
    * Uses pagination parameters for server-side pagination
-   * Filters users by company if not a FortiKey user
+   * Handles data for both admin and business users
    */
   const fetchUsers = useCallback(async () => {
     try {
@@ -63,54 +62,49 @@ const ViewAccounts = () => {
       const { page, pageSize } = paginationModel;
       const response = await authService.getUsers(page, pageSize);
 
-      // If not FortiKey user, filter the response to only include users from same company
-      if (!isFortiKeyUser) {
-        const filteredData = response.data.filter((user) => {
-          const userCompany = user?.organization || user?.company || "";
-          return userCompany === currentUserCompany;
-        });
-        setRows(filteredData);
-        // Adjust total count for pagination
-        setRowCount(filteredData.length);
-      } else {
-        // FortiKey users can see all users
-        setRows(response.data);
-        setRowCount(response.total);
+      if (!response || !response.data) {
+        throw new Error("Invalid API response format");
       }
+
+      const processedRows = response.data.map((user, index) => {
+        // Extract fields with proper fallback
+        const id = user._id || `temp-${index}`;
+        const email = user.externalUserId || "Unknown"; 
+        const createdAt = user.createdAt || "N/A";
+
+        return {
+          id: id,
+          email: email, // Match the field name used in columns
+          createdAt: createdAt,
+          company: user.metadata?.company || "N/A",
+        };
+      });
+
+      setRows(processedRows);
+      setRowCount(response.total || response.data.length);
     } catch (error) {
-      console.error("Failed to fetch users:", error);
-      setError("Unable to load user accounts. Please try again.");
+      console.error("Error fetching users:", error);
+      setError("Failed to load user accounts. Please try again.");
       showErrorToast("Failed to load user accounts");
     } finally {
       setLoading(false);
     }
-  }, [paginationModel, isFortiKeyUser, currentUserCompany, showErrorToast]);
+  }, [paginationModel, showErrorToast]);
 
-  // Fetch users when component mounts, pagination changes, or company status changes
   useEffect(() => {
-    // Only fetch once we have the user's company information
-    if (currentUserCompany || currentUserCompany === "") {
-      fetchUsers();
-    }
-  }, [fetchUsers, currentUserCompany]);
+    fetchUsers();
+  }, [fetchUsers]);
 
-  // Replace the useEffect that checks user organization
+  // Check user role and permissions
   useEffect(() => {
-    // Check if the user has admin role
     const checkUserRole = async () => {
       try {
         const user = await authService.getCurrentUser();
-
-        // Check for admin role instead of company name
+        // Set admin status based on role
         setIsFortiKeyUser(user?.role === "admin");
-
-        // Still keep company name for filtering non-admin views
-        const userCompany = user?.organization || user?.company || "";
-        setCurrentUserCompany(userCompany);
       } catch (error) {
         console.error("Error checking user role:", error);
         setIsFortiKeyUser(false);
-        setCurrentUserCompany("");
       }
     };
 
@@ -142,7 +136,7 @@ const ViewAccounts = () => {
       // Update the local state by refetching
       await fetchUsers();
 
-      showSuccessToast(`User ${selectedUser.name} deleted successfully`);
+      showSuccessToast(`User ${selectedUser.externalUserId} deleted successfully`);
     } catch (error) {
       console.error("Failed to delete user:", error);
       showErrorToast("Failed to delete user. Please try again.");
@@ -168,8 +162,8 @@ const ViewAccounts = () => {
    */
   const columns = [
     {
-      field: "name",
-      headerName: "Name",
+      field: "email",
+      headerName: "User ID",
       flex: 1,
       cellClassName: "name-column--cell",
       renderCell: (params) => (
@@ -180,29 +174,51 @@ const ViewAccounts = () => {
           }}
           onClick={() => handleNameClick(params.row)}
         >
-          {params.value}
+          {params.value || "Unknown User"}
         </div>
       ),
     },
     {
-      field: "externalUserId",
-      headerName: "External User ID",
+      field: "createdAt",
+      headerName: "Created Date",
       flex: 1,
+      // Using renderCell instead of valueGetter for more direct control
+      renderCell: (params) => {
+        // Access the row data directly from the params
+        const dateStr = params.row.createdAt;
+
+        if (!dateStr || dateStr === "N/A") {
+          return <div>N/A</div>;
+        }
+
+        try {
+          const date = new Date(dateStr);
+          if (!isNaN(date.getTime())) {
+            return (
+              <div>
+                {date.toLocaleDateString("en-US", {
+                  year: "numeric",
+                  month: "short",
+                  day: "numeric",
+                })}
+              </div>
+            );
+          }
+        } catch (error) {
+          console.error("Date parsing error:", error);
+        }
+
+        return <div>{dateStr}</div>;
+      },
     },
     {
-      field: "company",
-      headerName: "Company",
+      field: "status",
+      headerName: "Status",
       flex: 1,
-      valueGetter: (params) =>
-        params.row.organization || params.row.company || "Unknown",
-    },
-    {
-      field: "validated",
-      headerName: "Validated",
-      flex: 1,
+      valueGetter: (params) => "Active", // All TOTP secrets in the list are active
       renderCell: (params) => (
-        <div style={{ color: params.value ? "green" : "red" }}>
-          {params.value ? "Yes" : "No"}
+        <div style={{ color: "green" }}>
+          {params.value}
         </div>
       ),
     },
@@ -212,7 +228,10 @@ const ViewAccounts = () => {
     <ThemeProvider theme={theme}>
       <Box m="20px">
         {/* Page header */}
-        <Header title="View Accounts" subtitle="Manage Accounts" />
+        <Header
+          title="View Accounts"
+          subtitle={isFortiKeyUser ? "All Users" : "Your TOTP Users"}
+        />
 
         {/* Error display */}
         {error && (
@@ -294,7 +313,7 @@ const ViewAccounts = () => {
               {selectedUser && (
                 <>
                   Do you want to delete the account for{" "}
-                  <strong>{selectedUser.name}</strong>? This action cannot be
+                  <strong>{selectedUser.externalUserId}</strong>? This action cannot be
                   undone.
                 </>
               )}
