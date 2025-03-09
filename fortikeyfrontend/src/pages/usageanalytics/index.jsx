@@ -63,320 +63,363 @@ const UsageAnalytics = () => {
   };
 
   // Convert timeRange for API calls
-  const getTimeRangeValue = () => {
+  const getTimeRangeValue = useCallback(() => {
     return parseInt(timeRange, 10);
-  };
+  }, [timeRange]);
 
-  // Enhanced fetch data function with explicit period parameter
-  const fetchDataWithPeriod = async (explicitPeriod, force = false) => {
-    try {
-      setLoading(true);
-      if (force) setRefreshing(true);
-      setError(null);
-
-      // Use the explicit period rather than the state value
-      const periodToUse = explicitPeriod || getTimeRangeValue();
-
-      // Load summary data with explicit period
-      let totpResponse = { summary: {} };
-      let failureResponse = {};
-      let deviceResponse = {};
-
-      try {
-        totpResponse = await apiService.getTOTPStats({ period: periodToUse }, force);
-      } catch (err) {
-        // Handle error
-      }
-
-      try {
-        failureResponse = await apiService.getFailureAnalytics({ period: periodToUse }, force);
-      } catch (err) {
-        // Handle error
-      }
-
-      try {
-        deviceResponse = await apiService.getDeviceBreakdown({ period: periodToUse }, force);
-      } catch (err) {
-        // Handle error
-      }
-
-      // Process the data
-      const totpData = processTOTPStats(totpResponse);
-      const failureData = processFailureAnalytics(failureResponse);
-      const deviceData = processDeviceBreakdown(deviceResponse);
-
-      // Set the analytics data
-      setAnalyticsData({
-        summaryStats: [
-          {
-            label: "Total Authentications",
-            value: formatValue(totpData.summary.totalValidations),
-          },
-          {
-            label: "Success Rate",
-            value: formatValue(
-              totpData.summary.validationSuccessRate,
-              "percentage"
-            ),
-          },
-          {
-            label: "Failed Attempts",
-            value: formatValue(failureData.totalFailures),
-          },
-          {
-            label: "Backup Codes Used",
-            value: formatValue(totpData.summary.totalBackupCodesUsed),
-          },
-        ],
-        deviceTypes: deviceData.deviceTypes || {},
-        browsers: deviceData.browsers || {},
-        totpStats: totpData.dailyStats || [],
-        // Store raw data for comparison
-        rawData: {
-          totp: totpResponse,
-          failures: failureResponse,
-          devices: deviceResponse,
-        },
-      });
-
-      // Load chart data based on currently selected type
-      await loadChartDataWithPeriod(chartType, periodToUse, force);
-
-      // Record last refresh time
-      setLastRefreshTime(new Date());
-
-      if (force) {
-        showSuccessToast("Analytics data refreshed successfully");
-      }
-    } catch (error) {
-      setError(
-        "Unable to load analytics data. " +
-          (error.message || "Please try again later.")
-      );
-      showErrorToast("Failed to load analytics data");
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  };
-
+  // Get default chart data for different chart types
   const getDefaultChartData = (type) => {
+    // Provides default empty state data for charts
     switch (type) {
       case "devices":
-        return { "Desktop": 0, "Mobile": 0, "Tablet": 0 };
+        return { Desktop: 0, Mobile: 0, Tablet: 0 };
       case "auth":
-        return { "standardTOTP": 0, "backupCodes": 0 };
+        return { standardTOTP: 0, backupCodes: 0 };
       case "failures":
-        return { "authFailure": 0 };
+        return { authFailure: 0 };
       case "company":
       default:
         return {
           successfulEvents: 0,
           failedEvents: 0,
-          backupCodesUsed: 0
+          backupCodesUsed: 0,
         };
     }
   };
 
   // Enhanced load chart data function with explicit period parameter
-  const loadChartDataWithPeriod = async (
-    type,
-    explicitPeriod,
-    force = false
-  ) => {
-    try {
-      setRefreshing(true);
-      let data = {};
+  const loadChartDataWithPeriod = useCallback(
+    async (type, explicitPeriod, force = false) => {
+      try {
+        setLoading(true);
+        if (force) setRefreshing(true);
+        setError(null);
 
-      // Use the explicit period rather than the state value
-      const periodToUse = explicitPeriod || getTimeRangeValue();
+        // Use the explicit period rather than the state value
+        const periodToUse = explicitPeriod || getTimeRangeValue();
 
-      switch (type) {
-        case "devices": {
-          try {
-            const response = await apiService.getDeviceBreakdown(
-              { period: periodToUse },
-              force
-            );
-            const processedData = processDeviceBreakdown(response);
-            data = processedData.deviceTypes || {};
-          } catch (error) {
-            // Fallback to previous data if available
-            if (prevDataRef.current.devices) {
-              data = prevDataRef.current.devices;
+        let data = {};
+
+        switch (type) {
+          case "devices": {
+            try {
+              const response = await apiService.getDeviceBreakdown(
+                { period: periodToUse },
+                force
+              );
+              const processedData = processDeviceBreakdown(response);
+              data = processedData.deviceTypes || {};
+            } catch (error) {
+              // Fallback to previous data if available
+              if (prevDataRef.current.devices) {
+                data = prevDataRef.current.devices;
+              } else {
+                // Use default data if no fallback available
+                data = getDefaultChartData("devices");
+              }
             }
+            break;
           }
-          break;
-        }
-        case "auth": {
-          try {
-            const [totpResponse, backupResponse] = await Promise.all([
-              apiService.getTOTPStats({ period: periodToUse }, force),
-              apiService.getBackupCodeUsage({ period: periodToUse }, force),
-            ]);
+          case "auth": {
+            try {
+              const [totpResponse, backupResponse] = await Promise.all([
+                apiService.getTOTPStats({ period: periodToUse }, force),
+                apiService.getBackupCodeUsage({ period: periodToUse }, force),
+              ]);
 
+              const processedTOTP = processTOTPStats(totpResponse);
 
-            const processedTOTP = processTOTPStats(totpResponse);
+              // Try different properties to find the backup count
+              let backupCount = 0;
+              if (backupResponse.backupCount) {
+                backupCount = backupResponse.backupCount;
+              } else if (
+                backupResponse.summary &&
+                backupResponse.summary.backupCodeUses
+              ) {
+                backupCount = backupResponse.summary.backupCodeUses;
+              } else if (
+                backupResponse.summary &&
+                backupResponse.summary.backupCount
+              ) {
+                backupCount = backupResponse.summary.backupCount;
+              } else if (
+                processedTOTP.summary &&
+                processedTOTP.summary.totalBackupCodesUsed
+              ) {
+                // If it's not in the backup response, get it from the TOTP summary
+                backupCount = processedTOTP.summary.totalBackupCodesUsed;
+              }
 
+              const validations = processedTOTP.summary.totalValidations || 0;
 
-            // Try different properties to find the backup count
-            let backupCount = 0;
-            if (backupResponse.backupCount) {
-              backupCount = backupResponse.backupCount;
-            } else if (
-              backupResponse.summary &&
-              backupResponse.summary.backupCodeUses
-            ) {
-              backupCount = backupResponse.summary.backupCodeUses;
-            } else if (
-              backupResponse.summary &&
-              backupResponse.summary.backupCount
-            ) {
-              backupCount = backupResponse.summary.backupCount;
-            } else if (
-              processedTOTP.summary &&
-              processedTOTP.summary.totalBackupCodesUsed
-            ) {
-              // If it's not in the backup response, get it from the TOTP summary
-              backupCount = processedTOTP.summary.totalBackupCodesUsed;
+              // Make sure standard TOTP doesn't go negative if backupCount > validations
+              const standardTOTP = Math.max(0, validations - backupCount);
+
+              data = {
+                standardTOTP: standardTOTP,
+                backupCodes: backupCount,
+              };
+            } catch (error) {
+              // Use previous data or default if error occurs
+              if (prevDataRef.current.auth) {
+                data = prevDataRef.current.auth;
+              } else {
+                data = getDefaultChartData("auth");
+              }
             }
-
-
-            const validations = processedTOTP.summary.totalValidations || 0;
-
-
-            // Make sure standard TOTP doesn't go negative if backupCount > validations
-            const standardTOTP = Math.max(0, validations - backupCount);
-
-
-            data = {
-              standardTOTP: standardTOTP,
-              backupCodes: backupCount,
-            };
-          } catch (error) {
-            // error handling
+            break;
           }
-          break;
-        }
-        case "failures": {
-          try {
-            const response = await apiService.getFailureAnalytics(
-              { period: periodToUse },
-              force
-            );
-            const processedData = processFailureAnalytics(response);
+          case "failures": {
+            try {
+              const response = await apiService.getFailureAnalytics(
+                { period: periodToUse },
+                force
+              );
+              const processedData = processFailureAnalytics(response);
 
+              // Convert failures array to counts by type
+              const failureCounts = {};
 
-            // Convert failures array to counts by type
-            const failureCounts = {};
+              // Check the structure of failuresByType directly from the response
+              if (
+                response.failuresByType &&
+                Array.isArray(response.failuresByType)
+              ) {
+                response.failuresByType.forEach((item) => {
+                  // Extract the key from _id.eventType and the count value
+                  if (item._id && item._id.eventType) {
+                    const eventType = item._id.eventType;
 
+                    // Check if count is a number or an object
+                    let countValue = 0;
+                    if (typeof item.count === "number") {
+                      countValue = item.count;
+                    } else if (item.count && typeof item.count === "object") {
+                      // If count is an object, it might have a value property
+                      countValue =
+                        item.count.value || Object.values(item.count)[0] || 0;
+                    }
 
-            // Check the structure of failuresByType directly from the response
-            if (
-              response.failuresByType &&
-              Array.isArray(response.failuresByType)
-            ) {
-              response.failuresByType.forEach((item) => {
-                // Extract the key from _id.eventType and the count value
-                if (item._id && item._id.eventType) {
-                  const eventType = item._id.eventType;
+                    failureCounts[eventType] = countValue;
+                  }
+                });
+              } else {
+                failureCounts["Unknown"] = processedData.totalFailures || 0;
+              }
 
-
-                  // Check if count is a number or an object
-                  let countValue = 0;
-                  if (typeof item.count === "number") {
-                    countValue = item.count;
-                  } else if (item.count && typeof item.count === "object") {
-                    // If count is an object, it might have a value property
-                    countValue =
-                      item.count.value || Object.values(item.count)[0] || 0;
+              // If we still have no data, try using the failures array from processedData
+              if (
+                Object.keys(failureCounts).length === 0 &&
+                Array.isArray(processedData.failures)
+              ) {
+                processedData.failures.forEach((failure) => {
+                  let key = "Unknown";
+                  if (failure._id && failure._id.eventType) {
+                    key = failure._id.eventType;
                   }
 
+                  let value = 0;
+                  if (typeof failure.count === "number") {
+                    value = failure.count;
+                  } else if (
+                    failure.count &&
+                    typeof failure.count === "object"
+                  ) {
+                    value =
+                      failure.count.value ||
+                      Object.values(failure.count)[0] ||
+                      0;
+                  }
 
-                  failureCounts[eventType] = countValue;
-                }
-              });
-            } else {
-              failureCounts["Unknown"] = processedData.totalFailures || 0;
+                  failureCounts[key] = value;
+                });
+              }
+
+              data = failureCounts;
+            } catch (error) {
+              if (prevDataRef.current.failures) {
+                data = prevDataRef.current.failures;
+              } else {
+                // Use the default data for failures
+                data = getDefaultChartData("failures");
+              }
             }
-
-
-            // If we still have no data, try using the failures array from processedData
-            if (
-              Object.keys(failureCounts).length === 0 &&
-              Array.isArray(processedData.failures)
-            ) {
-              processedData.failures.forEach((failure, index) => {
-                let key = "Unknown";
-                if (failure._id && failure._id.eventType) {
-                  key = failure._id.eventType;
-                }
-
-
-                let value = 0;
-                if (typeof failure.count === "number") {
-                  value = failure.count;
-                } else if (failure.count && typeof failure.count === "object") {
-                  value =
-                    failure.count.value || Object.values(failure.count)[0] || 0;
-                }
-
-
-                failureCounts[key] = value;
-              });
-            }
-
-
-            data = failureCounts;
-          } catch (error) {
-            if (prevDataRef.current.failures) {
-              data = prevDataRef.current.failures;
-            } else {
-              // Default data if no fallback available
-              data = { "No Data": 1 };
-            }
+            break;
           }
-          break;
-        }
-        case "company":
-        default: {
-          try {
-            const response = await apiService.getCompanyStats(
-              { period: periodToUse },
-              force
-            );
+          case "company":
+          default: {
+            try {
+              const response = await apiService.getCompanyStats(
+                { period: periodToUse },
+                force
+              );
 
-            data = {
-              successfulEvents: response.summary?.successfulEvents || 0,
-              failedEvents: response.summary?.failedEvents || 0,
-              backupCodesUsed: response.summary?.totalBackupCodesUsed || 0,
-            };
-          } catch (error) {
-            if (prevDataRef.current.company) {
-              data = prevDataRef.current.company;
+              data = {
+                successfulEvents: response.summary?.successfulEvents || 0,
+                failedEvents: response.summary?.failedEvents || 0,
+                backupCodesUsed: response.summary?.totalBackupCodesUsed || 0,
+              };
+            } catch (error) {
+              if (prevDataRef.current.company) {
+                data = prevDataRef.current.company;
+              } else {
+                // Use default company data
+                data = getDefaultChartData("company");
+              }
             }
           }
         }
+
+        // Store data for fallback
+        prevDataRef.current[type] = data;
+
+        // Update chart data
+        setChartData(data);
+
+        // Update last refresh time
+        setLastRefreshTime(new Date());
+      } catch (error) {
+        setError(
+          "Unable to load analytics data. " +
+            (error.message || "Please try again later.")
+        );
+        showErrorToast("Failed to load analytics data");
+      } finally {
+        setLoading(false);
+        setRefreshing(false);
       }
+    },
+    [
+      getTimeRangeValue,
+      setLoading,
+      setRefreshing,
+      setError,
+      setLastRefreshTime,
+      showErrorToast,
+    ]
+  );
 
-      // Store data for fallback
-      prevDataRef.current[type] = data;
+  // Enhanced fetch data function with explicit period parameter
+  const fetchDataWithPeriod = useCallback(
+    async (explicitPeriod, force = false) => {
+      try {
+        setLoading(true);
+        if (force) setRefreshing(true);
+        setError(null);
 
-      // Update chart data
-      setChartData(data);
-    } catch (error) {
-      // Error handling
-    } finally {
-      setRefreshing(false);
-    }
-  };
+        // Use the explicit period rather than the state value
+        const periodToUse = explicitPeriod || getTimeRangeValue();
+
+        // Load summary data with explicit period
+        let totpResponse = { summary: {} };
+        let failureResponse = {};
+        let deviceResponse = {};
+
+        try {
+          totpResponse = await apiService.getTOTPStats(
+            { period: periodToUse },
+            force
+          );
+        } catch (err) {
+          // Handle error
+        }
+
+        try {
+          failureResponse = await apiService.getFailureAnalytics(
+            { period: periodToUse },
+            force
+          );
+        } catch (err) {
+          // Handle error
+        }
+
+        try {
+          deviceResponse = await apiService.getDeviceBreakdown(
+            { period: periodToUse },
+            force
+          );
+        } catch (err) {
+          // Handle error
+        }
+
+        // Process the data
+        const totpData = processTOTPStats(totpResponse);
+        const failureData = processFailureAnalytics(failureResponse);
+        const deviceData = processDeviceBreakdown(deviceResponse);
+
+        // Set the analytics data
+        setAnalyticsData({
+          summaryStats: [
+            {
+              label: "Total Authentications",
+              value: formatValue(totpData.summary.totalValidations),
+            },
+            {
+              label: "Success Rate",
+              value: formatValue(
+                totpData.summary.validationSuccessRate,
+                "percentage"
+              ),
+            },
+            {
+              label: "Failed Attempts",
+              value: formatValue(failureData.totalFailures),
+            },
+            {
+              label: "Backup Codes Used",
+              value: formatValue(totpData.summary.totalBackupCodesUsed),
+            },
+          ],
+          deviceTypes: deviceData.deviceTypes || {},
+          browsers: deviceData.browsers || {},
+          totpStats: totpData.dailyStats || [],
+          // Store raw data for comparison
+          rawData: {
+            totp: totpResponse,
+            failures: failureResponse,
+            devices: deviceResponse,
+          },
+        });
+
+        // Load chart data based on currently selected type
+        await loadChartDataWithPeriod(chartType, periodToUse, force);
+
+        // Record last refresh time
+        setLastRefreshTime(new Date());
+
+        if (force) {
+          showSuccessToast("Analytics data refreshed successfully");
+        }
+      } catch (error) {
+        setError(
+          "Unable to load analytics data. " +
+            (error.message || "Please try again later.")
+        );
+        showErrorToast("Failed to load analytics data");
+      } finally {
+        setLoading(false);
+        setRefreshing(false);
+      }
+    },
+    [
+      getTimeRangeValue,
+      setLoading,
+      setRefreshing,
+      setError,
+      showErrorToast,
+      showSuccessToast,
+      chartType,
+      loadChartDataWithPeriod,
+    ]
+  );
 
   // Regular fetchData function that uses the current state
   const fetchData = useCallback(
     async (force = false) => {
       await fetchDataWithPeriod(getTimeRangeValue(), force);
     },
-    [timeRange, chartType, showErrorToast, showSuccessToast]
+    [fetchDataWithPeriod, getTimeRangeValue]
   );
 
   // Regular loadChartData function that uses the current state
@@ -384,7 +427,7 @@ const UsageAnalytics = () => {
     async (type, force = false) => {
       await loadChartDataWithPeriod(type, getTimeRangeValue(), force);
     },
-    [timeRange]
+    [getTimeRangeValue, loadChartDataWithPeriod]
   );
 
   // Initial data fetch - only on first render

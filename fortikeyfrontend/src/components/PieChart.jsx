@@ -25,79 +25,87 @@ ChartJS.register(ArcElement, Tooltip, Legend, Title);
  * @param {Function} [props.onError] - Error callback
  * @returns {JSX.Element} A pie chart visualization
  */
-const PieChart = ({ 
-  chartType = "company", 
-  chartData = {}, 
-  loading = false, 
+const PieChart = ({
+  chartType = "company",
+  chartData = {},
+  loading = false,
   error = null,
-  onError 
+  onError,
 }) => {
   const colors = tokens();
   const theme = useTheme();
-  
+
   // Track previous data for smooth transitions
   const [prevChartData, setPrevChartData] = useState({});
   const [hasInitialData, setHasInitialData] = useState(false);
-  
+
   // Debug logging to track data changes
   useEffect(() => {
-    
     // Store previous data whenever it changes meaningfully
     if (Object.keys(chartData).length > 0) {
       setPrevChartData(chartData);
       if (!hasInitialData) setHasInitialData(true);
     }
-  }, [chartData, chartType]);
+  }, [chartData, chartType, hasInitialData]);
 
   // Handle empty data gracefully
   const isEmptyData = useMemo(() => {
     // If no current data, but we have previous data, use the previous data
-    if (Object.keys(chartData).length === 0 && Object.keys(prevChartData).length > 0 && hasInitialData) {
+    if (
+      Object.keys(chartData).length === 0 &&
+      Object.keys(prevChartData).length > 0 &&
+      hasInitialData
+    ) {
       return false;
     }
-    
+
     // Check if all values are zero
-    const allZero = Object.values(chartData).every(value => value === 0);
-    
+    const allZero = Object.values(chartData).every((value) => value === 0);
+
     return Object.keys(chartData).length === 0 || allZero;
   }, [chartData, prevChartData, hasInitialData]);
 
-  // Validate data and prepare for chart
-  const validateAndNormalizeData = (data) => {
-    // If data is empty but we have previous data, use previous data with visual indication
-    if (Object.keys(data).length === 0 && Object.keys(prevChartData).length > 0 && hasInitialData) {
-      // Return previous data with faded colors to indicate it's old
-      return prevChartData;
-    }
-    
-    // Return original data
-    return data;
-  };
-
   // Prepare chart data based on the chart type and provided data
   const data = useMemo(() => {
+    // Define validateAndNormalizeData function inside useMemo to avoid recreating it on every render
+    const validateAndNormalizeData = (data) => {
+      // If data is empty but we have previous data, use previous data with visual indication
+      if (
+        Object.keys(data).length === 0 &&
+        Object.keys(prevChartData).length > 0 &&
+        hasInitialData
+      ) {
+        // Return previous data with faded colors to indicate it's old
+        return prevChartData;
+      }
+
+      // Return original data
+      return data;
+    };
+
     // Check for empty data and use fallback
     if (isEmptyData) {
       return {
-        labels: ['No Data Available'],
-        datasets: [{
-          data: [1],
-          backgroundColor: [theme.palette.action.disabledBackground],
-          borderColor: [theme.palette.divider],
-        }]
+        labels: ["No Data Available"],
+        datasets: [
+          {
+            data: [1],
+            backgroundColor: [theme.palette.action.disabledBackground],
+            borderColor: [theme.palette.divider],
+          },
+        ],
       };
     }
-    
+
     // Normalize and validate data
     const validData = validateAndNormalizeData(chartData);
-    
+
     // Process based on chart type
     switch (chartType) {
       case "devices": {
         const labels = Object.keys(validData);
-        const values = labels.map(key => validData[key]);
-        const total = values.reduce((a, b) => a + b, 0);
-        
+        const values = labels.map((key) => validData[key]);
+
         // Use actual values instead of percentages for more consistent visualization
         return {
           labels,
@@ -116,11 +124,11 @@ const PieChart = ({
           ],
         };
       }
-      
+
       case "auth": {
         const standardTOTP = validData.standardTOTP || 0;
         const backupCodes = validData.backupCodes || 0;
-        
+
         // Use actual values for better proportion representation
         return {
           labels: ["Standard TOTP", "Backup Codes"],
@@ -137,22 +145,22 @@ const PieChart = ({
           ],
         };
       }
-      
+
       case "failures": {
         const labels = Object.keys(validData);
-        const values = labels.map(key => validData[key]);
-        
+        const values = labels.map((key) => validData[key]);
+
         // Use actual values for better proportion representation
         // Generate colors based on number of failure types
         const backgroundColor = [
-          colors.pieChart.unauthorized,   
-          colors.pieChart.authorized,   
-          colors.pieChart.apiUsage, 
-          '#FFEB3B',
-          '#FF9800',
-          '#9C27B0'
+          colors.pieChart.unauthorized,
+          colors.pieChart.authorized,
+          colors.pieChart.apiUsage,
+          "#FFEB3B",
+          "#FF9800",
+          "#9C27B0",
         ].slice(0, labels.length);
-        
+
         return {
           labels,
           datasets: [
@@ -165,13 +173,13 @@ const PieChart = ({
           ],
         };
       }
-      
+
       case "company":
       default: {
         const successfulEvents = validData.successfulEvents || 0;
         const failedEvents = validData.failedEvents || 0;
         const backupCodesUsed = validData.backupCodesUsed || 0;
-        
+
         // Use actual values for better proportion representation
         return {
           labels: ["Successful Auth", "Failed Auth", "Backup Codes Used"],
@@ -190,7 +198,15 @@ const PieChart = ({
         };
       }
     }
-  }, [chartData, chartType, colors, isEmptyData, prevChartData, hasInitialData, theme]);
+  }, [
+    chartData,
+    chartType,
+    colors,
+    isEmptyData,
+    theme,
+    prevChartData,
+    hasInitialData,
+  ]);
 
   // Get chart title based on type
   const getChartTitle = () => {
@@ -224,10 +240,10 @@ const PieChart = ({
           color: colors.text.primary,
           padding: 15,
           usePointStyle: true,
-          pointStyle: 'circle',
+          pointStyle: "circle",
           font: {
-            size: 11
-          }
+            size: 11,
+          },
         },
       },
       title: {
@@ -249,31 +265,33 @@ const PieChart = ({
           label: function (context) {
             const value = context.raw;
             // Check if we're using the empty data placeholder
-            if (context.label === 'No Data Available') {
-              return 'No data available for this time period';
+            if (context.label === "No Data Available") {
+              return "No data available for this time period";
             }
-            
+
             const total = context.dataset.data.reduce((a, b) => a + b, 0);
             const percentage = calculatePercentage(value, total);
-            return `${context.label}: ${value.toLocaleString()} (${percentage})`;
+            return `${
+              context.label
+            }: ${value.toLocaleString()} (${percentage})`;
           },
         },
       },
     },
     animation: {
       duration: 1000, // Slower animation for better transitions
-      easing: 'easeOutQuart'
+      easing: "easeOutQuart",
     },
     // Prevent weird animations when switching chart types
     transitions: {
       active: {
         animation: {
-          duration: 0
-        }
-      }
-    }
+          duration: 0,
+        },
+      },
+    },
   };
-  
+
   // Handle empty data state
   if (isEmptyData && !hasInitialData) {
     return (
@@ -289,7 +307,11 @@ const PieChart = ({
         <Typography variant="body1" textAlign="center">
           No data available for this time period
         </Typography>
-        <Typography variant="body2" textAlign="center" sx={{ mt: 1, opacity: 0.7 }}>
+        <Typography
+          variant="body2"
+          textAlign="center"
+          sx={{ mt: 1, opacity: 0.7 }}
+        >
           Try selecting a different date range
         </Typography>
       </Box>
@@ -325,7 +347,11 @@ const PieChart = ({
         <Typography color="error" variant="body1" textAlign="center">
           {error}
         </Typography>
-        <Typography variant="body2" textAlign="center" sx={{ mt: 1, opacity: 0.7 }}>
+        <Typography
+          variant="body2"
+          textAlign="center"
+          sx={{ mt: 1, opacity: 0.7 }}
+        >
           Please try refreshing the data
         </Typography>
       </Box>

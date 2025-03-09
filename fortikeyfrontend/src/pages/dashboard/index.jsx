@@ -48,7 +48,7 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const { showInfoToast, showErrorToast, showSuccessToast } = useToast();
   const [chartData, setChartData] = useState({});
-  const [chartType, setChartType] = useState("company");
+  const [chartType] = useState("company");
   const [chartLoading, setChartLoading] = useState(true);
 
   // State management
