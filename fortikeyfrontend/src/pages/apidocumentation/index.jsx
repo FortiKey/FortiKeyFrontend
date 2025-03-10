@@ -209,7 +209,7 @@ fetch('https://fortikeybackend.onrender.com/api/v1/totp-secrets/user/user123/reg
 
             <Box sx={{ backgroundColor: colors.primary.main, p: 2, borderRadius: 1, mb: 3 }}>
               <Typography variant="code" sx={{ fontFamily: 'monospace' }}>
-                https://api.fortikey.com/api/v1
+                https://fortikeybackend.onrender.com/api/v1
               </Typography>
             </Box>
 
