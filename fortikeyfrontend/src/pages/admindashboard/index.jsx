@@ -88,19 +88,19 @@ const AdminDashboard = () => {
     try {
       setStaffLoading(true);
       console.log("Opening dialog for userId:", userId);
-  
+
       // Find the selected row from the grid data
       const selectedRow = rows.find(row => row.id === userId);
       if (!selectedRow) {
         console.error("No matching row found!");
         return;
       }
-  
+
       console.log("Selected row:", selectedRow);
-  
+
       // Set company name for reference
       setSelectedCompany(selectedRow.company);
-  
+
       // Fetch the detailed user profile using the email from the selected row
       try {
         // First, get the user's ID by making an additional API call
@@ -112,10 +112,10 @@ const AdminDashboard = () => {
             },
           }
         );
-  
+
         // Assuming the search returns a single user or the first matching user
         const userDetails = usersResponse.data.users[0];
-  
+
         if (userDetails) {
           // Set the selected user with the correct details
           setSelectedUser({
@@ -136,14 +136,14 @@ const AdminDashboard = () => {
             createdAt: new Date().toISOString()
           });
         }
-  
+
         setDialogOpen(true);
-  
+
         // Fetch TOTP secrets using the correct company context
         try {
           const staffData = await authService.getStaffByCompany(userDetails?.id || userId);
           console.log("Staff data:", staffData);
-  
+
           const formattedStaffData = staffData.map((totp, index) => ({
             id: totp.id || index + 1,
             externalUserId: totp.externalUserId,
@@ -151,19 +151,19 @@ const AdminDashboard = () => {
             createdAt: totp.createdAt,
             lastUsed: totp.lastUsed || "Never"
           }));
-  
+
           setStaffData(formattedStaffData);
         } catch (staffError) {
           console.error("Failed to fetch staff data:", staffError);
           setStaffData([]); // Ensure staff data is reset
         }
-  
+
       } catch (userError) {
         console.error("Could not fetch detailed user profile:", userError);
         showErrorToast(`Failed to load user details`);
         handleClose();
       }
-  
+
     } catch (error) {
       console.error("Failed to fetch user data:", error);
       showErrorToast(`Failed to load user details`);
@@ -226,19 +226,19 @@ const AdminDashboard = () => {
     setSelectedCompanyToDelete(company);
     setCompanyDeleteDialogOpen(true);
   };
-  
+
   const handleCompanyDeleteConfirm = async () => {
     try {
       setDeleteLoading(true);
       // Call API to delete company
       await authService.deleteCompany(selectedCompanyToDelete);
-  
+
       // Update local state after successful deletion
       const updatedRows = rows.filter(
         (row) => row.company !== selectedCompanyToDelete
       );
       setRows(updatedRows);
-  
+
       showSuccessToast("Company deleted successfully");
     } catch (error) {
       console.error("Failed to delete company:", error);
@@ -281,9 +281,14 @@ const AdminDashboard = () => {
               e.stopPropagation();
               handleCompanyDeleteClick(params.row.company);
             }}
-            sx={{ color: theme.palette.error.main }}
+            sx={{
+              color: theme.palette.error.main,
+              '&:hover': {
+                backgroundColor: theme.palette.error.light + '20', 
+              }
+            }}
           >
-            <DeleteIcon /> {/* Make sure to import DeleteIcon from @mui/icons-material */}
+            <DeleteIcon />
           </IconButton>
         </Box>
       ),
@@ -544,9 +549,14 @@ const AdminDashboard = () => {
                       renderCell: (params) => (
                         <IconButton
                           onClick={() => handleDeleteClick(params.row)}
-                          sx={{ color: theme.palette.error.main }}
+                          sx={{
+                            color: theme.palette.error.main,
+                            '&:hover': {
+                              backgroundColor: theme.palette.error.light + '20', 
+                            }
+                          }}
                         >
-                          ×
+                          <DeleteIcon fontSize="small" />
                         </IconButton>
                       ),
                     },
