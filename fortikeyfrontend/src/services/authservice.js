@@ -282,41 +282,41 @@ const authService = {
  * @returns {Promise<Object>} Paginated user data
  * @throws {Error} If unauthorized or server error occurs
  */
-getUsers: async (page, pageSize) => {
-  try {
-    const token = localStorage.getItem(config.auth.tokenStorageKey);
-    if (!token) throw new Error("Authentication required");
+  getUsers: async (page, pageSize) => {
+    try {
+      const token = localStorage.getItem(config.auth.tokenStorageKey);
+      if (!token) throw new Error("Authentication required");
 
-    // Use the TOTP secrets endpoint to get all users with 2FA
-    const response = await axios.get(`${API_URL}/totp-secrets`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    
-    // Get total count before pagination
-    const totalCount = response.data.length;
-    
-    // Apply manual pagination (if the API doesn't support it)
-    const startIndex = page * pageSize;
-    const endIndex = startIndex + pageSize;
-    const paginatedData = response.data.slice(startIndex, endIndex);
-    
-    // Minimal transformation - just ensure id is present for DataGrid
-    const transformedData = paginatedData.map(totpSecret => ({
-      ...totpSecret,                        // Keep all original fields
-      id: totpSecret._id || String(Math.random())  // Ensure id exists for DataGrid
-    }));
-    
-    return {
-      data: transformedData,
-      total: totalCount,
-    };
-  } catch (error) {
-    console.error("Failed to fetch TOTP users:", error);
-    throw new Error(error.response?.data?.message || "Route not found");
-  }
-},
+      // Use the TOTP secrets endpoint to get all users with 2FA
+      const response = await axios.get(`${API_URL}/totp-secrets`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      // Get total count before pagination
+      const totalCount = response.data.length;
+
+      // Apply manual pagination (if the API doesn't support it)
+      const startIndex = page * pageSize;
+      const endIndex = startIndex + pageSize;
+      const paginatedData = response.data.slice(startIndex, endIndex);
+
+      // Minimal transformation - just ensure id is present for DataGrid
+      const transformedData = paginatedData.map(totpSecret => ({
+        ...totpSecret,                        // Keep all original fields
+        id: totpSecret._id || String(Math.random())  // Ensure id exists for DataGrid
+      }));
+
+      return {
+        data: transformedData,
+        total: totalCount,
+      };
+    } catch (error) {
+      console.error("Failed to fetch TOTP users:", error);
+      throw new Error(error.response?.data?.message || "Route not found");
+    }
+  },
 
   /**
    * Delete a user account (admin function)
@@ -360,13 +360,43 @@ getUsers: async (page, pageSize) => {
       const token = localStorage.getItem(config.auth.tokenStorageKey);
       if (!token) throw new Error("Authentication required");
 
-      const response = await axios.get(`${API_URL}/admin/companies`, {
+      // Get all FortiKey users (regular users, not TOTP users)
+      const usersResponse = await axios.get(`${config.apiUrl}/admin/business-users`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-      return response.data;
+
+      // Get all TOTP secrets to count them per user
+      const totpResponse = await axios.get(`${config.apiUrl}/totp-secrets`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      // Count TOTP users per FortiKey user (based on companyId)
+      const totpCountsByUser = {};
+      totpResponse.data.forEach(totp => {
+        const companyId = totp.companyId;
+        if (companyId) {
+          if (!totpCountsByUser[companyId]) {
+            totpCountsByUser[companyId] = 0;
+          }
+          totpCountsByUser[companyId]++;
+        }
+      });
+
+      //Format data for the DataGrid
+      const formattedData = usersResponse.data.users.map(user => ({
+        id: user._id || user.id,
+        email: user.email, // FortiKey User (email)
+        company: user.company, // Company name
+        staffCount: totpCountsByUser[user._id] || 0 // Number of TOTP users
+      }));
+
+      return formattedData;
     } catch (error) {
+      console.error("Error fetching companies:", error);
       throw error.response?.data || error;
     }
   },
@@ -378,21 +408,32 @@ getUsers: async (page, pageSize) => {
    * @returns {Promise<Array>} List of staff for the company
    * @throws {Error} If unauthorized or server error occurs
    */
-  getStaffByCompany: async (company) => {
+  getStaffByCompany: async (userId) => {
     try {
       const token = localStorage.getItem(config.auth.tokenStorageKey);
       if (!token) throw new Error("Authentication required");
 
-      const response = await axios.get(
-        `${API_URL}/admin/companies/${company}/staff`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      return response.data;
+      // Get all TOTP secrets for this specific user (by companyId)
+      const response = await axios.get(`${config.apiUrl}/totp-secrets`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      // Filter to only those with matching companyId
+      const userTotpSecrets = response.data
+        .filter(totpSecret => totpSecret.companyId === userId)
+        .map(totpSecret => ({
+          id: totpSecret._id,
+          externalUserId: totpSecret.externalUserId,
+          validated: totpSecret.metadata?.validated || true,
+          createdAt: totpSecret.createdAt,
+          lastUsed: totpSecret.lastUsed || "Never"
+        }));
+
+      return userTotpSecrets;
     } catch (error) {
+      console.error("Error fetching TOTP users:", error);
       throw error.response?.data || error;
     }
   },
@@ -492,6 +533,30 @@ getUsers: async (page, pageSize) => {
       throw error.response?.data || error;
     }
   },
+
+
+
+   // Get user profile by ID
+
+  getProfile: async (userId) => {
+    try {
+      const token = localStorage.getItem(config.auth.tokenStorageKey);
+      if (!token) throw new Error("Authentication required");
+
+      const response = await axios.get(
+        `${API_URL}/business/profile/${userId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error;
+    }
+  },
 };
+
 
 export default authService;
