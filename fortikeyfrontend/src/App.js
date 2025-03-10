@@ -4,6 +4,7 @@ import { theme } from "./theme";
 import { Routes, Route } from "react-router-dom";
 import Topbar from "./components/Topbar";
 import Sidebar from "./components/Sidebar";
+import Footer from "./components/Footer";
 import Dashboard from "./pages/dashboard";
 import ViewAccounts from "./pages/viewaccounts";
 import CreateUser from "./pages/createuser";
@@ -35,12 +36,68 @@ function App() {
       <ToastProvider>
         <Routes>
           {/* Public Routes - Accessible without authentication */}
-          <Route path="/" element={<Landing />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/createuser" element={<CreateUser />} />
-          <Route path="/signedout" element={<SignedOut />} />
+          <Route
+            path="/"
+            element={
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  minHeight: "100vh",
+                }}
+              >
+                <Landing />
+                <Footer />
+              </Box>
+            }
+          />
+          <Route
+            path="/login"
+            element={
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  minHeight: "100vh",
+                }}
+              >
+                <Login />
+                <Footer />
+              </Box>
+            }
+          />
+          <Route
+            path="/createuser"
+            element={
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  minHeight: "100vh",
+                }}
+              >
+                <CreateUser />
+                <Footer />
+              </Box>
+            }
+          />
+          <Route
+            path="/signedout"
+            element={
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  minHeight: "100vh",
+                }}
+              >
+                <SignedOut />
+                <Footer />
+              </Box>
+            }
+          />
 
-          {/* Protected Routes - Require authentication */}
+          {/* Protected Routes - Require authentication - No Footer */}
           <Route
             path="/*"
             element={
