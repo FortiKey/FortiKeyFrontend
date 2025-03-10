@@ -24,13 +24,8 @@ const Footer = () => {
         bgcolor: colors.neutral.main,
         color: colors.primary.main,
         py: { xs: 1, sm: 1.5 }, // Smaller padding on mobile
-        mt: 0,
+        mt: "auto", // Changed back to auto to push to bottom of flex containers
         width: "100%",
-        position: "sticky",
-        bottom: 0,
-        left: 0,
-        right: 0,
-        zIndex: 10,
         boxShadow: "0px -2px 4px rgba(0,0,0,0.05)",
       }}
     >
