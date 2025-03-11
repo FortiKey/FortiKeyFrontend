@@ -185,15 +185,7 @@ const AdminDashboard = () => {
         return;
       }
       
-      // Call API to delete TOTP secret with admin JWT token
-      const response = await axios.delete(
-        `${config.apiUrl}/totp-secrets/${selectedStaff.id}`,
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
-        }
-      );
+
   
       // Update local state after successful deletion
       const updatedStaffData = staffData.filter(
