@@ -7,7 +7,9 @@ import {
   DialogTitle,
   CircularProgress,
   Alert,
+  IconButton,
 } from "@mui/material";
+import DeleteIcon from '@mui/icons-material/Delete';
 import { DataGrid } from "@mui/x-data-grid";
 import Header from "../../components/Header";
 import { tokens } from "../../theme";
@@ -136,7 +138,7 @@ const ViewAccounts = () => {
       // Update the local state by refetching
       await fetchUsers();
 
-      showSuccessToast(`User ${selectedUser.externalUserId} deleted successfully`);
+      showSuccessToast(`User ${selectedUser.email} deleted successfully`);
     } catch (error) {
       console.error("Failed to delete user:", error);
       showErrorToast("Failed to delete user. Please try again.");
@@ -172,7 +174,6 @@ const ViewAccounts = () => {
             cursor: "pointer",
             color: colors.text.primary,
           }}
-          onClick={() => handleNameClick(params.row)}
         >
           {params.value || "Unknown User"}
         </div>
@@ -182,15 +183,13 @@ const ViewAccounts = () => {
       field: "createdAt",
       headerName: "Created Date",
       flex: 1,
-      // Using renderCell instead of valueGetter for more direct control
       renderCell: (params) => {
-        // Access the row data directly from the params
         const dateStr = params.row.createdAt;
-
+  
         if (!dateStr || dateStr === "N/A") {
           return <div>N/A</div>;
         }
-
+  
         try {
           const date = new Date(dateStr);
           if (!isNaN(date.getTime())) {
@@ -207,7 +206,7 @@ const ViewAccounts = () => {
         } catch (error) {
           console.error("Date parsing error:", error);
         }
-
+  
         return <div>{dateStr}</div>;
       },
     },
@@ -215,11 +214,29 @@ const ViewAccounts = () => {
       field: "status",
       headerName: "Status",
       flex: 1,
-      valueGetter: (params) => "Active", // All TOTP secrets in the list are active
       renderCell: (params) => (
-        <div style={{ color: "green" }}>
-          {params.value}
-        </div>
+        <Box 
+          display="flex" 
+          alignItems="center" 
+          gap={1}
+        >
+          <Typography color="green">Active</Typography>
+          <IconButton
+            size="small"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleNameClick(params.row);
+            }}
+            sx={{
+              color: theme.palette.error.main,
+              '&:hover': {
+                backgroundColor: theme.palette.error.light + '20', 
+              }
+            }}
+          >
+            <DeleteIcon fontSize="small" />
+          </IconButton>
+        </Box>
       ),
     },
   ];
@@ -313,7 +330,7 @@ const ViewAccounts = () => {
               {selectedUser && (
                 <>
                   Do you want to delete the account for{" "}
-                  <strong>{selectedUser.externalUserId}</strong>? This action cannot be
+                  <strong>{selectedUser.email}</strong>? This action cannot be
                   undone.
                 </>
               )}
@@ -360,5 +377,5 @@ const ViewAccounts = () => {
     </ThemeProvider>
   );
 };
-
-export default ViewAccounts;
+            
+            export default ViewAccounts

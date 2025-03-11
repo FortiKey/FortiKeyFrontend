@@ -57,10 +57,8 @@ const AdminDashboard = () => {
       try {
         setLoading(true);
         setError(null);
-        console.log("Fetching companies...");
 
         const data = await authService.getCompanies();
-        console.log("Companies received:", data);
 
         // Format data for DataGrid - Use the correct field names
         const formattedData = data.map((item) => ({
@@ -70,10 +68,8 @@ const AdminDashboard = () => {
           staffCount: item.staffCount
         }));
 
-        console.log("Formatted data:", formattedData);
         setRows(formattedData);
       } catch (error) {
-        console.error("Failed to fetch companies:", error);
         setError("Failed to load company data. Please try again later.");
       } finally {
         setLoading(false);
@@ -87,16 +83,12 @@ const AdminDashboard = () => {
   const handleOpen = async (userId) => {
     try {
       setStaffLoading(true);
-      console.log("Opening dialog for userId:", userId);
 
       // Find the selected row from the grid data
       const selectedRow = rows.find(row => row.id === userId);
       if (!selectedRow) {
-        console.error("No matching row found!");
         return;
       }
-
-      console.log("Selected row:", selectedRow);
 
       // Set company name for reference
       setSelectedCompany(selectedRow.company);
@@ -126,7 +118,6 @@ const AdminDashboard = () => {
             createdAt: userDetails.createdAt
           });
         } else {
-          console.error("No user details found for the email");
           // Fallback to the row data
           setSelectedUser({
             email: selectedRow.email,
@@ -142,7 +133,6 @@ const AdminDashboard = () => {
         // Fetch TOTP secrets using the correct company context
         try {
           const staffData = await authService.getStaffByCompany(userDetails?.id || userId);
-          console.log("Staff data:", staffData);
 
           const formattedStaffData = staffData.map((totp, index) => ({
             id: totp.id || index + 1,
@@ -173,9 +163,6 @@ const AdminDashboard = () => {
     }
   };
 
-
-
-
   const handleClose = () => {
     setDialogOpen(false);
     setSelectedCompany("");
@@ -190,16 +177,31 @@ const AdminDashboard = () => {
   const handleDeleteConfirm = async () => {
     try {
       setDeleteLoading(true);
-      // Call API to delete staff member
-      await authService.deleteStaff(selectedStaff.id);
-
+      
+      // Get the admin JWT token
+      const token = localStorage.getItem(config.auth.tokenStorageKey);
+      if (!token) {
+        showErrorToast("Authentication required. Please log in again.");
+        return;
+      }
+      
+      // Call API to delete TOTP secret with admin JWT token
+      const response = await axios.delete(
+        `${config.apiUrl}/totp-secrets/${selectedStaff.id}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        }
+      );
+  
       // Update local state after successful deletion
       const updatedStaffData = staffData.filter(
         (staff) => staff.id !== selectedStaff.id
       );
       setStaffData(updatedStaffData);
-
-      // Update company staff count
+  
+      // Update TOTP count
       const updatedRows = rows.map((row) => {
         if (row.company === selectedCompany) {
           return {
@@ -210,11 +212,11 @@ const AdminDashboard = () => {
         return row;
       });
       setRows(updatedRows);
-
-      showSuccessToast("Staff member deleted successfully");
+  
+      showSuccessToast("TOTP user deleted successfully");
     } catch (error) {
-      console.error("Failed to delete staff:", error);
-      showErrorToast("Failed to delete staff member");
+      console.error("Failed to delete TOTP user:", error);
+      showErrorToast(error.response?.data?.message || "Failed to delete TOTP user");
     } finally {
       setDeleteLoading(false);
       setDeleteDialogOpen(false);
@@ -230,19 +232,74 @@ const AdminDashboard = () => {
   const handleCompanyDeleteConfirm = async () => {
     try {
       setDeleteLoading(true);
-      // Call API to delete company
-      await authService.deleteCompany(selectedCompanyToDelete);
-
-      // Update local state after successful deletion
-      const updatedRows = rows.filter(
-        (row) => row.company !== selectedCompanyToDelete
-      );
-      setRows(updatedRows);
-
-      showSuccessToast("Company deleted successfully");
+      
+      // Find the user ID from the rows data
+      const userToDelete = rows.find(row => row.company === selectedCompanyToDelete);
+      
+      if (!userToDelete || !userToDelete.id) {
+        showErrorToast("Could not find FortiKey user to delete");
+        return;
+      }
+      
+      // Get the admin JWT token
+      const token = localStorage.getItem(config.auth.tokenStorageKey);
+      if (!token) {
+        showErrorToast("Authentication required. Please log in again.");
+        return;
+      }
+      
+      // Use the admin endpoint specifically for deleting business users
+      try {
+        const response = await axios.delete(
+          `${config.apiUrl}/admin/business-users/${userToDelete.id}`,
+          {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+            },
+          }
+        );
+        
+        // Update local state after successful deletion
+        const updatedRows = rows.filter((row) => row.company !== selectedCompanyToDelete);
+        setRows(updatedRows);
+        
+        // Show detailed success message
+        if (response.data && response.data.deletedData) {
+          const { totpSecrets = 0, apiKeys = 0, usageRecords = 0 } = response.data.deletedData;
+          showSuccessToast(
+            `FortiKey user deleted successfully. Removed ${totpSecrets} TOTP secrets, ${apiKeys} API keys, and ${usageRecords} usage records.`
+          );
+        } else {
+          showSuccessToast("FortiKey user deleted successfully");
+        }
+      } catch (error) {
+        // Handle specific error cases
+        let errorMessage = "Failed to delete FortiKey user";
+        
+        // Check for specific error codes
+        if (error.response) {
+          if (error.response.status === 403) {
+            errorMessage = "You don't have admin permissions to delete users";
+          } else if (error.response.status === 404) {
+            errorMessage = "FortiKey user not found";
+          } else if (error.response.data && error.response.data.message) {
+            errorMessage = error.response.data.message;
+          }
+        } else if (error.message) {
+          errorMessage = error.message;
+        }
+        
+        // For 404 errors (user not found), we should still update the UI
+        if (error.response && error.response.status === 404) {
+          const updatedRows = rows.filter((row) => row.company !== selectedCompanyToDelete);
+          setRows(updatedRows);
+          showSuccessToast("FortiKey user removed from dashboard");
+        } else {
+          showErrorToast(errorMessage);
+        }
+      }
     } catch (error) {
-      console.error("Failed to delete company:", error);
-      showErrorToast("Failed to delete company");
+      showErrorToast(error.message || "An error occurred during the deletion process");
     } finally {
       setDeleteLoading(false);
       setCompanyDeleteDialogOpen(false);
