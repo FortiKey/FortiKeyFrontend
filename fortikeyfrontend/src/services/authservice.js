@@ -439,53 +439,66 @@ const authService = {
   },
 
   /**
-   * Delete a staff member (admin function)
-   *
-   * @param {string} staffId - ID of staff to delete
-   * @returns {Promise<Object>} Success message
-   * @throws {Error} If unauthorized or server error occurs
-   */
-  deleteStaff: async (staffId) => {
-    try {
-      const token = localStorage.getItem(config.auth.tokenStorageKey);
-      if (!token) throw new Error("Authentication required");
+ * Delete a TOTP secret by ID
+ * @param {string} secretId - ID of the TOTP secret to delete
+ * @returns {Promise<Object>} Success message
+ * @throws {Error} If unauthorized or server error occurs
+ */
+deleteTOTPSecret: async (secretId) => {
+  try {
+    const token = localStorage.getItem(config.auth.tokenStorageKey);
+    if (!token) throw new Error("Authentication required");
 
-      const response = await axios.delete(`${API_URL}/admin/staff/${staffId}`, {
+    // Use the TOTP secret delete endpoint
+    const response = await axios.delete(`${API_URL}/totp-secrets/${secretId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error;
+  }
+},
+
+  /**
+ * Delete a business user account and all associated data (admin function)
+ *
+ * @param {string} userId - ID of the business user to delete
+ * @returns {Promise<Object>} Success message with deletion details
+ * @throws {Error} If unauthorized or server error occurs
+ */
+deleteBusinessUser: async (userId) => {
+  try {
+    const token = localStorage.getItem(config.auth.tokenStorageKey);
+    if (!token) throw new Error("Authentication required");
+
+    const response = await axios.delete(
+      `${API_URL}/admin/business-users/${userId}`,
+      {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-      });
-      return response.data;
-    } catch (error) {
-      throw error.response?.data || error;
+      }
+    );
+    
+    return response.data;
+  } catch (error) {
+    // Handle specific error cases with more useful messages
+    if (error.response) {
+      if (error.response.status === 401) {
+        throw new Error("Unauthorized: You don't have permission to perform this action");
+      } else if (error.response.status === 403) {
+        throw new Error("Forbidden: Admin privileges required for this operation");
+      } else if (error.response.status === 404) {
+        throw new Error("User not found: The specified user does not exist");
+      }
     }
-  },
-
-  /**
-   * Delete a company and all associated staff (admin function)
-   *
-   * @param {string} company - Company name
-   * @returns {Promise<Object>} Success message
-   * @throws {Error} If unauthorized or server error occurs
-   */
-  deleteCompany: async (company) => {
-    try {
-      const token = localStorage.getItem(config.auth.tokenStorageKey);
-      if (!token) throw new Error("Authentication required");
-
-      const response = await axios.delete(
-        `${API_URL}/admin/companies/${company}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      return response.data;
-    } catch (error) {
-      throw error.response?.data || error;
-    }
-  },
+    
+    console.error("Error deleting business user:", error);
+    throw error.response?.data || error;
+  }
+},
 
   /**
    * Update user profile information
