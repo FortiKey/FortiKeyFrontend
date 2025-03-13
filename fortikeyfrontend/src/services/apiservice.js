@@ -61,14 +61,12 @@ const apiService = {
    */
   getCurrentApiKey: async () => {
     try {
-      // Note: This is a placeholder for a backend endpoint that doesn't yet exist
-      // The backend should implement a GET endpoint for retrieving the current API key
 
       const http = getAuthenticatedAxios();
       const response = await http.get(`${API_URL}/business/apikey`);
       return response.data;
     } catch (error) {
-      // For now, if the endpoint doesn't exist, we can fall back to localStorage
+      
       const storedKey = localStorage.getItem("apiKey");
       if (storedKey) {
         return { apiKey: storedKey };

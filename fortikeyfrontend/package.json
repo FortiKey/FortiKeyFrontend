@@ -60,7 +60,7 @@
       "\\.(css|less|scss|sass)$": "<rootDir>/src/tests/__mocks__/styleMock.js"
     },
     "transformIgnorePatterns": [
-      "node_modules/(?!(axios)/)"
+      "node_modules/(?!(axios|react-syntax-highlighter)/)"
     ]
   }
 }

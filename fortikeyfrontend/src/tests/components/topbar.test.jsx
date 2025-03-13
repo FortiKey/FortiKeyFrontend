@@ -18,7 +18,7 @@ jest.mock("../../services/authservice", () => ({
   getCurrentUser: jest
     .fn()
     .mockResolvedValue({ id: "123", email: "test@example.com" }),
-  getUserData: jest.fn(), // Add this if your component uses it
+  getUserData: jest.fn(), // 
 }));
 
 describe("Topbar Component", () => {

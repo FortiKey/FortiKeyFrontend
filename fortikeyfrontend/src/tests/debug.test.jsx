@@ -12,7 +12,7 @@ test("debug create user form structure", () => {
     screen.getAllByRole("textbox").map((el) => el.name || el.id)
   );
 
-  // This will help you see exactly what labels are present
+  // See exactly what labels are present
   console.log(
     "All label texts:",
     Array.from(document.querySelectorAll("label")).map((l) => l.textContent)

@@ -63,7 +63,7 @@ jest.mock("@mui/material", () => {
   };
 });
 
-// Add this mock for MUI X DataGrid
+// mock for MUI X DataGrid
 jest.mock("@mui/x-data-grid", () => ({
   DataGrid: ({ rows, columns }) => (
     <div data-testid="mock-data-grid">
@@ -72,7 +72,7 @@ jest.mock("@mui/x-data-grid", () => ({
   ),
 }));
 
-// And also add the complete MUI material mock
+// complete MUI material mock
 jest.mock("@mui/material", () => ({
   Box: ({ children, ...props }) => <div {...props}>{children}</div>,
   Container: ({ children, ...props }) => <div {...props}>{children}</div>,
@@ -86,6 +86,11 @@ jest.mock("@mui/material", () => ({
   CssBaseline: () => null,
   useTheme: () => ({ palette: { mode: "light" } }),
 }));
+
+//  mock for Footer component
+jest.mock("../components/Footer", () => () => (
+  <div data-testid="footer-component">Mock Footer</div>
+));
 
 // Write the actual tests
 describe("App Component", () => {

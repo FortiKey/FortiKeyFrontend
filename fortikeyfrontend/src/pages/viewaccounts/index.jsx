@@ -9,7 +9,7 @@ import {
   Alert,
   IconButton,
 } from "@mui/material";
-import DeleteIcon from '@mui/icons-material/Delete';
+import DeleteIcon from "@mui/icons-material/Delete";
 import { DataGrid } from "@mui/x-data-grid";
 import Header from "../../components/Header";
 import { tokens } from "../../theme";
@@ -71,7 +71,7 @@ const ViewAccounts = () => {
       const processedRows = response.data.map((user, index) => {
         // Extract fields with proper fallback
         const id = user._id || `temp-${index}`;
-        const email = user.externalUserId || "Unknown"; 
+        const email = user.externalUserId || "Unknown";
         const createdAt = user.createdAt || "N/A";
 
         return {
@@ -185,11 +185,11 @@ const ViewAccounts = () => {
       flex: 1,
       renderCell: (params) => {
         const dateStr = params.row.createdAt;
-  
+
         if (!dateStr || dateStr === "N/A") {
           return <div>N/A</div>;
         }
-  
+
         try {
           const date = new Date(dateStr);
           if (!isNaN(date.getTime())) {
@@ -206,7 +206,7 @@ const ViewAccounts = () => {
         } catch (error) {
           console.error("Date parsing error:", error);
         }
-  
+
         return <div>{dateStr}</div>;
       },
     },
@@ -215,11 +215,7 @@ const ViewAccounts = () => {
       headerName: "Status",
       flex: 1,
       renderCell: (params) => (
-        <Box 
-          display="flex" 
-          alignItems="center" 
-          gap={1}
-        >
+        <Box display="flex" alignItems="center" gap={1}>
           <Typography color="green">Active</Typography>
           <IconButton
             size="small"
@@ -229,9 +225,9 @@ const ViewAccounts = () => {
             }}
             sx={{
               color: theme.palette.error.main,
-              '&:hover': {
-                backgroundColor: theme.palette.error.light + '20', 
-              }
+              "&:hover": {
+                backgroundColor: theme.palette.error.light + "20",
+              },
             }}
           >
             <DeleteIcon fontSize="small" />
@@ -306,7 +302,7 @@ const ViewAccounts = () => {
             },
           }}
         >
-          <DialogTitle sx={{ textAlign: "center", pb: 0 }}>
+          <Box sx={{ textAlign: "center", p: 2, pb: 0 }}>
             <Typography
               variant="h4"
               sx={{
@@ -317,7 +313,7 @@ const ViewAccounts = () => {
             >
               Confirm Delete
             </Typography>
-          </DialogTitle>
+          </Box>
           <Box p={2}>
             <Typography
               sx={{
@@ -377,5 +373,5 @@ const ViewAccounts = () => {
     </ThemeProvider>
   );
 };
-            
-            export default ViewAccounts
+
+export default ViewAccounts;

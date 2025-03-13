@@ -42,7 +42,7 @@ jest.mock("../../services/apiservice", () => ({
   getCompanyStats: jest.fn().mockResolvedValue({ data: {} }),
 }));
 
-// Add this at the top of the file, outside any describe blocks
+// at the top of the file, outside any describe blocks
 jest.setTimeout(10000);
 
 describe("Dashboard Component", () => {
@@ -127,20 +127,6 @@ describe("Dashboard Component", () => {
     expect(mockNavigate).toHaveBeenCalledWith("/apidocumentation");
   });
 
-  // This test is not needed because authentication is handled by the ProtectedRoute component
-  // and tested in protectedroute.test.jsx
-  // test("redirects to login page when user is not authenticated", async () => {
-  //   // Mock authService directly for this test only
-  //   authService.isAuthenticated.mockReturnValue(false);
-  //   authService.getCurrentUser.mockReturnValue(null);
-  //
-  //   renderWithProviders(<Dashboard />);
-  //
-  //   // Verify navigation to login page
-  //   await waitFor(() => {
-  //     expect(mockNavigate).toHaveBeenCalledWith("/login");
-  //   });
-  // });
 
   test("renders dashboard with title after loading", async () => {
     // Fix the mock API responses with proper structure

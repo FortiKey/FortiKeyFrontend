@@ -27,7 +27,7 @@ describe("Landing Page", () => {
     renderWithProviders(<LandingPage />);
 
     // Check for FortiKey text instead of looking for main element
-    expect(screen.getByText(/FortiKey/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/FortiKey/i)[0]).toBeInTheDocument();
 
     // Instead of looking for specific main role, check content elements
     const headings = screen.getAllByRole("heading") || [];
@@ -58,6 +58,4 @@ describe("Landing Page", () => {
       }
     }
   });
-
-
 });

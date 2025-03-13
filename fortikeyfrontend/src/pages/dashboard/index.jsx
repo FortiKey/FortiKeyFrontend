@@ -65,7 +65,7 @@ const Dashboard = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [updating, setUpdating] = useState(false);
 
-  // Add this formStyles object - copied exactly from createuser
+  // formStyles object - from createuser
   const formStyles = {
     textField: createTextFieldStyles(colors.otherColor.main),
   };
