@@ -317,7 +317,7 @@ const Sidebar = () => {
         </ProSidebar>
       </Box>
 
-      {/* Position the burger menu button inside the purple area and above the home button */}
+      {/* Position the burger menu button inside the purple area (dev tools) and above the home button */}
       <IconButton
         sx={{
           position: "fixed",

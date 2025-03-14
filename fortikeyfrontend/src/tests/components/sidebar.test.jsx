@@ -29,8 +29,6 @@ describe("Sidebar Component", () => {
     // Basic component render test
     expect(document.body).toBeInTheDocument();
 
-    // Add specific tests for your sidebar content once we know what's in it
-    // For example: expect(screen.getByText(/Dashboard/i)).toBeInTheDocument();
   });
 
   test("stores company name from user organization in state", async () => {

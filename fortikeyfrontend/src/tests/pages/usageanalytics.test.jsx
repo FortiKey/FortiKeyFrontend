@@ -362,7 +362,7 @@ describe("UsageAnalytics Component", () => {
     expect(apiService.getDeviceBreakdown).toHaveBeenCalled();
   });
 
-  // DATA REFRESH - FIXED VERSION
+  // DATA REFRESH
   test("refreshes data when refresh button is clicked", async () => {
     // Mock implementation specifically for this test to track the force parameter
     apiService.getTOTPStats.mockImplementation((params, force) => {
@@ -421,8 +421,7 @@ describe("UsageAnalytics Component", () => {
     // Now we should expect the API to have been called
     expect(apiService.getTOTPStats).toHaveBeenCalled();
 
-    // If we want to skip the specific parameter test, use this simpler assertion
-    // Comment out this line if still having issues with the force parameter
+    // Check that the API was called at least once
     expect(apiService.getTOTPStats.mock.calls.length).toBeGreaterThan(0);
   });
 
@@ -725,7 +724,7 @@ describe("UsageAnalytics Component", () => {
       expect(screen.queryByTestId("circular-progress")).not.toBeInTheDocument();
     });
 
-    // For this test, we'll just assert that the component rendered successfully
+    // Assert that the component rendered successfully
     expect(screen.getByText("Usage Analytics")).toBeInTheDocument();
   });
 
@@ -819,8 +818,7 @@ describe("UsageAnalytics Component", () => {
 
   // TEST PERCENTAGE CALCULATION FUNCTION
   test("calculates percentages correctly", async () => {
-    // Create our own percentage calculation function to test the logic
-    // This matches the implementation in the UsageAnalytics component
+    // function to test the logic
     const calculatePercentage = (value, total) => {
       if (!total) return "0%";
       return `${Math.round((value / total) * 100)}%`;
@@ -1119,7 +1117,7 @@ describe("UsageAnalytics Component", () => {
     const container = screen.getByText("Usage Analytics").closest("div");
 
     // Test that calculating percentages works correctly
-    // This covers the calculatePercentage function (line 597)
+    // This covers the calculatePercentage function 
     const calculatePercentage = (value, total) => {
       if (!total) return "0%";
       return `${Math.round((value / total) * 100)}%`;
@@ -1229,7 +1227,6 @@ describe("UsageAnalytics Component", () => {
     }
   });
 
-  // ADD NEW TEST TO TARGET REMAINING UNCOVERED LINES
   test("handles complex failure analytics data formats", async () => {
     // Test the direct array format and unusual property nesting (lines 198-200, 208, 216-235)
     apiService.getFailureAnalytics.mockResolvedValue([
@@ -1291,7 +1288,6 @@ describe("UsageAnalytics Component", () => {
     expect(screen.getByText("Usage Analytics")).toBeInTheDocument();
   });
 
-  // TEST FOR LINES 242, 265, 283-287 (ERROR FALLBACKS)
   test("handles specific error fallbacks for chart types", async () => {
     // Setup successful initial load but failing chart-specific APIs
     apiService.getTOTPStats.mockResolvedValue({
@@ -1303,7 +1299,7 @@ describe("UsageAnalytics Component", () => {
       dailyStats: [{ date: "2022-01-01", validations: 30, successRate: 0.9 }],
     });
 
-    // Make company stats fail (testing line 242)
+    // Make company stats fail 
     apiService.getCompanyStats.mockRejectedValue(
       new Error("Company API Error")
     );
@@ -1323,7 +1319,7 @@ describe("UsageAnalytics Component", () => {
 
     cleanup();
 
-    // Test device breakdown error fallback (line 265)
+    // Test device breakdown error fallback 
     apiService.getDeviceBreakdown.mockRejectedValue(
       new Error("Device API Error")
     );
@@ -1350,7 +1346,7 @@ describe("UsageAnalytics Component", () => {
     expect(screen.getByText("Usage Analytics")).toBeInTheDocument();
   });
 
-  // TEST FOR LINE 392 (formatLastRefreshTime)
+  // formatLastRefreshTime)
   test("directly tests formatLastRefreshTime function", async () => {
     // Create a test implementation of formatLastRefreshTime
     const formatLastRefreshTime = (time) => {
@@ -1368,7 +1364,7 @@ describe("UsageAnalytics Component", () => {
     expect(formatLastRefreshTime(validTimestamp)).not.toBe("Never");
   });
 
-  // TEST FOR LINES 597-601 (calculatePercentage for device/browser breakdowns)
+  // calculatePercentage for device/browser breakdowns
   test("tests device and browser breakdown percentage calculations", async () => {
     // Mock rich device data to test percentage calculations
     const mockDeviceData = {
@@ -1396,7 +1392,7 @@ describe("UsageAnalytics Component", () => {
       await Promise.resolve();
     });
 
-    // Directly test calculatePercentage function (lines 597-601)
+    // Directly test calculatePercentage function 
     const calculatePercentage = (value, total) => {
       if (!total) return "0%";
       return `${Math.round((value / total) * 100)}%`;
@@ -1410,7 +1406,7 @@ describe("UsageAnalytics Component", () => {
     expect(screen.getByText("Usage Analytics")).toBeInTheDocument();
   });
 
-  // 1. API ERROR HANDLING WITH DIFFERENT ERROR TYPES (lines 150-151, 157-159)
+  // 1. API ERROR HANDLING WITH DIFFERENT ERROR TYPES 
   test("handles different API error scenarios", async () => {
     // Reset mocks
     jest.clearAllMocks();
@@ -1454,7 +1450,7 @@ describe("UsageAnalytics Component", () => {
       await Promise.resolve();
     });
 
-    // Should handle error gracefully
+    // Should handle error correctly
     expect(mockShowErrorToast).toHaveBeenCalled();
     expect(screen.getByTestId("alert-error")).toBeInTheDocument();
 
@@ -1483,7 +1479,7 @@ describe("UsageAnalytics Component", () => {
     expect(screen.getByTestId("alert-error")).toBeInTheDocument();
   });
 
-  // 2. BACKUP CODE USAGE FALLBACK (line 166)
+  // 2. BACKUP CODE USAGE FALLBACK 
   test("uses multiple fallback paths for backup code data", async () => {
     // Reset mocks
     jest.clearAllMocks();
@@ -1550,7 +1546,7 @@ describe("UsageAnalytics Component", () => {
       summary: {
         successfulEvents: 95,
         failedEvents: 5,
-        // No totalBackupCodesUsed here either
+        // No totalBackupCodesUsed 
       },
     });
 
@@ -1729,7 +1725,7 @@ describe("UsageAnalytics Component", () => {
     // Reset mocks
     jest.clearAllMocks();
 
-    // Test company chart fallback (line 242)
+    // Test company chart fallback 
     apiService.getTOTPStats.mockResolvedValue({
       summary: {
         totalValidations: 100,
@@ -1757,7 +1753,7 @@ describe("UsageAnalytics Component", () => {
     cleanup();
     jest.clearAllMocks();
 
-    // Test device breakdown fallback (line 265)
+    // Test device breakdown fallback 
     apiService.getTOTPStats.mockResolvedValue({
       summary: {
         totalValidations: 100,
@@ -1845,7 +1841,7 @@ describe("UsageAnalytics Component", () => {
     // Test with various inputs
     expect(formatLastRefreshTime(null)).toBe("Never");
     expect(formatLastRefreshTime(undefined)).toBe("Never");
-    expect(formatLastRefreshTime(0)).toBe("Never"); // 0 is falsy in JavaScript
+    expect(formatLastRefreshTime(0)).toBe("Never");
     expect(formatLastRefreshTime(false)).toBe("Never");
 
     // Test with a valid timestamp
@@ -1893,7 +1889,7 @@ describe("UsageAnalytics Component", () => {
     });
 
     // Test the calculatePercentage function with various inputs
-    // This directly tests the function on lines 597-601
+  
     const calculatePercentage = (value, total) => {
       if (!total) return "0%";
       return `${Math.round((value / total) * 100)}%`;
@@ -1905,8 +1901,8 @@ describe("UsageAnalytics Component", () => {
 
     // Test edge cases
     expect(calculatePercentage(0, 100)).toBe("0%");
-    expect(calculatePercentage(100, 0)).toBe("0%"); // Division by zero
-    expect(calculatePercentage(0, 0)).toBe("0%"); // Both are zero
+    expect(calculatePercentage(100, 0)).toBe("0%"); 
+    expect(calculatePercentage(0, 0)).toBe("0%"); 
 
     // Test rounding
     expect(calculatePercentage(33.33, 100)).toBe("33%");

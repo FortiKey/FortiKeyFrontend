@@ -307,7 +307,7 @@ export const getCacheStats = () => {
   keys.forEach((key) => {
     const entry = dataCache[key];
     const json = JSON.stringify(entry.data);
-    totalSize += json.length * 2; // Rough estimate: 2 bytes per character
+    totalSize += json.length * 2; 
   });
 
   // Format size

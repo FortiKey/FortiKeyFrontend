@@ -2,7 +2,6 @@ import { screen, waitFor } from "@testing-library/react";
 
 /**
  * Wait for an element to be visible and then click it
- * This is more reliable than plain fireEvent.click
  */
 export const waitAndClick = async (matcher, options = {}) => {
   const element = await waitFor(() => {

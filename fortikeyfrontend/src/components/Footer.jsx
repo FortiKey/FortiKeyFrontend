@@ -14,7 +14,7 @@ import LinkedInIcon from "@mui/icons-material/LinkedIn";
 import { tokens } from "../theme";
 
 const Footer = () => {
-  const currentYear = 2025; // Changed to 2025 as requested
+  const currentYear = 2025; // Changed to 2025
   const colors = tokens();
 
   return (
