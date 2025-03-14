@@ -1,70 +1,103 @@
-# Getting Started with Create React App
+This is the frontend application for FortiKey, a two-factor authentication (2FA) platform that enables businesses to protect their users' accounts with a secure second layer of authentication.
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## Overview
+
+The FortiKey frontend provides a responsive, feature-rich dashboard for businesses to:
+- Manage API keys for 2FA integration
+- View usage analytics for 2FA authentication
+- Access detailed API documentation
+- Monitor user accounts and security metrics
+
+## Setup and Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd FortiKeyFrontend/fortikeyfrontend
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Set up environment variables**
+   Create a `.env` file in the root directory with:
+   ```
+   REACT_APP_API_URL=https://fortikeybackend.onrender.com/api/v1
+   ```
+
+4. **Start the development server**
+   ```bash
+   npm start
+   ```
 
 ## Available Scripts
 
-In the project directory, you can run:
+- **`npm start`**: Runs the app in development mode at [http://localhost:3000](http://localhost:3000)
+- **`npm test`**: Launches the test runner in interactive watch mode
+- **`npm run test:coverage`**: Runs tests with coverage reporting
+- **`npm run build`**: Builds the app for production to the `build` folder
+- **`npm run eject`**: Ejects from Create React App (one-way operation)
 
-### `npm start`
+## Frontend Architecture
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+The application follows a component-based architecture using React:
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+- **Pages**: Complete views like Dashboard, Login, API Documentation
+- **Components**: Reusable UI elements across multiple pages
+- **Services**: API interaction layer with Axios
+- **Context**: For state management across components
+- **Theme**: Material UI theme configuration
+- **Utils**: Helper functions and utilities
 
-### `npm test`
+## Key Libraries and Technologies
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### Core Libraries
+- React (v19.0.0)
+- React Router (v6.29.0)
+- Axios (v1.8.1)
 
-### `npm run build`
+### UI Framework
+- Material UI (v6.4.5)
+- React Pro Sidebar (v0.7.1)
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### Data Visualization
+- Chart.js (v4.4.8) with React-Chartjs-2 (v5.3.0)
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### Specialized Components
+- React Syntax Highlighter (v15.6.1)
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+### Testing Framework
+- Jest with React Testing Library
 
-### `npm run eject`
+### Development and Performance
+- Web Vitals (v2.1.4)
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+## Testing
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+Tests are located in the `src/tests` directory and follow the naming convention `*.test.js` or `*.test.jsx`.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+To run tests with coverage reporting:
+```bash
+npm run test:coverage
+```
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+## Deployment
 
-## Learn More
+The frontend is deployed on Netlify with continuous integration from the main branch. Production builds are automatically generated when changes are merged to the main branch.
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+## Project Structure
 
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+```
+src/
+├── components/      # Reusable UI components
+├── context/         # React context providers
+├── pages/           # Page components
+├── services/        # API service layer
+├── tests/           # Test files
+├── theme/           # Theme configuration
+├── utils/           # Utility functions
+├── App.jsx          # Main App component
+└── index.js         # Application entry point
+```
